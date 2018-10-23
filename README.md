@@ -1,4 +1,4 @@
-# ReMinecraft
+# RE:Minecraft
 A headless Minecraft bouncer written in Java
 
 ## Huh?

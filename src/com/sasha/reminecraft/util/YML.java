@@ -1280,9 +1280,8 @@ class ConfigSection extends LinkedHashMap<String, Object> {
         Set<String> keys = new LinkedHashSet<>();
         this.entrySet().forEach(entry -> {
             keys.add(entry.getKey());
-            if (entry.getValue() instanceof ConfigSection) {
-                if (child)
-                    ((ConfigSection) entry.getValue()).getKeys(true).forEach(childKey -> keys.add(entry.getKey() + "." + childKey));
+            if (entry.getValue() instanceof ConfigSection && child) {
+                ((ConfigSection) entry.getValue()).getKeys(true).forEach(childKey -> keys.add(entry.getKey() + "." + childKey));
             }
         });
         return keys;
@@ -1297,6 +1296,7 @@ class ConfigSection extends LinkedHashMap<String, Object> {
         return this.getKeys(true);
     }
 }
+
 class FileUtils {
 
     public static void writeFile(String fileName, String content) throws IOException {

@@ -89,13 +89,14 @@ public class ReMinecraft {
         try {
             var authServ = new AuthenticationService(Configuration.var_clientId, Proxy.NO_PROXY);
             authServ.setUsername(Configuration.var_mojangEmail);
-            authServ.setAccessToken(Configuration.var_sessionId);
+            authServ.setPassword(Configuration.var_mojangPassword);
             authServ.login();
             protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
         }catch (RequestException e)  {
             // login completely failed
+            e.printStackTrace();
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
             ReMinecraft.INSTANCE.stop();
         }

@@ -7,6 +7,8 @@ import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
+import com.sasha.reminecraft.client.ReListener;
+import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.command.ExitCommand;
 import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
@@ -44,6 +46,9 @@ public class ReMinecraft {
      * Launch Re:Minecraft and and setup the console command system.
      */
     public static void main(String[] args) throws IllegalAccessException, InstantiationException {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            ReMinecraft.INSTANCE.stopSoft();
+        }));
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
         Scanner scanner = new Scanner(System.in);
         String cmd = scanner.nextLine();
@@ -140,6 +145,12 @@ public class ReMinecraft {
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
         System.exit(0);
+    }
+    public void stopSoft() {
+        logger.log("Stopping RE:Minecraft...");
+        if (minecraftClient != null && minecraftClient.getSession().isConnected())
+            minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
+        logger.log("Stopped RE:Minecraft...");
     }
 
 }

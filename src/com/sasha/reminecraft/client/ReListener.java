@@ -1,7 +1,12 @@
-package com.sasha.reminecraft;
+package com.sasha.reminecraft.client;
 
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.github.steveice10.packetlib.event.session.*;
+import com.sasha.reminecraft.ReMinecraft;
 
+/**
+ * Listens and processes packets being Tx'd and Rx'd from the remote server.
+ */
 public class ReListener implements SessionListener {
 
     /**
@@ -9,7 +14,9 @@ public class ReListener implements SessionListener {
      */
     @Override
     public void packetReceived(PacketReceivedEvent packetReceivedEvent) {
-
+        if (packetReceivedEvent.getPacket() instanceof ServerChatPacket) {
+            ReMinecraft.INSTANCE.logger.log(((ServerChatPacket) packetReceivedEvent.getPacket()).getMessage().getFullText());
+        }
     }
 
     /**

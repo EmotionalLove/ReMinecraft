@@ -1,12 +1,16 @@
 package com.sasha.reminecraft;
 
+import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
 import com.sasha.reminecraft.command.ExitCommand;
+import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -19,6 +23,7 @@ public class ReMinecraft {
      */
     public static ReMinecraft INSTANCE;
     public static final SimpleCommandProcessor COMMAND_PROCESSOR = new SimpleCommandProcessor("");
+    public static final String DATA_FILE = "ReMinecraft.yml";
 
     /**
      * Current software version of Re:Minecraft
@@ -50,9 +55,32 @@ public class ReMinecraft {
     public void start(String[] args) throws InstantiationException, IllegalAccessException {
         INSTANCE = this;
         logger.log("Starting RE:Minecraft " + VERSION + "");
-        // TODO register commands
         COMMAND_PROCESSOR.register(ExitCommand.class);
+        Configuration.configure(); // set config vars
+    }
 
+    /**
+     * Authenticate with Mojang, first via session token, then via email/password
+     */
+    public AuthenticationService authenticate() {
+        File file = getDataFile();
+        YML parser = new YML(file);
+        if (parser.exists("sessionid")) {
+
+        }
+        return null;
+    }
+
+    public File getDataFile() {
+        File file = new File(DATA_FILE);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
     }
 
     /**

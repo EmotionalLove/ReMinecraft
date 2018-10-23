@@ -49,12 +49,15 @@ public class ReMinecraft {
      */
     public void start(String[] args) throws InstantiationException, IllegalAccessException {
         INSTANCE = this;
-        logger.log("// Starting RE:Minecraft " + VERSION + " \\\\");
+        logger.log("Starting RE:Minecraft " + VERSION + "");
         // TODO register commands
         COMMAND_PROCESSOR.register(ExitCommand.class);
 
     }
 
+    /**
+     * Stop and close RE:Minecraft
+     */
     public void stop() {
         logger.log("Stopping RE:Minecraft...");
         logger.log("Stopped RE:Minecraft...");

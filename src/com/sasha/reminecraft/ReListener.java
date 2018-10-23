@@ -53,6 +53,6 @@ public class ReListener implements SessionListener {
      */
     @Override
     public void disconnected(DisconnectedEvent disconnectedEvent) {
-
+        ReMinecraft.INSTANCE.logger.logWarning("Disconnected: " + disconnectedEvent.getReason());
     }
 }

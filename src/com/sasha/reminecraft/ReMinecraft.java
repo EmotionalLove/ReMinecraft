@@ -136,6 +136,8 @@ public class ReMinecraft {
      */
     public void stop() {
         logger.log("Stopping RE:Minecraft...");
+        if (minecraftClient != null && minecraftClient.getSession().isConnected())
+            minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
         System.exit(0);
     }

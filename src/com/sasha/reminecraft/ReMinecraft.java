@@ -6,6 +6,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
+import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.reminecraft.command.ExitCommand;
 import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
@@ -60,6 +61,13 @@ public class ReMinecraft {
         COMMAND_PROCESSOR.register(ExitCommand.class);
         Configuration.configure(); // set config vars
         authenticate(); // log into mc
+        minecraftClient = new Client(Configuration.var_remoteServerIp,
+                Configuration.var_remoteServerPort,
+                protocol,
+                new TcpSessionFactory(/*todo proxies?*/));
+        minecraftClient.getSession().addListener(new ReListener());
+        this.logger.log("Connecting...");
+        minecraftClient.getSession().connect(true); // connect to the remote server
     }
 
     /**
@@ -78,8 +86,7 @@ public class ReMinecraft {
                 updateToken(authServ.getAccessToken());
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 return authServ;
-            }
-            catch (RequestException ex) {
+            } catch (RequestException ex) {
                 // the session token is invalid
                 ReMinecraft.INSTANCE.logger.logError("Session token was invalid!");
             }
@@ -94,7 +101,7 @@ public class ReMinecraft {
             protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
-        }catch (RequestException e)  {
+        } catch (RequestException e) {
             // login completely failed
             e.printStackTrace();
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
@@ -103,6 +110,9 @@ public class ReMinecraft {
         return null;
     }
 
+    /**
+     * Update the session token inside ReMinecraft.yml
+     */
     private void updateToken(String token) {
         YML yml = new YML(getDataFile());
         yml.set("sessionId", token);

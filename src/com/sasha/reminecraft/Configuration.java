@@ -25,6 +25,8 @@ public abstract class Configuration {
     @ConfigSetting public static String var_mojangEmail = null;
     @ConfigSetting public static String var_mojangPassword = null;
     @ConfigSetting public static boolean var_cracked = false;
+    @ConfigSetting public static String var_remoteServerIp = "constantiam.net";
+    @ConfigSetting public static int var_remoteServerPort = 25565;
 
     /**
      * Fill the above fields and version the config.

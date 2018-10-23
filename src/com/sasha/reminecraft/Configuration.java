@@ -8,6 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 /**
  * Holds all of the configuration values
@@ -20,6 +21,7 @@ public abstract class Configuration {
      * #@ConfigSetting public static [Type] var_[name] = [defualt value]
      */
     @ConfigSetting public static String var_sessionId = null;
+    @ConfigSetting public static String var_clientId = UUID.randomUUID().toString();
     @ConfigSetting public static String var_mojangEmail = null;
     @ConfigSetting public static String var_mojangPassword = null;
     @ConfigSetting public static boolean var_cracked = false;
@@ -50,6 +52,11 @@ public abstract class Configuration {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface ConfigSetting {
+
+    }
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    @interface Removed {
 
     }
 }

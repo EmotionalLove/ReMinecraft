@@ -1,5 +1,6 @@
 package com.sasha.reminecraft;
 
+import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.Client;
@@ -11,6 +12,7 @@ import com.sasha.simplecmdsys.SimpleCommandProcessor;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.*;
 
 /**
@@ -57,18 +59,53 @@ public class ReMinecraft {
         logger.log("Starting RE:Minecraft " + VERSION + "");
         COMMAND_PROCESSOR.register(ExitCommand.class);
         Configuration.configure(); // set config vars
+        authenticate(); // log into mc
     }
 
     /**
      * Authenticate with Mojang, first via session token, then via email/password
      */
     public AuthenticationService authenticate() {
-        File file = getDataFile();
-        YML parser = new YML(file);
-        if (parser.exists("sessionid")) {
-
+        if (!Configuration.var_sessionId.equalsIgnoreCase("[no default]")) {
+            try {
+                // try authing with session id first, since it [appears] to be present
+                ReMinecraft.INSTANCE.logger.log("Attempting to log in with session token");
+                var authServ = new AuthenticationService(Configuration.var_clientId, Proxy.NO_PROXY);
+                authServ.setUsername(Configuration.var_mojangEmail);
+                authServ.setAccessToken(Configuration.var_sessionId);
+                authServ.login();
+                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
+                updateToken(authServ.getAccessToken());
+                ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
+                return authServ;
+            }
+            catch (RequestException ex) {
+                // the session token is invalid
+                ReMinecraft.INSTANCE.logger.logError("Session token was invalid!");
+            }
+        }
+        // log in normally w username and password
+        ReMinecraft.INSTANCE.logger.log("Attemping to log in with email and password");
+        try {
+            var authServ = new AuthenticationService(Configuration.var_clientId, Proxy.NO_PROXY);
+            authServ.setUsername(Configuration.var_mojangEmail);
+            authServ.setAccessToken(Configuration.var_sessionId);
+            authServ.login();
+            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
+            updateToken(authServ.getAccessToken());
+            ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
+        }catch (RequestException e)  {
+            // login completely failed
+            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
+            ReMinecraft.INSTANCE.stop();
         }
         return null;
+    }
+
+    private void updateToken(String token) {
+        YML yml = new YML(getDataFile());
+        yml.set("sessionId", token);
+        yml.save();
     }
 
     public File getDataFile() {

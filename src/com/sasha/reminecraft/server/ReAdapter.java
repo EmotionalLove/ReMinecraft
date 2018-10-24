@@ -1,5 +1,6 @@
 package com.sasha.reminecraft.server;
 
+import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
 
@@ -15,6 +16,10 @@ public class ReAdapter extends SessionAdapter {
 
     @Override
     public void packetSent(PacketSentEvent event) {
+        if (event.getPacket() instanceof LoginSuccessPacket) {
+            var pck = (LoginSuccessPacket) event.getPacket();
+            ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getProfile().getName()));
+        }
     }
 
     @Override

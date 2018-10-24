@@ -4,24 +4,23 @@ import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
+import com.github.steveice10.mc.protocol.data.game.world.block.BlockChangeRecord;
+import com.github.steveice10.mc.protocol.data.game.world.notify.ClientNotification;
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerBossBarPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerUnloadChunkPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerUpdateTimePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.world.*;
+import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
+import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.util.ChunkUtil;
-import com.sasha.reminecraft.util.entity.Entity;
-import com.sasha.reminecraft.util.entity.EntityPlayer;
+import com.sasha.reminecraft.util.entity.*;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -171,7 +170,7 @@ public class ReListener implements SessionListener {
                         .getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
                 if (column == null) {
                     // not ignoring this can leak memory in the notchian client
-                    ReMinecraft.INSTANCE.logger.logWarning("Ignoring request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar?");
+                    ReMinecraft.INSTANCE.logger.logWarning("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
                     return;
                 }
                 Chunk subChunk = column.getChunks()[cubeY];
@@ -185,6 +184,106 @@ public class ReListener implements SessionListener {
                     e.printStackTrace();
                 }
                 ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
+            }
+            if (event.getPacket() instanceof ServerMultiBlockChangePacket) {
+                // this is more complicated
+                var pck = (ServerMultiBlockChangePacket) event.getPacket();
+                int chunkX = pck.getRecords()[0].getPosition().getX() >> 4;
+                int chunkZ = pck.getRecords()[0].getPosition().getZ() >> 4;
+                Column column = ReListenerCache.chunkCache.getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
+                if (column == null) {
+                    // not ignoring this can leak memory in the notchian client
+                    ReMinecraft.INSTANCE.logger.logWarning("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
+                    return;
+                }
+                for (BlockChangeRecord record : pck.getRecords()) {
+                    int relativeChunkX = Math.abs(Math.abs(record.getPosition().getX()) - (Math.abs(Math.abs(record.getPosition().getX() >> 4)) * 16));
+                    int relativeChunkZ = Math.abs(Math.abs(record.getPosition().getZ()) - (Math.abs(Math.abs(record.getPosition().getZ() >> 4)) * 16));
+                    int cubeY = ChunkUtil.clamp(record.getPosition().getY() >> 4, 0, 15);
+                    Chunk cube = column.getChunks()[cubeY];
+                    int cubeRelativeY = Math.abs(record.getPosition().getY() - 16 * cubeY);
+                    try {
+                        cube.getBlocks().set(relativeChunkX, ChunkUtil.clamp(cubeRelativeY, 0, 15), relativeChunkZ, record.getBlock());
+                        column.getChunks()[cubeY] = cube;
+                    } catch (Exception e) {
+                        System.out.println(relativeChunkX + " " + cubeRelativeY + " " + relativeChunkZ + " " + (cubeRelativeY << 8 | relativeChunkZ << 4 | relativeChunkX));
+                    }
+                }
+                ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
+            }
+            if (event.getPacket() instanceof ServerJoinGamePacket) {
+                // this is when YOU join the server, not another player
+                var pck = (ServerJoinGamePacket) event.getPacket();
+                ReListenerCache.dimension = pck.getDimension();
+                ReListenerCache.entityId = pck.getEntityId();
+                ReListenerCache.gameMode = pck.getGameMode();
+                EntityPlayer player = new EntityPlayer();
+                player.type = EntityType.REAL_PLAYER;
+                player.entityId = ReListenerCache.entityId;
+                player.uuid = ReListenerCache.uuid;
+                ReListenerCache.player = player;
+                ReListenerCache.entityCache.put(player.entityId, player);
+            }
+            if (event.getPacket() instanceof LoginSuccessPacket) {
+                ReListenerCache.uuid = ((LoginSuccessPacket)event.getPacket()).getProfile().getId();
+            }
+            if (event.getPacket() instanceof ServerNotifyClientPacket) {
+                var pck = (ServerNotifyClientPacket) event.getPacket();
+                if (pck.getNotification() == ClientNotification.CHANGE_GAMEMODE) {
+                    ReListenerCache.gameMode = (GameMode) pck.getValue();
+                }
+            }
+            if (event.getPacket() instanceof ServerRespawnPacket) {
+                // clear everything because none of it matters now :smiling_imp:
+                var pck = (ServerRespawnPacket) event.getPacket();
+                ReListenerCache.dimension = pck.getDimension();
+                ReListenerCache.gameMode = pck.getGameMode();
+                ReListenerCache.chunkCache.clear();
+                ReListenerCache.entityCache.entrySet().removeIf(integerEntityEntry -> integerEntityEntry.getKey() != ReListenerCache.entityId);
+                ReListenerCache.cachedBossBars.clear();
+                ReListenerCache.player.potionEffects.clear();
+            }
+            if (event.getPacket() instanceof LoginDisconnectPacket) {
+                var pck = (LoginDisconnectPacket) event.getPacket();
+                ReMinecraft.INSTANCE.logger.logError("Kicked whilst logging in: " + pck.getReason().getFullText());
+                ReMinecraft.INSTANCE.minecraftClient.getSession().disconnect(pck.getReason().getFullText(), true);
+            }
+            if (event.getPacket() instanceof ServerSpawnMobPacket) {
+                var pck = (ServerSpawnMobPacket) event.getPacket();
+                EntityMob e = new EntityMob();
+                e.type = EntityType.MOB;
+                e.entityId = pck.getEntityId();
+                e.uuid = pck.getUUID();
+                e.mobType = pck.getType();
+                e.x = pck.getX();
+                e.y = pck.getY();
+                e.z = pck.getZ();
+                e.pitch = pck.getPitch();
+                e.yaw = pck.getYaw();
+                e.headYaw = pck.getHeadYaw();
+                e.motionX = pck.getMotionX();
+                e.motionY = pck.getMotionY();
+                e.motionZ = pck.getMotionZ();
+                e.metadata = pck.getMetadata();
+                ReListenerCache.entityCache.put(e.entityId, e);
+            }
+            if (event.getPacket() instanceof ServerSpawnObjectPacket) {
+                var pck = (ServerSpawnObjectPacket) event.getPacket();
+                EntityObject e = new EntityObject();
+                e.type = EntityType.OBJECT;
+                e.entityId = pck.getEntityId();
+                e.uuid = pck.getUUID();
+                e.objectType = pck.getType();
+                e.x = pck.getX();
+                e.y = pck.getY();
+                e.z = pck.getZ();
+                e.pitch = pck.getPitch();
+                e.yaw = pck.getYaw();
+                e.motionX = pck.getMotionX();
+                e.motionY = pck.getMotionY();
+                e.motionZ = pck.getMotionZ();
+                e.data = pck.getData();
+                ReListenerCache.entityCache.put(e.entityId, e);
             }
         } catch (Exception e) {
             e.printStackTrace();

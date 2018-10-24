@@ -9,6 +9,7 @@ import com.github.steveice10.mc.protocol.data.game.world.notify.ClientNotificati
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.*;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
@@ -179,8 +180,7 @@ public class ReListener implements SessionListener {
                     subChunk.getBlocks().set(Math.abs(Math.abs(pck.getRecord().getPosition().getX()) - (Math.abs(Math.abs(pck.getRecord().getPosition().getX() >> 4)) * 16)), ChunkUtil.clamp(cubeRelY, 0, 15), Math.abs(Math.abs(pck.getRecord().getPosition().getZ()) - (Math.abs(Math.abs(pck.getRecord().getPosition().getZ() >> 4)) * 16)), pck.getRecord().getBlock());
                     column.getChunks()[cubeY] = subChunk;
                     ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
@@ -225,7 +225,7 @@ public class ReListener implements SessionListener {
                 ReListenerCache.entityCache.put(player.entityId, player);
             }
             if (event.getPacket() instanceof LoginSuccessPacket) {
-                ReListenerCache.uuid = ((LoginSuccessPacket)event.getPacket()).getProfile().getId();
+                ReListenerCache.uuid = ((LoginSuccessPacket) event.getPacket()).getProfile().getId();
             }
             if (event.getPacket() instanceof ServerNotifyClientPacket) {
                 var pck = (ServerNotifyClientPacket) event.getPacket();
@@ -255,9 +255,9 @@ public class ReListener implements SessionListener {
                 e.entityId = pck.getEntityId();
                 e.uuid = pck.getUUID();
                 e.mobType = pck.getType();
-                e.x = pck.getX();
-                e.y = pck.getY();
-                e.z = pck.getZ();
+                e.posX = pck.getX();
+                e.posY = pck.getY();
+                e.posZ = pck.getZ();
                 e.pitch = pck.getPitch();
                 e.yaw = pck.getYaw();
                 e.headYaw = pck.getHeadYaw();
@@ -274,9 +274,9 @@ public class ReListener implements SessionListener {
                 e.entityId = pck.getEntityId();
                 e.uuid = pck.getUUID();
                 e.objectType = pck.getType();
-                e.x = pck.getX();
-                e.y = pck.getY();
-                e.z = pck.getZ();
+                e.posX = pck.getX();
+                e.posY = pck.getY();
+                e.posZ = pck.getZ();
                 e.pitch = pck.getPitch();
                 e.yaw = pck.getYaw();
                 e.motionX = pck.getMotionX();
@@ -284,6 +284,86 @@ public class ReListener implements SessionListener {
                 e.motionZ = pck.getMotionZ();
                 e.data = pck.getData();
                 ReListenerCache.entityCache.put(e.entityId, e);
+            }
+            if (event.getPacket() instanceof ServerEntityDestroyPacket) {
+                var pck = (ServerEntityDestroyPacket) event.getPacket();
+                for (int entityId : pck.getEntityIds()) {
+                    ReListenerCache.entityCache.remove(entityId);
+                }
+            }
+            if (event.getPacket() instanceof ServerEntityAttachPacket) {
+                var pck = (ServerEntityAttachPacket) event.getPacket();
+                EntityRotation entityRotation = (EntityRotation) ReListenerCache.entityCache.get(pck.getEntityId());
+                if (pck.getAttachedToId() == -1) {
+                    entityRotation.isLeashed = false;
+                    entityRotation.leashedID = pck.getAttachedToId();
+                } else {
+                    entityRotation.isLeashed = true;
+                    entityRotation.leashedID = pck.getAttachedToId();
+                }
+            }
+            if (event.getPacket() instanceof ServerEntityCollectItemPacket) {
+                var pck = (ServerEntityCollectItemPacket) event.getPacket();
+                ReListenerCache.entityCache.remove(pck.getCollectedEntityId());
+            }
+            if (event.getPacket() instanceof ServerEntityEffectPacket) {
+                var pck = (ServerEntityEffectPacket) event.getPacket();
+                PotionEffect effect = new PotionEffect();
+                effect.effect = pck.getEffect();
+                effect.amplifier = pck.getAmplifier();
+                effect.duration = pck.getDuration();
+                effect.ambient = pck.isAmbient();
+                effect.showParticles = pck.getShowParticles();
+                ((EntityEquipment) ReListenerCache.entityCache.get(pck.getEntityId())).potionEffects.add(effect);
+            }
+            if (event.getPacket() instanceof ServerEntityEquipmentPacket) {
+                var pck = (ServerEntityEquipmentPacket) event.getPacket();
+                Entity entity = ReListenerCache.entityCache.get(pck.getEntityId());
+                if (entity instanceof EntityObject) {
+                    ReMinecraft.INSTANCE.logger.logError("Server tried adding equipment to an EntityObject! Ignoring.");
+                    return;
+                }
+                EntityEquipment equipment = (EntityEquipment) entity;
+                equipment.equipment.put(pck.getSlot(), pck.getItem());
+            }
+            if (event.getPacket() instanceof ServerEntityHeadLookPacket) {
+                var pck = (ServerEntityHeadLookPacket) event.getPacket();
+                EntityRotation e = (EntityRotation) ReListenerCache.entityCache.get(pck.getEntityId());
+                e.headYaw = pck.getHeadYaw();
+            }
+            if (event.getPacket() instanceof ServerEntityMovementPacket) {
+                var pck = (ServerEntityMovementPacket) event.getPacket();
+                Entity e = ReListenerCache.entityCache.get(pck.getEntityId());
+                e.posX += pck.getMovementX() / 4096d;
+                e.posY += pck.getMovementY() / 4096d;
+                e.posZ += pck.getMovementZ() / 4096d;
+                boolean flag;
+                var field = pck.getClass().getDeclaredField("rot");
+                field.setAccessible(true); // leet hax
+                flag = (boolean)field.get(pck);
+                if (flag && e instanceof EntityRotation) {
+                    ((EntityRotation) e).yaw = pck.getYaw();
+                    ((EntityRotation) e).pitch = pck.getPitch();
+                }
+            }
+            if (event.getPacket() instanceof ServerEntityPropertiesPacket) {
+                var pck = (ServerEntityPropertiesPacket) event.getPacket();
+                EntityRotation rotation = (EntityRotation) ReListenerCache.entityCache.get(pck.getEntityId());
+                rotation.properties.addAll(pck.getAttributes());
+            }
+            if (event.getPacket() instanceof ServerEntityRemoveEffectPacket) {
+                var pck = (ServerEntityRemoveEffectPacket) event.getPacket();
+                EntityEquipment e = (EntityEquipment) ReListenerCache.entityCache.get(pck.getEntityId());
+                e.potionEffects.remove(pck.getEffect());
+            }
+            if (event.getPacket() instanceof ServerEntitySetPassengersPacket) {
+                var pck = (ServerEntitySetPassengersPacket) event.getPacket();
+                EntityEquipment equipment = (EntityEquipment) ReListenerCache.entityCache.get(pck.getEntityId());
+                if (pck.getPassengerIds() == null || pck.getPassengerIds().length == 0) {
+                    equipment.passengerIds = null;
+                } else {
+                    equipment.passengerIds = pck.getPassengerIds();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

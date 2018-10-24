@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public abstract class Entity {
     public EntityType type;
-    public double x, y, z;
+    public double posX, posY, posZ;
     public int entityId;
     public UUID uuid;
     public EntityMetadata metadata[] = new EntityMetadata[0];

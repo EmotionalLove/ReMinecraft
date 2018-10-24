@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.net.Proxy;
+import java.rmi.Remote;
 
 public class ReServer extends ServerAdapter {
 
@@ -34,6 +35,7 @@ public class ReServer extends ServerAdapter {
     }
 
     public void sessionRemoved(SessionRemovedEvent event) {
+        ReMinecraft.INSTANCE.childClients.remove(getClientBySession(event.getSession()));
     }
 
     @Nullable
@@ -52,23 +54,16 @@ public class ReServer extends ServerAdapter {
         server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, Configuration.var_onlineModeServer);
         server.setGlobalFlag
                 (MinecraftConstants.SERVER_INFO_BUILDER_KEY,
-                        (ServerInfoBuilder) session ->
-                                new ServerStatusInfo(
+                        new ServerInfoBuilder() {
+                            @Override
+                            public ServerStatusInfo buildInfo(Session session) {
+                                return new ServerStatusInfo(
                                         new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
                                         new PlayerInfo(1, 0, new GameProfile[]{}),
                                         new TextMessage(Configuration.var_messageOfTheDay),
-                                        new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)));
-        server.setGlobalFlag(MinecraftConstants.SERVER_INFO_HANDLER_KEY, (ServerLoginHandler) session ->
-                session.send(
-                        new ServerJoinGamePacket(
-                                ReListener.ReListenerCache.entityId,
-                                false,
-                                ReListener.ReListenerCache.gameMode,
-                                ReListener.ReListenerCache.dimension,
-                                Difficulty.NORMAL,
-                                Integer.MAX_VALUE,
-                                WorldType.DEFAULT,
-                                false)));
+                                        new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB));
+                            }
+                        });
         server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
         return server;
     }

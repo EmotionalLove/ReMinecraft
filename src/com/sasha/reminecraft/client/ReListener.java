@@ -20,6 +20,7 @@ import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPack
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.util.ChunkUtil;
 import com.sasha.reminecraft.util.entity.*;
 
@@ -390,7 +391,10 @@ public class ReListener implements SessionListener {
                     ((EntityRotation) entity).pitch = pck.getPitch();
                 }
             }
-            //todo send to little bois
+            for (ChildReClient childClient : ReMinecraft.INSTANCE.childClients) {
+                if (!childClient.isPlaying()) continue;// this client is still going thru auth
+                childClient.getSession().send(event.getPacket());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

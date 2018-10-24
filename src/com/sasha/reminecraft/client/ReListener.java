@@ -338,7 +338,7 @@ public class ReListener implements SessionListener {
                 e.posY += pck.getMovementY() / 4096d;
                 e.posZ += pck.getMovementZ() / 4096d;
                 boolean flag;
-                var field = pck.getClass().getDeclaredField("rot");
+                var field = ServerEntityMovementPacket.class.getDeclaredField("rot");
                 field.setAccessible(true); // leet hax
                 flag = (boolean)field.get(pck);
                 if (flag && e instanceof EntityRotation) {

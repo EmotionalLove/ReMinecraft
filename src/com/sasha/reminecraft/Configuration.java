@@ -26,7 +26,11 @@ public abstract class Configuration {
     @ConfigSetting public static String var_mojangPassword = null;
     @ConfigSetting public static boolean var_cracked = false;
     @ConfigSetting public static String var_remoteServerIp = "constantiam.net";
+    @ConfigSetting public static String var_hostServerIp = "0.0.0.0";
     @ConfigSetting public static int var_remoteServerPort = 25565;
+    @ConfigSetting public static int var_hostServerPort = 25565;
+    @ConfigSetting public static boolean var_onlineModeServer = true;
+    @ConfigSetting public static String var_messageOfTheDay = "\247dRE:Minecraft \2477" + ReMinecraft.VERSION;
 
     /**
      * Fill the above fields and version the config.

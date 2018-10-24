@@ -378,7 +378,19 @@ public class ReListener implements SessionListener {
             }
             if (event.getPacket() instanceof ServerVehicleMovePacket) {
                 var pck = (ServerVehicleMovePacket) event.getPacket();
+                Entity entity = Entity.getEntityBeingRiddenBy(ReListenerCache.entityId);
+                if (entity == null) {
+                    return;
+                }
+                entity.posX = pck.getX();
+                entity.posY = pck.getY();
+                entity.posZ = pck.getZ();
+                if (entity instanceof EntityRotation) {
+                    ((EntityRotation) entity).yaw = pck.getYaw();
+                    ((EntityRotation) entity).pitch = pck.getPitch();
+                }
             }
+            //todo send to little bois
         } catch (Exception e) {
             e.printStackTrace();
         }

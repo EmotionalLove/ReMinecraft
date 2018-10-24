@@ -23,6 +23,8 @@ import java.util.*;
  */
 public class ReMinecraft {
 
+    private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
+
     /**
      * Singleton of this Re:Minecraft
      */
@@ -46,9 +48,7 @@ public class ReMinecraft {
      * Launch Re:Minecraft and and setup the console command system.
      */
     public static void main(String[] args) throws IllegalAccessException, InstantiationException {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            ReMinecraft.INSTANCE.stopSoft();
-        }));
+        Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
         Scanner scanner = new Scanner(System.in);
         String cmd = scanner.nextLine();
@@ -124,6 +124,10 @@ public class ReMinecraft {
         yml.save();
     }
 
+    public boolean areChildrenConnected() {
+        return !childClients.isEmpty();
+    }
+
     public File getDataFile() {
         File file = new File(DATA_FILE);
         if (!file.exists()) {
@@ -140,6 +144,7 @@ public class ReMinecraft {
      * Stop and close RE:Minecraft
      */
     public void stop() {
+        Runtime.getRuntime().removeShutdownHook(shutdownThread);
         logger.log("Stopping RE:Minecraft...");
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);

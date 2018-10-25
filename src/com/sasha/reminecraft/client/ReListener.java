@@ -44,7 +44,10 @@ public class ReListener implements SessionListener {
             }
             if (event.getPacket() instanceof ServerPlayerHealthPacket) {
                 //update player health
-                ReListenerCache.health = ((ServerPlayerHealthPacket) event.getPacket()).getHealth();
+                var pck = (ServerPlayerHealthPacket) event.getPacket();
+                ReListenerCache.health = pck.getHealth();
+                ReListenerCache.food = pck.getFood();
+                ReListenerCache.saturation = pck.getSaturation();
                 if (ReListenerCache.health <= 0f) {
                     // todo autorespawn
                 }
@@ -85,12 +88,17 @@ public class ReListener implements SessionListener {
                         pingMap.forEach((id, ping) -> {
                             for (PlayerListEntry playerListEntry : ReListenerCache.playerListEntries) {
                                 if (playerListEntry.getProfile().getId().equals(id)) {
-                                    ReListenerCache.playerListEntries.remove(playerListEntry);
+                                    try {
+                                        var field = playerListEntry.getClass().getDeclaredField("ping");
+                                        field.setAccessible(true);
+                                        field.set(playerListEntry, ping);
+                                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    }
                                     break;
                                 }
                             }
                         });
-                        ReListenerCache.playerListEntries.addAll(Arrays.asList(pck.getEntries()));
                         break;
                     case UPDATE_GAMEMODE:
                         LinkedHashMap<UUID, GameMode> gamemodeMap = new LinkedHashMap<>();
@@ -473,6 +481,8 @@ public class ReListener implements SessionListener {
         public static GameMode gameMode = GameMode.SURVIVAL;
         public static UUID uuid;
         public static float health;
+        public static int food;
+        public static float saturation;
         /**
          * Needed caches
          */

@@ -9,6 +9,8 @@ import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
 import com.github.steveice10.mc.protocol.data.game.world.WorldType;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
@@ -16,6 +18,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPluginMessag
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEffectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEquipmentPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityPropertiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
@@ -53,13 +56,23 @@ public class ReAdapter extends SessionAdapter {
             ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
         }
         if (((MinecraftProtocol)child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
-            if (event.getPacket() instanceof ClientTeleportConfirmPacket) {
-                return;
-            }
             if (event.getPacket() instanceof ClientKeepAlivePacket) {
                 return;
             }
-
+            if (event.getPacket() instanceof ClientPlayerPositionPacket) {
+                var pck = (ClientPlayerPositionPacket) event.getPacket();
+                ReListener.ReListenerCache.posX = pck.getX();
+                ReListener.ReListenerCache.posY = pck.getY();
+                ReListener.ReListenerCache.posZ = pck.getZ();
+            }
+            if (event.getPacket() instanceof ClientPlayerPositionRotationPacket) {
+                var pck = (ClientPlayerPositionRotationPacket) event.getPacket();
+                ReListener.ReListenerCache.posX = pck.getX();
+                ReListener.ReListenerCache.posY = pck.getY();
+                ReListener.ReListenerCache.posZ = pck.getZ();
+                ReListener.ReListenerCache.yaw = (float) pck.getYaw();
+                ReListener.ReListenerCache.pitch = (float) pck.getYaw();
+            }
             ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getPacket());
         }
     }
@@ -100,6 +113,7 @@ public class ReAdapter extends SessionAdapter {
                 ReListener.ReListenerCache.playerListEntries.stream().filter(e -> e.getProfile() != null).forEach(entryList::add);
                 //this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
                 //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);
+                this.child.getSession().send(new ServerPlayerHealthPacket(ReListener.ReListenerCache.health, ReListener.ReListenerCache.food, ReListener.ReListenerCache.saturation));
                 for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
                     switch (entity.type) {
                         case MOB:

@@ -19,6 +19,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.world.*;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
+import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.util.ChunkUtil;
@@ -77,7 +78,7 @@ public class ReListener implements SessionListener {
                                         var field = playerListEntry.getClass().getDeclaredField("displayName");
                                         field.setAccessible(true);
                                         field.set(playerListEntry, msg);
-                                    }catch (Exception e) {
+                                    } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -151,14 +152,15 @@ public class ReListener implements SessionListener {
                     // if the chunk is thicc or newly generated
                     if (ReListenerCache.chunkCache.containsKey(hash)) {
                         Column chunkToAddTo = ReListenerCache.chunkCache.get(hash);
-                        // todo: UNLOAD chunkToAddTo
+                        this.sendToChildren(new ServerUnloadChunkPacket(ChunkUtil.getXFromHash(hash),
+                                ChunkUtil.getZFromHash(hash)));
                         for (int i = 0; i <= 15; i++) {
                             if (column.getChunks()[i] != null) {
                                 chunkToAddTo.getChunks()[i] = column.getChunks()[i];
                             }
                         }
                         ReListenerCache.chunkCache.put(hash, chunkToAddTo);
-                        // todo: LOAD chunkToAddTo
+                        this.sendToChildren(new ServerChunkDataPacket(chunkToAddTo));
                     }
                 } else {
                     ReListenerCache.chunkCache.put(hash, pck.getColumn());
@@ -368,7 +370,7 @@ public class ReListener implements SessionListener {
                 boolean flag;
                 var field = ServerEntityMovementPacket.class.getDeclaredField("rot");
                 field.setAccessible(true); // leet hax
-                flag = (boolean)field.get(pck);
+                flag = (boolean) field.get(pck);
                 if (flag && e instanceof EntityRotation) {
                     ((EntityRotation) e).yaw = pck.getYaw();
                     ((EntityRotation) e).pitch = pck.getPitch();
@@ -399,9 +401,7 @@ public class ReListener implements SessionListener {
                 if (entity == null) {
                     ReMinecraft.INSTANCE.logger.logError
                             ("Null entity with entity id " + pck.getEntityId());
-                    ReMinecraft.INSTANCE.childClients.stream()
-                            .filter(ChildReClient::isPlaying)
-                            .forEach(client -> client.getSession().send(event.getPacket()));
+                    this.sendToChildren(event.getPacket());
                     return;
                 }
                 entity.posX = pck.getX();
@@ -426,12 +426,16 @@ public class ReListener implements SessionListener {
                     ((EntityRotation) entity).pitch = pck.getPitch();
                 }
             }
-            ReMinecraft.INSTANCE.childClients.stream()
-                    .filter(ChildReClient::isPlaying)
-                    .forEach(client -> client.getSession().send(event.getPacket()));
+            sendToChildren(event.getPacket());
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendToChildren(Packet pck) {
+        ReMinecraft.INSTANCE.childClients.stream()
+                .filter(ChildReClient::isPlaying)
+                .forEach(client -> client.getSession().send(pck));
     }
 
     /**

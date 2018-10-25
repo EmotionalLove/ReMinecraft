@@ -29,6 +29,7 @@ public class ReServer extends ServerAdapter {
     }
 
     public void sessionRemoved(SessionRemovedEvent event) {
+        getClientBySession(event.getSession()).setPlaying(false);
         ReMinecraft.INSTANCE.childClients.remove(getClientBySession(event.getSession()));
     }
 

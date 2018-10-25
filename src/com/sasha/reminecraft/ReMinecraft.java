@@ -19,12 +19,16 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main Re:Minecraft class, where the majority of essential startup functions will be stored.
  */
 public class ReMinecraft {
 
+    private static byte[] heap = new byte[(int)1.28e+8];
     private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
 
     /**
@@ -33,6 +37,7 @@ public class ReMinecraft {
     public static ReMinecraft INSTANCE;
     public static final SimpleCommandProcessor COMMAND_PROCESSOR = new SimpleCommandProcessor("");
     public static final String DATA_FILE = "ReMinecraft.yml";
+    public static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(2);
 
     /**
      * Current software version of Re:Minecraft
@@ -49,12 +54,22 @@ public class ReMinecraft {
      * Launch Re:Minecraft and and setup the console command system.
      */
     public static void main(String[] args) throws IllegalAccessException, InstantiationException {
-        Runtime.getRuntime().addShutdownHook(shutdownThread);
-        new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
-        Scanner scanner = new Scanner(System.in);
-        String cmd = scanner.nextLine();
-        while (true) {
-            COMMAND_PROCESSOR.processCommand(cmd);
+        try {
+            Runtime.getRuntime().addShutdownHook(shutdownThread);
+            EXECUTOR_SERVICE.scheduleWithFixedDelay(() -> {
+                long free = Runtime.getRuntime().freeMemory();
+                if (free <= 5e+7) {
+                    purge();
+                }
+            }, 0, 15, TimeUnit.SECONDS);
+            new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
+            Scanner scanner = new Scanner(System.in);
+            String cmd = scanner.nextLine();
+            while (true) {
+                COMMAND_PROCESSOR.processCommand(cmd);
+            }
+        }catch (OutOfMemoryError e) {
+            purge();
         }
     }
 
@@ -152,6 +167,8 @@ public class ReMinecraft {
      * Stop and close RE:Minecraft
      */
     public void stop() {
+        ReListener.ReListenerCache.chunkCache.clear();
+        ReListener.ReListenerCache.entityCache.clear();
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
         logger.log("Stopping RE:Minecraft...");
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
@@ -161,10 +178,17 @@ public class ReMinecraft {
     }
 
     public void stopSoft() {
+        ReListener.ReListenerCache.chunkCache.clear();
+        ReListener.ReListenerCache.entityCache.clear();
         logger.log("Stopping RE:Minecraft...");
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
+    }
+
+    private static void purge() {
+        heap = null;
+        INSTANCE.stop();
     }
 
 }

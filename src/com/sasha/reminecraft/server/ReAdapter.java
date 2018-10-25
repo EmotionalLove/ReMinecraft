@@ -13,11 +13,10 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlaye
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPluginMessagePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEffectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEquipmentPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityPropertiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
@@ -58,23 +57,33 @@ public class ReAdapter extends SessionAdapter {
             var pck = (LoginStartPacket) event.getPacket();
             ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
         }
-        if (((MinecraftProtocol)child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
+        if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
             if (event.getPacket() instanceof ClientKeepAlivePacket) {
                 return;
             }
             if (event.getPacket() instanceof ClientPlayerPositionPacket) {
                 var pck = (ClientPlayerPositionPacket) event.getPacket();
                 ReListener.ReListenerCache.posX = pck.getX();
+                ReListener.ReListenerCache.player.posX = pck.getX();
                 ReListener.ReListenerCache.posY = pck.getY();
+                ReListener.ReListenerCache.player.posY = pck.getY();
                 ReListener.ReListenerCache.posZ = pck.getZ();
+                ReListener.ReListenerCache.player.posZ = pck.getZ();
+                ReListener.ReListenerCache.onGround = pck.isOnGround();
             }
             if (event.getPacket() instanceof ClientPlayerPositionRotationPacket) {
                 var pck = (ClientPlayerPositionRotationPacket) event.getPacket();
                 ReListener.ReListenerCache.posX = pck.getX();
+                ReListener.ReListenerCache.player.posX = pck.getX();
                 ReListener.ReListenerCache.posY = pck.getY();
+                ReListener.ReListenerCache.player.posY = pck.getY();
                 ReListener.ReListenerCache.posZ = pck.getZ();
+                ReListener.ReListenerCache.player.posZ = pck.getZ();
                 ReListener.ReListenerCache.yaw = (float) pck.getYaw();
-                ReListener.ReListenerCache.pitch = (float) pck.getYaw();
+                ReListener.ReListenerCache.player.yaw = (float) pck.getYaw();
+                ReListener.ReListenerCache.pitch = (float) pck.getPitch();
+                ReListener.ReListenerCache.player.pitch = (float) pck.getPitch();
+                ReListener.ReListenerCache.onGround = pck.isOnGround();
             }
             ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getPacket());
         }
@@ -105,22 +114,31 @@ public class ReAdapter extends SessionAdapter {
         if (event.getPacket() instanceof ServerJoinGamePacket) {
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
             new Thread(() -> {
-                ReListener.ReListenerCache.chunkCache.forEach((hash, chunk)-> {
+                ReListener.ReListenerCache.chunkCache.forEach((hash, chunk) -> {
                     this.child.getSession().send(new ServerChunkDataPacket(chunk));
                     try {
-                        Thread.sleep(20L);
+                        Thread.sleep(30L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 });
                 ReMinecraft.INSTANCE.logger.log("Sent " + ReListener.ReListenerCache.chunkCache.size() + " chunks");
                 this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
-                List<PlayerListEntry> entryList = new ArrayList<>();
-                ReListener.ReListenerCache.playerListEntries.stream().filter(e -> e.getProfile() != null).forEach(entryList::add);
+                ReListener.ReListenerCache.playerListEntries.stream()
+                        .filter(entry -> entry.getProfile() == null)
+                        .forEach(entry ->
+                                this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, new PlayerListEntry[]{entry}))
+                        );
                 // todo this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
                 //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);
+                this.child.getSession().send(new ServerPlayerListDataPacket(ReListener.ReListenerCache.tabHeader, ReListener.ReListenerCache.tabFooter));
                 this.child.getSession().send(new ServerPlayerHealthPacket(ReListener.ReListenerCache.health, ReListener.ReListenerCache.food, ReListener.ReListenerCache.saturation));
                 for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
+                    try {
+                        Thread.sleep(20L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     switch (entity.type) {
                         case MOB:
                             EntityMob mob = (EntityMob) entity;
@@ -199,6 +217,21 @@ public class ReAdapter extends SessionAdapter {
                             break;
                     }
                 }
+                for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
+                    if (entity instanceof EntityEquipment) {
+                        if (((EntityEquipment) entity).passengerIds.length > 0) {
+                            this.child.getSession().send(new ServerEntitySetPassengersPacket(entity.entityId,
+                                    ((EntityEquipment) entity).passengerIds));
+                        }
+                    }
+                    if (entity instanceof EntityRotation) {
+                        EntityRotation rotation = (EntityRotation) entity;
+                        if (rotation.isLeashed) {
+                            this.child.getSession().send(new ServerEntityAttachPacket(entity.entityId,
+                                    rotation.leashedID));
+                        }
+                    }
+                }
                 this.child.setPlaying(true);
             }).start();
         }
@@ -217,6 +250,7 @@ public class ReAdapter extends SessionAdapter {
     }
 
 }
+
 class ServerBranding {
     public static final String BRAND = "RE:Minecraft " + ReMinecraft.VERSION;
     public static byte[] BRAND_ENCODED;
@@ -240,6 +274,7 @@ class ServerBranding {
         writeVarInt(buf, bytes.length);
         buf.writeBytes(bytes);
     }
+
     private static void writeVarInt(ByteBuf buf, int value) {
         byte part;
         while (true) {

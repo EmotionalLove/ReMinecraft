@@ -341,11 +341,27 @@ public class ReListener implements SessionListener {
             if (event.getPacket() instanceof ServerEntityHeadLookPacket) {
                 var pck = (ServerEntityHeadLookPacket) event.getPacket();
                 EntityRotation e = (EntityRotation) ReListenerCache.entityCache.get(pck.getEntityId());
+                if (e == null) {
+                    ReMinecraft.INSTANCE.logger.logError
+                            ("Null entity with entity id " + pck.getEntityId());
+                    ReMinecraft.INSTANCE.childClients.stream()
+                            .filter(ChildReClient::isPlaying)
+                            .forEach(client -> client.getSession().send(event.getPacket()));
+                    return;
+                }
                 e.headYaw = pck.getHeadYaw();
             }
             if (event.getPacket() instanceof ServerEntityMovementPacket) {
                 var pck = (ServerEntityMovementPacket) event.getPacket();
                 Entity e = ReListenerCache.entityCache.get(pck.getEntityId());
+                if (e == null) {
+                    ReMinecraft.INSTANCE.logger.logError
+                            ("Null entity with entity id " + pck.getEntityId());
+                    ReMinecraft.INSTANCE.childClients.stream()
+                            .filter(ChildReClient::isPlaying)
+                            .forEach(client -> client.getSession().send(event.getPacket()));
+                    return;
+                }
                 e.posX += pck.getMovementX() / 4096d;
                 e.posY += pck.getMovementY() / 4096d;
                 e.posZ += pck.getMovementZ() / 4096d;
@@ -380,6 +396,14 @@ public class ReListener implements SessionListener {
             if (event.getPacket() instanceof ServerEntityTeleportPacket) {
                 var pck = (ServerEntityTeleportPacket) event.getPacket();
                 Entity entity = ReListenerCache.entityCache.get(pck.getEntityId());
+                if (entity == null) {
+                    ReMinecraft.INSTANCE.logger.logError
+                            ("Null entity with entity id " + pck.getEntityId());
+                    ReMinecraft.INSTANCE.childClients.stream()
+                            .filter(ChildReClient::isPlaying)
+                            .forEach(client -> client.getSession().send(event.getPacket()));
+                    return;
+                }
                 entity.posX = pck.getX();
                 entity.posY = pck.getY();
                 entity.posZ = pck.getZ();
@@ -402,10 +426,9 @@ public class ReListener implements SessionListener {
                     ((EntityRotation) entity).pitch = pck.getPitch();
                 }
             }
-            for (ChildReClient childClient : ReMinecraft.INSTANCE.childClients) {
-                if (!childClient.isPlaying()) continue;// this client is still going thru auth
-                childClient.getSession().send(event.getPacket());
-            }
+            ReMinecraft.INSTANCE.childClients.stream()
+                    .filter(ChildReClient::isPlaying)
+                    .forEach(client -> client.getSession().send(event.getPacket()));
         } catch (Exception e) {
             e.printStackTrace();
         }

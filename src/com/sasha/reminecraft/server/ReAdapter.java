@@ -8,6 +8,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
 import com.github.steveice10.mc.protocol.data.game.world.WorldType;
+import com.github.steveice10.mc.protocol.data.message.TextMessage;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
@@ -125,9 +126,17 @@ public class ReAdapter extends SessionAdapter {
                 ReMinecraft.INSTANCE.logger.log("Sent " + ReListener.ReListenerCache.chunkCache.size() + " chunks");
                 this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
                 ReListener.ReListenerCache.playerListEntries.stream()
-                        .filter(entry -> entry.getProfile() == null)
-                        .forEach(entry ->
-                                this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, new PlayerListEntry[]{entry}))
+                        .filter(entry -> entry.getProfile() != null)
+                        .forEach(entry -> {
+                                    try {
+                                        var field = PlayerListEntry.class.getDeclaredField("displayName");
+                                        field.setAccessible(true);
+                                        field.set(entry, new TextMessage(entry.getProfile().getName()));
+                                        this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, new PlayerListEntry[]{entry}));
+                                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                         );
                 // todo this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
                 //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);

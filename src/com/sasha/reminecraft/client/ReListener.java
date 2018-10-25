@@ -19,6 +19,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.world.*;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
+import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.util.ChunkUtil;
@@ -151,14 +152,14 @@ public class ReListener implements SessionListener {
                     // if the chunk is thicc or newly generated
                     if (ReListenerCache.chunkCache.containsKey(hash)) {
                         Column chunkToAddTo = ReListenerCache.chunkCache.get(hash);
-                        // todo: UNLOAD chunkToAddTo
+                        this.sendToChildren(new ServerUnloadChunkPacket(chunkToAddTo.getX(), chunkToAddTo.getZ()));
                         for (int i = 0; i <= 15; i++) {
                             if (column.getChunks()[i] != null) {
                                 chunkToAddTo.getChunks()[i] = column.getChunks()[i];
                             }
                         }
                         ReListenerCache.chunkCache.put(hash, chunkToAddTo);
-                        // todo: LOAD chunkToAddTo
+                        this.sendToChildren(new ServerChunkDataPacket(chunkToAddTo));
                     }
                 } else {
                     ReListenerCache.chunkCache.put(hash, pck.getColumn());
@@ -344,9 +345,7 @@ public class ReListener implements SessionListener {
                 if (e == null) {
                     ReMinecraft.INSTANCE.logger.logError
                             ("Null entity with entity id " + pck.getEntityId());
-                    ReMinecraft.INSTANCE.childClients.stream()
-                            .filter(ChildReClient::isPlaying)
-                            .forEach(client -> client.getSession().send(event.getPacket()));
+                    this.sendToChildren(event.getPacket());
                     return;
                 }
                 e.headYaw = pck.getHeadYaw();
@@ -357,9 +356,7 @@ public class ReListener implements SessionListener {
                 if (e == null) {
                     ReMinecraft.INSTANCE.logger.logError
                             ("Null entity with entity id " + pck.getEntityId());
-                    ReMinecraft.INSTANCE.childClients.stream()
-                            .filter(ChildReClient::isPlaying)
-                            .forEach(client -> client.getSession().send(event.getPacket()));
+                    this.sendToChildren(event.getPacket());
                     return;
                 }
                 e.posX += pck.getMovementX() / 4096d;
@@ -426,12 +423,16 @@ public class ReListener implements SessionListener {
                     ((EntityRotation) entity).pitch = pck.getPitch();
                 }
             }
-            ReMinecraft.INSTANCE.childClients.stream()
-                    .filter(ChildReClient::isPlaying)
-                    .forEach(client -> client.getSession().send(event.getPacket()));
+            this.sendToChildren(event.getPacket());
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendToChildren(Packet pck) {
+        ReMinecraft.INSTANCE.childClients.stream()
+                .filter(ChildReClient::isPlaying)
+                .forEach(client -> client.getSession().send(pck));
     }
 
     /**

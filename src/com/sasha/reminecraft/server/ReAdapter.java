@@ -2,6 +2,8 @@ package com.sasha.reminecraft.server;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
+import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
@@ -9,6 +11,7 @@ import com.github.steveice10.mc.protocol.data.game.world.WorldType;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPluginMessagePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEffectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEquipmentPacket;
@@ -30,6 +33,8 @@ import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -55,6 +60,7 @@ public class ReAdapter extends SessionAdapter {
                 return;
             }
 
+            ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getPacket());
         }
     }
 
@@ -90,7 +96,9 @@ public class ReAdapter extends SessionAdapter {
                 });
                 ReMinecraft.INSTANCE.logger.log("Sent " + ReListener.ReListenerCache.chunkCache.size() + " chunks");
                 this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
-                //this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER,ReListener.ReListenerCache.playerListEntries.toArray(new PlayerListEntry[ReListener.ReListenerCache.playerListEntries.size()])));
+                List<PlayerListEntry> entryList = new ArrayList<>();
+                ReListener.ReListenerCache.playerListEntries.stream().filter(e -> e.getProfile() != null).forEach(entryList::add);
+                //this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
                 //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);
                 for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
                     switch (entity.type) {

@@ -22,12 +22,15 @@ import com.github.steveice10.packetlib.event.session.*;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.util.ChunkReference;
 import com.sasha.reminecraft.util.ChunkUtil;
+import com.sasha.reminecraft.util.ChunkWriter;
 import com.sasha.reminecraft.util.entity.*;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Listens and processes packets being Tx'd and Rx'd from the remote server.
@@ -150,8 +153,8 @@ public class ReListener implements SessionListener {
                 long hash = ChunkUtil.getChunkHashFromXZ(column.getX(), column.getZ());
                 if (!column.hasBiomeData()) {
                     // if the chunk is thicc or newly generated
-                    if (ReListenerCache.chunkCache.containsKey(hash)) {
-                        Column chunkToAddTo = ReListenerCache.chunkCache.get(hash);
+                    if (ChunkWriter.hasChunk(hash)) {
+                        Column chunkToAddTo = ChunkWriter.getChunk(hash);
                         this.sendToChildren(new ServerUnloadChunkPacket(ChunkUtil.getXFromHash(hash),
                                 ChunkUtil.getZFromHash(hash)));
                         for (int i = 0; i <= 15; i++) {
@@ -159,11 +162,11 @@ public class ReListener implements SessionListener {
                                 chunkToAddTo.getChunks()[i] = column.getChunks()[i];
                             }
                         }
-                        ReListenerCache.chunkCache.put(hash, chunkToAddTo);
+                        ChunkWriter.putChunk(chunkToAddTo, hash);
                         this.sendToChildren(new ServerChunkDataPacket(chunkToAddTo));
                     }
                 } else {
-                    ReListenerCache.chunkCache.put(hash, pck.getColumn());
+                    ChunkWriter.putChunk(column, hash);
                 }
             }
             if (event.getPacket() instanceof ServerUnloadChunkPacket) {
@@ -181,8 +184,7 @@ public class ReListener implements SessionListener {
                 int chunkX = pck.getRecord().getPosition().getX() >> 4;
                 int chunkZ = pck.getRecord().getPosition().getZ() >> 4;
                 int cubeY = ChunkUtil.clamp(pck.getRecord().getPosition().getY() >> 4, 0, 15);
-                Column column = ReListenerCache.chunkCache
-                        .getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
+                var column = ChunkWriter.getChunk(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ));
                 if (column == null) {
                     // not ignoring this can leak memory in the notchian client
                     ReMinecraft.INSTANCE.logger.logWarning("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
@@ -193,18 +195,18 @@ public class ReListener implements SessionListener {
                 try {
                     subChunk.getBlocks().set(Math.abs(Math.abs(pck.getRecord().getPosition().getX()) - (Math.abs(Math.abs(pck.getRecord().getPosition().getX() >> 4)) * 16)), ChunkUtil.clamp(cubeRelY, 0, 15), Math.abs(Math.abs(pck.getRecord().getPosition().getZ()) - (Math.abs(Math.abs(pck.getRecord().getPosition().getZ() >> 4)) * 16)), pck.getRecord().getBlock());
                     column.getChunks()[cubeY] = subChunk;
-                    ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
+                    ChunkWriter.putChunk(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
+                ChunkWriter.putChunk(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
             }
             if (event.getPacket() instanceof ServerMultiBlockChangePacket) {
                 // this is more complicated
                 var pck = (ServerMultiBlockChangePacket) event.getPacket();
                 int chunkX = pck.getRecords()[0].getPosition().getX() >> 4;
                 int chunkZ = pck.getRecords()[0].getPosition().getZ() >> 4;
-                Column column = ReListenerCache.chunkCache.getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
+                Column column = ChunkWriter.getChunk(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ));
                 if (column == null) {
                     // not ignoring this can leak memory in the notchian client
                     ReMinecraft.INSTANCE.logger.logWarning("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
@@ -223,7 +225,7 @@ public class ReListener implements SessionListener {
                         System.out.println(relativeChunkX + " " + cubeRelativeY + " " + relativeChunkZ + " " + (cubeRelativeY << 8 | relativeChunkZ << 4 | relativeChunkX));
                     }
                 }
-                ReListenerCache.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
+                //ChunkWriter.putChunk(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
             }
             if (event.getPacket() instanceof ServerJoinGamePacket) {
                 // this is when YOU join the server, not another player
@@ -516,7 +518,7 @@ public class ReListener implements SessionListener {
         /**
          * Needed caches
          */
-        public static ConcurrentHashMap<Long, Column> chunkCache = new ConcurrentHashMap<>();
+        public static List<ChunkReference> chunkCache = new ArrayList<>();
         public static ConcurrentHashMap<Integer, Entity> entityCache = new ConcurrentHashMap<>();
         public static HashMap<UUID, ServerBossBarPacket> cachedBossBars = new HashMap<>();
         public static BufferedImage icon = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);

@@ -4,6 +4,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
+import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
@@ -29,6 +30,7 @@ import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.ReListener;
 import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.util.ChunkWriter;
 import com.sasha.reminecraft.util.entity.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -112,11 +114,12 @@ public class ReAdapter extends SessionAdapter {
         if (event.getPacket() instanceof ServerJoinGamePacket) {
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
             new Thread(() -> {
-                ReListener.ReListenerCache.chunkCache.forEach((hash, chunk) -> {
-                    this.child.getSession().send(new ServerChunkDataPacket(chunk));
+                ReListener.ReListenerCache.chunkCache.forEach(ref -> {
                     try {
+                        var chunk = ChunkWriter.getChunk(ref.getHash());
+                        this.child.getSession().send(new ServerChunkDataPacket(chunk));
                         Thread.sleep(30L);
-                    } catch (InterruptedException e) {
+                    } catch (IOException | ClassNotFoundException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 });

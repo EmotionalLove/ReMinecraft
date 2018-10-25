@@ -25,6 +25,7 @@ import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.util.ChunkReference;
 import com.sasha.reminecraft.util.ChunkUtil;
 import com.sasha.reminecraft.util.ChunkWriter;
+import com.sasha.reminecraft.util.ConcurrentDoublyLinkedList;
 import com.sasha.reminecraft.util.entity.*;
 
 import java.awt.image.BufferedImage;

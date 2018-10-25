@@ -10,6 +10,7 @@ import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerChangeHeldItemPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
@@ -423,6 +424,10 @@ public class ReListener implements SessionListener {
                     ((EntityRotation) entity).pitch = pck.getPitch();
                 }
             }
+            if (event.getPacket() instanceof ServerPlayerChangeHeldItemPacket) {
+                var pck = (ServerPlayerChangeHeldItemPacket) event.getPacket();
+                ReListenerCache.heldItem = pck.getSlot();
+            }
             this.sendToChildren(event.getPacket());
         } catch (Exception e) {
             e.printStackTrace();
@@ -491,6 +496,7 @@ public class ReListener implements SessionListener {
          * Player inventory
          */
         public static ServerWindowItemsPacket playerInventory;
+        public static int heldItem = 0;
         /**
          * Player position
          */
@@ -507,7 +513,7 @@ public class ReListener implements SessionListener {
         public static int entityId = 0;
         public static GameMode gameMode = GameMode.SURVIVAL;
         public static UUID uuid;
-        public static float health;
+        public static float health = 20f;
         public static int food;
         public static float saturation;
         /**

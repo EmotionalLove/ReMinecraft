@@ -10,14 +10,14 @@ import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
 import com.github.steveice10.mc.protocol.data.game.world.WorldType;
 import com.github.steveice10.mc.protocol.data.message.TextMessage;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerAbilitiesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPluginMessagePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerAbilitiesPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerChangeHeldItemPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
@@ -25,6 +25,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.Serve
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
+import com.github.steveice10.mc.protocol.packet.login.server.LoginSetCompressionPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
@@ -110,139 +111,140 @@ public class ReAdapter extends SessionAdapter {
                     Difficulty.NORMAL,
                     Integer.MAX_VALUE,
                     WorldType.DEFAULT,
-                    false));
+                    true));
         }
         if (event.getPacket() instanceof ServerJoinGamePacket) {
+            ReListener.ReListenerCache.chunkCache.forEach((hash, chunk) -> {
+                this.child.getSession().send(new ServerChunkDataPacket(chunk));
+                try {
+                    Thread.sleep(0L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            ReMinecraft.INSTANCE.logger.log("Sent " + ReListener.ReListenerCache.chunkCache.size() + " chunks");
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
-            new Thread(() -> {
-                ReListener.ReListenerCache.chunkCache.forEach((hash, chunk) -> {
-                    this.child.getSession().send(new ServerChunkDataPacket(chunk));
-                    try {
-                        Thread.sleep(30L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-                ReMinecraft.INSTANCE.logger.log("Sent " + ReListener.ReListenerCache.chunkCache.size() + " chunks");
-                this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
-                ReListener.ReListenerCache.playerListEntries.stream()
-                        .filter(entry -> entry.getProfile() != null)
-                        .forEach(entry -> {
-                                    try {
-                                        var field = PlayerListEntry.class.getDeclaredField("displayName");
-                                        field.setAccessible(true);
-                                        field.set(entry, new TextMessage(entry.getProfile().getName()));
-                                        this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, new PlayerListEntry[]{entry}));
-                                    } catch (IllegalAccessException | NoSuchFieldException e) {
-                                        e.printStackTrace();
-                                    }
+            //this.child.getSession().send(new ServerPlayerAbilitiesPacket(false, false, false, false, 1f, 10f));
+            this.child.getSession().send(new ServerPlayerChangeHeldItemPacket());
+            this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
+            ReListener.ReListenerCache.playerListEntries.stream()
+                    .filter(entry -> entry.getProfile() != null)
+                    .forEach(entry -> {
+                                try {
+                                    var field = PlayerListEntry.class.getDeclaredField("displayName");
+                                    field.setAccessible(true);
+                                    field.set(entry, new TextMessage(entry.getProfile().getName()));
+                                    this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, new PlayerListEntry[]{entry}));
+                                } catch (IllegalAccessException | NoSuchFieldException e) {
+                                    e.printStackTrace();
                                 }
-                        );
-                // todo this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
-                //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);
-                this.child.getSession().send(new ServerPlayerListDataPacket(ReListener.ReListenerCache.tabHeader, ReListener.ReListenerCache.tabFooter));
-                this.child.getSession().send(new ServerPlayerHealthPacket(ReListener.ReListenerCache.health, ReListener.ReListenerCache.food, ReListener.ReListenerCache.saturation));
-                for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
-                    try {
-                        Thread.sleep(20L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    switch (entity.type) {
-                        case MOB:
-                            EntityMob mob = (EntityMob) entity;
-                            this.child.getSession().send(new ServerSpawnMobPacket(entity.entityId,
-                                    entity.uuid,
-                                    mob.mobType,
-                                    entity.posX,
-                                    entity.posY,
-                                    entity.posZ,
-                                    mob.yaw,
-                                    mob.pitch,
-                                    mob.headYaw,
-                                    mob.motionX,
-                                    mob.motionY,
-                                    mob.motionZ,
-                                    mob.metadata));
-                            for (PotionEffect effect : mob.potionEffects) {
-                                child.getSession().send(new ServerEntityEffectPacket(entity.entityId,
-                                        effect.effect,
-                                        effect.amplifier,
-                                        effect.duration,
-                                        effect.ambient,
-                                        effect.showParticles));
                             }
-                            for (Map.Entry<EquipmentSlot, ItemStack> entry : mob.equipment.entrySet()) {
-                                child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
-                                        entry.getKey(),
-                                        entry.getValue()));
-                            }
-                            if (mob.properties.size() > 0) {
-                                child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
-                                        mob.properties));
-                            }
-                            break;
-                        case PLAYER:
-                            EntityPlayer playerSending = (EntityPlayer) entity;
-                            child.getSession().send(new ServerSpawnPlayerPacket(entity.entityId,
-                                    entity.uuid,
-                                    entity.posX,
-                                    entity.posY,
-                                    entity.posZ,
-                                    playerSending.yaw,
-                                    playerSending.pitch,
-                                    playerSending.metadata));
-                        case REAL_PLAYER:
-                            EntityPlayer player = (EntityPlayer) entity;
-                            for (PotionEffect effect : player.potionEffects) {
-                                child.getSession().send(new ServerEntityEffectPacket(entity.entityId,
-                                        effect.effect,
-                                        effect.amplifier,
-                                        effect.duration,
-                                        effect.ambient,
-                                        effect.showParticles));
-                            }
-                            for (Map.Entry<EquipmentSlot, ItemStack> entry : player.equipment.entrySet()) {
-                                child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
-                                        entry.getKey(),
-                                        entry.getValue()));
-                            }
-                            if (player.properties.size() > 0) {
-                                child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
-                                        player.properties));
-                            }
-                            break;
-                        case OBJECT:
-                            EntityObject object = (EntityObject) entity;
-                            child.getSession().send(new ServerSpawnObjectPacket(entity.entityId,
-                                    entity.uuid,
-                                    object.objectType,
-                                    object.data,
-                                    entity.posX,
-                                    entity.posY,
-                                    entity.posZ,
-                                    object.yaw,
-                                    object.pitch));
-                            break;
+                    );
+            //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);
+            this.child.getSession().send(new ServerPlayerListDataPacket(ReListener.ReListenerCache.tabHeader, ReListener.ReListenerCache.tabFooter));
+            this.child.getSession().send(new ServerPlayerHealthPacket(ReListener.ReListenerCache.health, ReListener.ReListenerCache.food, ReListener.ReListenerCache.saturation));
+            for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
+                try {
+                    Thread.sleep(0l);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                switch (entity.type) {
+                    case MOB:
+                        EntityMob mob = (EntityMob) entity;
+                        this.child.getSession().send(new ServerSpawnMobPacket(entity.entityId,
+                                mob.uuid,
+                                mob.mobType,
+                                mob.posX,
+                                mob.posY,
+                                mob.posZ,
+                                mob.yaw,
+                                mob.pitch,
+                                mob.headYaw,
+                                mob.motionX,
+                                mob.motionY,
+                                mob.motionZ,
+                                mob.metadata));
+                        for (PotionEffect effect : mob.potionEffects) {
+                            child.getSession().send(new ServerEntityEffectPacket(entity.entityId,
+                                    effect.effect,
+                                    effect.amplifier,
+                                    effect.duration,
+                                    effect.ambient,
+                                    effect.showParticles));
+                        }
+                        for (Map.Entry<EquipmentSlot, ItemStack> entry : mob.equipment.entrySet()) {
+                            child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
+                                    entry.getKey(),
+                                    entry.getValue()));
+                        }
+                        if (mob.properties.size() > 0) {
+                            child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
+                                    mob.properties));
+                        }
+                        break;
+                    case PLAYER:
+                        EntityPlayer playerSending = (EntityPlayer) entity;
+                        child.getSession().send(new ServerSpawnPlayerPacket(playerSending.entityId,
+                                playerSending.uuid,
+                                playerSending.posX,
+                                playerSending.posY,
+                                playerSending.posZ,
+                                playerSending.yaw,
+                                playerSending.pitch,
+                                playerSending.metadata));
+                    case REAL_PLAYER:
+                        EntityPlayer player = (EntityPlayer) entity;
+                        for (PotionEffect effect : player.potionEffects) {
+                            child.getSession().send(new ServerEntityEffectPacket(entity.entityId,
+                                    effect.effect,
+                                    effect.amplifier,
+                                    effect.duration,
+                                    effect.ambient,
+                                    effect.showParticles));
+                        }
+                        for (Map.Entry<EquipmentSlot, ItemStack> entry : player.equipment.entrySet()) {
+                            child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
+                                    entry.getKey(),
+                                    entry.getValue()));
+                        }
+                        if (player.properties.size() > 0) {
+                            child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
+                                    player.properties));
+                        }
+                        break;
+                    case OBJECT:
+                        EntityObject object = (EntityObject) entity;
+                        child.getSession().send(new ServerSpawnObjectPacket(entity.entityId,
+                                object.uuid,
+                                object.objectType,
+                                object.data,
+                                object.posX,
+                                object.posY,
+                                object.posZ,
+                                object.yaw,
+                                object.pitch));
+                        break;
+                    case PAINTING:
+                        break;
+                }
+            }
+            for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
+                if (entity instanceof EntityEquipment) {
+                    if (((EntityEquipment) entity).passengerIds.length > 0) {
+                        this.child.getSession().send(new ServerEntitySetPassengersPacket(entity.entityId,
+                                ((EntityEquipment) entity).passengerIds));
                     }
                 }
-                for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
-                    if (entity instanceof EntityEquipment) {
-                        if (((EntityEquipment) entity).passengerIds.length > 0) {
-                            this.child.getSession().send(new ServerEntitySetPassengersPacket(entity.entityId,
-                                    ((EntityEquipment) entity).passengerIds));
-                        }
-                    }
-                    if (entity instanceof EntityRotation) {
-                        EntityRotation rotation = (EntityRotation) entity;
-                        if (rotation.isLeashed) {
-                            this.child.getSession().send(new ServerEntityAttachPacket(entity.entityId,
-                                    rotation.leashedID));
-                        }
+                if (entity instanceof EntityRotation) {
+                    EntityRotation rotation = (EntityRotation) entity;
+                    if (rotation.isLeashed) {
+                        this.child.getSession().send(new ServerEntityAttachPacket(entity.entityId,
+                                rotation.leashedID));
                     }
                 }
-                this.child.setPlaying(true);
-            }).start();
+            }
+            this.child.setPlaying(true);
         }
     }
 

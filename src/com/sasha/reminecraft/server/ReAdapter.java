@@ -49,6 +49,9 @@ public class ReAdapter extends SessionAdapter {
         this.child = child;
     }
 
+    /**
+     * Invoked when the child sends us a packet
+     */
     @Override
     public void packetReceived(PacketReceivedEvent event) {
         if (event.getPacket() instanceof LoginStartPacket) {
@@ -81,6 +84,9 @@ public class ReAdapter extends SessionAdapter {
     public void packetSending(PacketSendingEvent event) {
     }
 
+    /**
+     * Invoked when WE send a packet to a CHILD
+     */
     @Override
     public void packetSent(PacketSentEvent event) {
         if (event.getPacket() instanceof LoginSuccessPacket) {
@@ -111,7 +117,7 @@ public class ReAdapter extends SessionAdapter {
                 this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
                 List<PlayerListEntry> entryList = new ArrayList<>();
                 ReListener.ReListenerCache.playerListEntries.stream().filter(e -> e.getProfile() != null).forEach(entryList::add);
-                //this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
+                // todo this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, entryList.toArray(new PlayerListEntry[entryList.size()])));
                 //this.child.getSession().send(ReListener.ReListenerCache.playerInventory);
                 this.child.getSession().send(new ServerPlayerHealthPacket(ReListener.ReListenerCache.health, ReListener.ReListenerCache.food, ReListener.ReListenerCache.saturation));
                 for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {

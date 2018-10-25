@@ -73,12 +73,16 @@ public class ReListener implements SessionListener {
                         changeMap.forEach((id, msg) -> {
                             for (PlayerListEntry playerListEntry : ReListenerCache.playerListEntries) {
                                 if (playerListEntry.getProfile().getId().equals(id)) {
-                                    ReListenerCache.playerListEntries.remove(playerListEntry);
-                                    break;
+                                    try {
+                                        var field = playerListEntry.getClass().getDeclaredField("displayName");
+                                        field.setAccessible(true);
+                                        field.set(playerListEntry, msg);
+                                    }catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         });
-                        ReListenerCache.playerListEntries.addAll(Arrays.asList(pck.getEntries()));
                         break;
                     case UPDATE_LATENCY:
                         LinkedHashMap<UUID, Integer> pingMap = new LinkedHashMap<>();
@@ -95,7 +99,6 @@ public class ReListener implements SessionListener {
                                     } catch (NoSuchFieldException | IllegalAccessException e) {
                                         e.printStackTrace();
                                     }
-                                    break;
                                 }
                             }
                         });

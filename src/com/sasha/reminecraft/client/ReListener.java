@@ -109,15 +109,19 @@ public class ReListener implements SessionListener {
                         for (PlayerListEntry entry : pck.getEntries()) {
                             gamemodeMap.put(entry.getProfile().getId(), entry.getGameMode());
                         }
-                        gamemodeMap.forEach((id, ping) -> {
+                        gamemodeMap.forEach((id, gm) -> {
                             for (PlayerListEntry playerListEntry : ReListenerCache.playerListEntries) {
                                 if (playerListEntry.getProfile().getId().equals(id)) {
-                                    ReListenerCache.playerListEntries.remove(playerListEntry);
-                                    break;
+                                    try {
+                                        var field = playerListEntry.getClass().getDeclaredField("gameMode");
+                                        field.setAccessible(true);
+                                        field.set(playerListEntry, gm);
+                                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         });
-                        ReListenerCache.playerListEntries.addAll(Arrays.asList(pck.getEntries()));
                         break;
                     default:
                         ReMinecraft.INSTANCE.logger.logError("Unsupported tablist action!");
@@ -531,8 +535,8 @@ public class ReListener implements SessionListener {
         /**
          * Tablist header/footer
          */
-        public static Message tabHeader;
-        public static Message tabFooter;
+        public static Message tabHeader = Message.fromString("\nRE:Minecraft " + ReMinecraft.VERSION + "\n");
+        public static Message tabFooter = Message.fromString("\nCreated by: Sasha\n");
         public static List<PlayerListEntry> playerListEntries = new ArrayList<>();
     }
 }

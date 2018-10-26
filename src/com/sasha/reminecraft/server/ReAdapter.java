@@ -1,12 +1,13 @@
 package com.sasha.reminecraft.server;
 
+import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.mc.protocol.data.message.TextMessage;
+import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
@@ -121,7 +122,12 @@ public class ReAdapter extends SessionAdapter {
                                 try {
                                     var field = PlayerListEntry.class.getDeclaredField("displayName");
                                     field.setAccessible(true);
-                                    field.set(entry, new TextMessage(entry.getProfile().getName()));
+                                    field.set(entry, Message.fromString(entry.getProfile().getName()));
+                                    if (entry.getProfile().getName() == null) {
+                                        var f = GameProfile.class.getDeclaredField("name");
+                                        f.setAccessible(true);
+                                        f.set(entry.getProfile(), "???");
+                                    }
                                     this.child.getSession().send(new ServerPlayerListEntryPacket(PlayerListEntryAction.ADD_PLAYER, new PlayerListEntry[]{entry}));
                                 } catch (IllegalAccessException | NoSuchFieldException e) {
                                     e.printStackTrace();
@@ -266,6 +272,8 @@ public class ReAdapter extends SessionAdapter {
 
     @Override
     public void disconnected(DisconnectedEvent event) {
+        event.getCause().printStackTrace();
+        ReMinecraft.INSTANCE.logger.log("Child disconnected due to " + event.getReason());
     }
 
 }

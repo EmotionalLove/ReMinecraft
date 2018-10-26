@@ -1,12 +1,13 @@
 package com.sasha.reminecraft.client.children;
 
+import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.packetlib.Session;
 import com.sasha.reminecraft.server.ReAdapter;
 
 /**
  * The child client that is trying to play on the logged in Mojang account
  */
-
 public class ChildReClient {
 
     private Session session;
@@ -26,6 +27,7 @@ public class ChildReClient {
     }
 
     public boolean isPlaying() {
-        return playing;
+        var pckprot = (MinecraftProtocol) session.getPacketProtocol();
+        return playing && pckprot.getSubProtocol() == SubProtocol.GAME;
     }
 }

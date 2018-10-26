@@ -55,7 +55,8 @@ public class ReAdapter extends SessionAdapter {
      */
     @Override
     public void packetReceived(PacketReceivedEvent event) {
-        if (event.getPacket() instanceof LoginStartPacket) {
+        var protocol = (MinecraftProtocol) child.getSession().getPacketProtocol();
+        if (event.getPacket() instanceof LoginStartPacket && (protocol.getSubProtocol() == SubProtocol.LOGIN || protocol.getSubProtocol() == SubProtocol.HANDSHAKE)) {
             var pck = (LoginStartPacket) event.getPacket();
             ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
         }
@@ -124,8 +125,7 @@ public class ReAdapter extends SessionAdapter {
             });
             ReMinecraft.INSTANCE.logger.log("Sent " + ReListener.ReListenerCache.chunkCache.size() + " chunks");
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
-            //this.child.getSession().send(new ServerPlayerAbilitiesPacket(false, false, false, false, 1f, 10f));
-            this.child.getSession().send(new ServerPlayerChangeHeldItemPacket());
+            this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReListener.ReListenerCache.heldItem));
             this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
             ReListener.ReListenerCache.playerListEntries.stream()
                     .filter(entry -> entry.getProfile() != null)
@@ -144,90 +144,110 @@ public class ReAdapter extends SessionAdapter {
             this.child.getSession().send(new ServerPlayerListDataPacket(ReListener.ReListenerCache.tabHeader, ReListener.ReListenerCache.tabFooter));
             this.child.getSession().send(new ServerPlayerHealthPacket(ReListener.ReListenerCache.health, ReListener.ReListenerCache.food, ReListener.ReListenerCache.saturation));
             for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
-                try {
-                    Thread.sleep(0l);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (entity == null) continue;
+                if (entity.type == EntityType.MOB && entity instanceof EntityMob) {
+                    EntityMob mob = (EntityMob) entity;
+                    this.child.getSession().send(
+                            new ServerSpawnMobPacket
+                                    (mob.entityId,
+                                            mob.uuid,
+                                            mob.mobType,
+                                            mob.posX,
+                                            mob.posY,
+                                            mob.posZ,
+                                            mob.yaw,
+                                            mob.pitch,
+                                            mob.headYaw,
+                                            mob.motionX,
+                                            mob.motionY,
+                                            mob.motionZ,
+                                            mob.metadata));
+                    for (PotionEffect potionEffect : mob.potionEffects) {
+                        this.child.getSession().send(new ServerEntityEffectPacket(
+                                mob.entityId,
+                                potionEffect.effect,
+                                potionEffect.amplifier,
+                                potionEffect.duration,
+                                potionEffect.ambient,
+                                potionEffect.showParticles
+                        ));
+                    }
+                    for (Map.Entry<EquipmentSlot, ItemStack> entry : mob.equipment.entrySet()) {
+                        this.child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
+                                entry.getKey(),
+                                entry.getValue()));
+                    }
+                    if (mob.properties.size() > 0) {
+                        this.child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
+                                mob.properties));
+                    }
+                    continue;
                 }
-                switch (entity.type) {
-                    case MOB:
-                        EntityMob mob = (EntityMob) entity;
-                        this.child.getSession().send(new ServerSpawnMobPacket(entity.entityId,
-                                mob.uuid,
-                                mob.mobType,
-                                mob.posX,
-                                mob.posY,
-                                mob.posZ,
-                                mob.yaw,
-                                mob.pitch,
-                                mob.headYaw,
-                                mob.motionX,
-                                mob.motionY,
-                                mob.motionZ,
-                                mob.metadata));
-                        for (PotionEffect effect : mob.potionEffects) {
-                            child.getSession().send(new ServerEntityEffectPacket(entity.entityId,
-                                    effect.effect,
-                                    effect.amplifier,
-                                    effect.duration,
-                                    effect.ambient,
-                                    effect.showParticles));
-                        }
-                        for (Map.Entry<EquipmentSlot, ItemStack> entry : mob.equipment.entrySet()) {
-                            child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
-                                    entry.getKey(),
-                                    entry.getValue()));
-                        }
-                        if (mob.properties.size() > 0) {
-                            child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
-                                    mob.properties));
-                        }
-                        break;
-                    case PLAYER:
-                        EntityPlayer playerSending = (EntityPlayer) entity;
-                        child.getSession().send(new ServerSpawnPlayerPacket(playerSending.entityId,
-                                playerSending.uuid,
-                                playerSending.posX,
-                                playerSending.posY,
-                                playerSending.posZ,
-                                playerSending.yaw,
-                                playerSending.pitch,
-                                playerSending.metadata));
-                    case REAL_PLAYER:
-                        EntityPlayer player = (EntityPlayer) entity;
-                        for (PotionEffect effect : player.potionEffects) {
-                            child.getSession().send(new ServerEntityEffectPacket(entity.entityId,
-                                    effect.effect,
-                                    effect.amplifier,
-                                    effect.duration,
-                                    effect.ambient,
-                                    effect.showParticles));
-                        }
-                        for (Map.Entry<EquipmentSlot, ItemStack> entry : player.equipment.entrySet()) {
-                            child.getSession().send(new ServerEntityEquipmentPacket(entity.entityId,
-                                    entry.getKey(),
-                                    entry.getValue()));
-                        }
-                        if (player.properties.size() > 0) {
-                            child.getSession().send(new ServerEntityPropertiesPacket(entity.entityId,
-                                    player.properties));
-                        }
-                        break;
-                    case OBJECT:
-                        EntityObject object = (EntityObject) entity;
-                        child.getSession().send(new ServerSpawnObjectPacket(entity.entityId,
-                                object.uuid,
+                if (entity.type == EntityType.PLAYER && entity instanceof EntityPlayer) {
+                    EntityPlayer player = (EntityPlayer) entity;
+                    this.child.getSession().send(new ServerSpawnPlayerPacket(
+                            player.entityId,
+                            player.uuid,
+                            player.posX,
+                            player.posY,
+                            player.posZ,
+                            player.yaw,
+                            player.pitch,
+                            player.metadata
+                    ));
+                    for (PotionEffect effect : player.potionEffects) {
+                        this.child.getSession().send(new ServerEntityEffectPacket(player.entityId,
+                                effect.effect,
+                                effect.amplifier,
+                                effect.duration,
+                                effect.ambient,
+                                effect.showParticles));
+                    }
+                    for (Map.Entry<EquipmentSlot, ItemStack> entry : player.equipment.entrySet()) {
+                        this.child.getSession().send(new ServerEntityEquipmentPacket(player.entityId,
+                                entry.getKey(),
+                                entry.getValue()));
+                    }
+                    if (player.properties.size() > 0) {
+                        this.child.getSession().send(new ServerEntityPropertiesPacket(player.entityId,
+                                player.properties));
+                    }
+                    continue;
+                }
+                if (entity.type == EntityType.OBJECT && entity instanceof EntityObject) {
+                    EntityObject object = (EntityObject) entity;
+                    // hello entityobject my old friend ;-;
+                    if (object.data == null) {
+                        this.child.getSession().send(new ServerSpawnObjectPacket(
+                                entity.entityId,
+                                entity.uuid,
                                 object.objectType,
-                                object.data,
-                                object.posX,
-                                object.posY,
-                                object.posZ,
+                                entity.posX,
+                                entity.posY,
+                                entity.posZ,
                                 object.yaw,
-                                object.pitch));
-                        break;
-                    case PAINTING:
-                        break;
+                                object.pitch,
+                                object.motionX,
+                                object.motionY,
+                                object.motionZ));
+                        continue;
+                    }
+                    this.child.getSession().send(new ServerSpawnObjectPacket(
+                            entity.entityId,
+                            entity.uuid,
+                            object.objectType,
+                            object.data,
+                            entity.posX,
+                            entity.posY,
+                            entity.posZ,
+                            object.yaw,
+                            object.pitch,
+                            object.motionX,
+                            object.motionY,
+                            object.motionZ));
+                    continue;
                 }
+                ReMinecraft.INSTANCE.logger.log("??? There's a problem, Sasha!");
             }
             for (Entity entity : ReListener.ReListenerCache.entityCache.values()) {
                 if (entity instanceof EntityEquipment) {

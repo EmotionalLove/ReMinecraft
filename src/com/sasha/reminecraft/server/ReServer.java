@@ -48,17 +48,12 @@ public class ReServer extends ServerAdapter {
         server.setGlobalFlag(MinecraftConstants.AUTH_PROXY_KEY, Proxy.NO_PROXY);
         server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, Configuration.var_onlineModeServer);
         server.setGlobalFlag
-                (MinecraftConstants.SERVER_INFO_BUILDER_KEY,
-                        new ServerInfoBuilder() {
-                            @Override
-                            public ServerStatusInfo buildInfo(Session session) {
-                                return new ServerStatusInfo(
-                                        new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
-                                        new PlayerInfo(1, 0, new GameProfile[]{}),
-                                        new TextMessage(Configuration.var_messageOfTheDay),
-                                        new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB));
-                            }
-                        });
+                ("info-builder",
+                        (ServerInfoBuilder) session -> new ServerStatusInfo(
+                                new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
+                                new PlayerInfo(1, 0, new GameProfile[]{}),
+                                new TextMessage(Configuration.var_messageOfTheDay),
+                                new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)));
         server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
         return server;
     }

@@ -375,6 +375,10 @@ public class ReListener implements SessionListener {
             if (event.getPacket() instanceof ServerEntityPropertiesPacket) {
                 var pck = (ServerEntityPropertiesPacket) event.getPacket();
                 EntityRotation rotation = (EntityRotation) ReListenerCache.entityCache.get(pck.getEntityId());
+                if (rotation == null) {
+                    this.sendToChildren(event.getPacket());
+                    return;
+                }
                 rotation.properties.addAll(pck.getAttributes());
             }
             if (event.getPacket() instanceof ServerEntityRemoveEffectPacket) {

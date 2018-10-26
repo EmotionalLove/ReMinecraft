@@ -95,7 +95,7 @@ public class ReMinecraft {
                 authServ.setUsername(Configuration.var_mojangEmail);
                 authServ.setAccessToken(Configuration.var_sessionId);
                 authServ.login();
-                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
+                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), Configuration.var_clientId, authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 return authServ;
@@ -111,7 +111,7 @@ public class ReMinecraft {
             authServ.setUsername(Configuration.var_mojangEmail);
             authServ.setPassword(Configuration.var_mojangPassword);
             authServ.login();
-            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
+            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), Configuration.var_clientId,authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
         } catch (RequestException e) {

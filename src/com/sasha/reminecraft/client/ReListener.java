@@ -20,7 +20,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.world.*;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
-import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.util.ChunkUtil;
@@ -153,14 +152,14 @@ public class ReListener implements SessionListener {
                     // if the chunk is thicc or newly generated
                     if (ReListenerCache.chunkCache.containsKey(hash)) {
                         Column chunkToAddTo = ReListenerCache.chunkCache.get(hash);
-                        this.sendToChildren(new ServerUnloadChunkPacket(chunkToAddTo.getX(), chunkToAddTo.getZ()));
+                        ReMinecraft.INSTANCE.sendToChildren(new ServerUnloadChunkPacket(chunkToAddTo.getX(), chunkToAddTo.getZ()));
                         for (int i = 0; i <= 15; i++) {
                             if (column.getChunks()[i] != null) {
                                 chunkToAddTo.getChunks()[i] = column.getChunks()[i];
                             }
                         }
                         ReListenerCache.chunkCache.put(hash, chunkToAddTo);
-                        this.sendToChildren(new ServerChunkDataPacket(chunkToAddTo));
+                        ReMinecraft.INSTANCE.sendToChildren(new ServerChunkDataPacket(chunkToAddTo));
                     }
                 } else {
                     ReListenerCache.chunkCache.put(hash, pck.getColumn());
@@ -173,6 +172,12 @@ public class ReListener implements SessionListener {
             }
             if (event.getPacket() instanceof ServerUpdateTimePacket) {
                 // todo
+            }
+            if (event.getPacket() instanceof ServerWindowItemsPacket) {
+                var pck = (ServerWindowItemsPacket) event.getPacket();
+                if (pck.getWindowId() == 0) {
+                    ReListenerCache.playerInventory = pck;
+                }
             }
             if (event.getPacket() instanceof ServerBlockChangePacket) {
                 // update the cached chunks
@@ -346,7 +351,7 @@ public class ReListener implements SessionListener {
                 if (e == null) {
                     ReMinecraft.INSTANCE.logger.logError
                             ("Null entity with entity id " + pck.getEntityId());
-                    this.sendToChildren(event.getPacket());
+                    ReMinecraft.INSTANCE.sendToChildren(event.getPacket());
                     return;
                 }
                 e.headYaw = pck.getHeadYaw();
@@ -357,7 +362,7 @@ public class ReListener implements SessionListener {
                 if (e == null) {
                     ReMinecraft.INSTANCE.logger.logError
                             ("Null entity with entity id " + pck.getEntityId());
-                    this.sendToChildren(event.getPacket());
+                    ReMinecraft.INSTANCE.sendToChildren(event.getPacket());
                     return;
                 }
                 e.posX += pck.getMovementX() / 4096d;
@@ -376,7 +381,7 @@ public class ReListener implements SessionListener {
                 var pck = (ServerEntityPropertiesPacket) event.getPacket();
                 EntityRotation rotation = (EntityRotation) ReListenerCache.entityCache.get(pck.getEntityId());
                 if (rotation == null) {
-                    this.sendToChildren(event.getPacket());
+                    ReMinecraft.INSTANCE.sendToChildren(event.getPacket());
                     return;
                 }
                 rotation.properties.addAll(pck.getAttributes());
@@ -432,16 +437,10 @@ public class ReListener implements SessionListener {
                 var pck = (ServerPlayerChangeHeldItemPacket) event.getPacket();
                 ReListenerCache.heldItem = pck.getSlot();
             }
-            this.sendToChildren(event.getPacket());
+            ReMinecraft.INSTANCE.sendToChildren(event.getPacket());
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void sendToChildren(Packet pck) {
-        ReMinecraft.INSTANCE.childClients.stream()
-                .filter(ChildReClient::isPlaying)
-                .forEach(client -> client.getSession().send(pck));
     }
 
     /**
@@ -486,6 +485,7 @@ public class ReListener implements SessionListener {
     @Override
     public void disconnected(DisconnectedEvent disconnectedEvent) {
         ReMinecraft.INSTANCE.logger.logWarning("Disconnected: " + disconnectedEvent.getReason());
+
     }
 
     /**

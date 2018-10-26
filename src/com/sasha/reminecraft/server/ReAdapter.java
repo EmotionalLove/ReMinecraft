@@ -21,6 +21,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
@@ -113,6 +114,7 @@ public class ReAdapter extends SessionAdapter {
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
             this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReListener.ReListenerCache.heldItem));
             this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReListener.ReListenerCache.posX, ReListener.ReListenerCache.posY, ReListener.ReListenerCache.posZ, ReListener.ReListenerCache.yaw, ReListener.ReListenerCache.pitch, new Random().nextInt(1000) + 10));
+            this.child.getSession().send(new ServerWindowItemsPacket(ReListener.ReListenerCache.playerInventory.getWindowId(), ReListener.ReListenerCache.playerInventory.getItems()));
             ReListener.ReListenerCache.playerListEntries.stream()
                     .filter(entry -> entry.getProfile() != null)
                     .forEach(entry -> {

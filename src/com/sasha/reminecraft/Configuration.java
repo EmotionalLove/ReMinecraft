@@ -31,6 +31,7 @@ public abstract class Configuration {
     @ConfigSetting public static int var_hostServerPort = 25565;
     @ConfigSetting public static boolean var_onlineModeServer = true;
     @ConfigSetting public static String var_messageOfTheDay = "\247dRE:Minecraft \2477" + ReMinecraft.VERSION;
+    @ConfigSetting public static int var_reconnectDelaySeconds = 5;
 
     /**
      * Fill the above fields and version the config.

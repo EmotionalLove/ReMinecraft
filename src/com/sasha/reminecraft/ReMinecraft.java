@@ -6,11 +6,13 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.event.session.SessionListener;
+import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
+import com.sasha.eventsys.SimpleEventManager;
 import com.sasha.reminecraft.client.ReListener;
 import com.sasha.reminecraft.client.children.ChildReClient;
-import com.sasha.reminecraft.command.ExitCommand;
-import com.sasha.reminecraft.server.ReAdapter;
+import com.sasha.reminecraft.command.game.TestCommand;
+import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.server.ReServer;
 import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
@@ -34,7 +36,6 @@ public class ReMinecraft {
      * Singleton of this Re:Minecraft
      */
     public static ReMinecraft INSTANCE;
-    public static final SimpleCommandProcessor COMMAND_PROCESSOR = new SimpleCommandProcessor("");
     public static final String DATA_FILE = "ReMinecraft.yml";
 
     /**
@@ -48,6 +49,19 @@ public class ReMinecraft {
     public MinecraftProtocol protocol;
     public List<ChildReClient> childClients = new ArrayList<>();
     public LinkedHashMap<ChildReClient, SessionListener> childAdapters = new LinkedHashMap<>();
+    
+    /**
+     * The command line command processor
+     */
+    public static final SimpleCommandProcessor TERMINAL_CMD_PROCESSOR = new SimpleCommandProcessor("");
+    /**
+     * The in-game command processor
+     */
+    public static final SimpleCommandProcessor INGAME_CMD_PROCESSOR = new SimpleCommandProcessor("\\");
+    /**
+     * The event manager for Re:Minecraft
+     */
+    public static final SimpleEventManager EVENT_BUS = new SimpleEventManager();
 
     /**
      * Launch Re:Minecraft and and setup the console command system.
@@ -58,8 +72,14 @@ public class ReMinecraft {
         Scanner scanner = new Scanner(System.in);
         String cmd = scanner.nextLine();
         while (true) {
-            COMMAND_PROCESSOR.processCommand(cmd);
+            TERMINAL_CMD_PROCESSOR.processCommand(cmd);
         }
+    }
+
+    public void sendToChildren(Packet pck) {
+        INSTANCE.childClients.stream()
+                .filter(ChildReClient::isPlaying)
+                .forEach(client -> client.getSession().send(pck));
     }
 
     /**
@@ -68,7 +88,7 @@ public class ReMinecraft {
     public void start(String[] args) throws InstantiationException, IllegalAccessException {
         INSTANCE = this;
         logger.log("Starting RE:Minecraft " + VERSION + "");
-        COMMAND_PROCESSOR.register(ExitCommand.class);
+        this.registerCommands();
         Configuration.configure(); // set config vars
         authenticate(); // log into mc
         minecraftClient = new Client(Configuration.var_remoteServerIp,
@@ -152,6 +172,11 @@ public class ReMinecraft {
         return file;
     }
 
+    private void registerCommands() throws InstantiationException, IllegalAccessException {
+        TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
+        INGAME_CMD_PROCESSOR.register(TestCommand.class);
+    }
+
     /**
      * Stop and close RE:Minecraft
      */
@@ -169,6 +194,10 @@ public class ReMinecraft {
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
+    }
+
+    public void reLaunch() {
+
     }
 
 }

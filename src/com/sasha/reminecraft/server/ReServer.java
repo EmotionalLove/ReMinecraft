@@ -28,6 +28,8 @@ import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.api.event.ChildServerPacketRecieveEvent;
+import com.sasha.reminecraft.api.event.ChildServerPacketSendEvent;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.util.entity.*;
@@ -51,18 +53,20 @@ public class ReServer extends SessionAdapter {
      * Invoked when the child sends us a packet
      */
     @Override
-    public void packetReceived(PacketReceivedEvent event) {
+    public void packetReceived(PacketReceivedEvent ev) {
+        var event = new ChildServerPacketRecieveEvent(this.child, ev.getPacket());
+        ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         var protocol = (MinecraftProtocol) child.getSession().getPacketProtocol();
-        if (event.getPacket() instanceof LoginStartPacket && (protocol.getSubProtocol() == SubProtocol.LOGIN || protocol.getSubProtocol() == SubProtocol.HANDSHAKE)) {
-            var pck = (LoginStartPacket) event.getPacket();
+        if (event.getRecievedPacket() instanceof LoginStartPacket && (protocol.getSubProtocol() == SubProtocol.LOGIN || protocol.getSubProtocol() == SubProtocol.HANDSHAKE)) {
+            var pck = (LoginStartPacket) event.getRecievedPacket();
             ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
         }
         if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
-            if (event.getPacket() instanceof ClientKeepAlivePacket) {
+            if (event.getRecievedPacket() instanceof ClientKeepAlivePacket) {
                 return;
             }
-            if (event.getPacket() instanceof ClientPlayerPositionPacket) {
-                var pck = (ClientPlayerPositionPacket) event.getPacket();
+            if (event.getRecievedPacket() instanceof ClientPlayerPositionPacket) {
+                var pck = (ClientPlayerPositionPacket) event.getRecievedPacket();
                 ReClient.ReClientCache.posX = pck.getX();
                 ReClient.ReClientCache.player.posX = pck.getX();
                 ReClient.ReClientCache.posY = pck.getY();
@@ -71,8 +75,8 @@ public class ReServer extends SessionAdapter {
                 ReClient.ReClientCache.player.posZ = pck.getZ();
                 ReClient.ReClientCache.onGround = pck.isOnGround();
             }
-            if (event.getPacket() instanceof ClientPlayerPositionRotationPacket) {
-                var pck = (ClientPlayerPositionRotationPacket) event.getPacket();
+            if (event.getRecievedPacket() instanceof ClientPlayerPositionRotationPacket) {
+                var pck = (ClientPlayerPositionRotationPacket) event.getRecievedPacket();
                 ReClient.ReClientCache.posX = pck.getX();
                 ReClient.ReClientCache.player.posX = pck.getX();
                 ReClient.ReClientCache.posY = pck.getY();
@@ -85,7 +89,7 @@ public class ReServer extends SessionAdapter {
                 ReClient.ReClientCache.player.pitch = (float) pck.getPitch();
                 ReClient.ReClientCache.onGround = pck.isOnGround();
             }
-            ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getPacket());
+            ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket());
         }
     }
 
@@ -97,12 +101,15 @@ public class ReServer extends SessionAdapter {
      * Invoked when WE send a packet to a CHILD
      */
     @Override
-    public void packetSent(PacketSentEvent event) {
-        if (event.getPacket() instanceof LoginSuccessPacket) {
-            var pck = (LoginSuccessPacket) event.getPacket();
+    public void packetSent(PacketSentEvent ev) {
+        ChildServerPacketSendEvent event = new ChildServerPacketSendEvent(this.child, ev.getPacket());
+        ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
+        if (event.isCancelled()) return;
+        if (event.getSendingPacket() instanceof LoginSuccessPacket) {
+            var pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
         }
-        if (event.getPacket() instanceof ServerJoinGamePacket) {
+        if (event.getSendingPacket() instanceof ServerJoinGamePacket) {
             ReClient.ReClientCache.chunkCache.forEach((hash, chunk) -> {
                 this.child.getSession().send(new ServerChunkDataPacket(chunk));
                 try {
@@ -115,7 +122,7 @@ public class ReServer extends SessionAdapter {
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
             this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReClient.ReClientCache.heldItem));
             this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReClient.ReClientCache.posX, ReClient.ReClientCache.posY, ReClient.ReClientCache.posZ, ReClient.ReClientCache.yaw, ReClient.ReClientCache.pitch, new Random().nextInt(1000) + 10));
-            this.child.getSession().send(new ServerWindowItemsPacket(ReClient.ReClientCache.playerInventory.getWindowId(), ReClient.ReClientCache.playerInventory.getItems()));
+            this.child.getSession().send(new ServerWindowItemsPacket(0, ReClient.ReClientCache.playerInventory));
             ReClient.ReClientCache.playerListEntries.stream()
                     .filter(entry -> entry.getProfile() != null)
                     .forEach(entry -> {

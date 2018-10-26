@@ -3,6 +3,7 @@ package com.sasha.reminecraft.client;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
+import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.world.block.BlockChangeRecord;
 import com.github.steveice10.mc.protocol.data.game.world.notify.ClientNotification;
@@ -179,13 +180,10 @@ public class ReClient implements SessionListener {
                 long hash = ChunkUtil.getChunkHashFromXZ(pck.getX(), pck.getZ());
                 ReClientCache.chunkCache.remove(hash);
             }
-            if (event.getRecievedPacket() instanceof ServerUpdateTimePacket) {
-                // todo
-            }
             if (event.getRecievedPacket() instanceof ServerWindowItemsPacket) {
                 var pck = (ServerWindowItemsPacket) event.getRecievedPacket();
                 if (pck.getWindowId() == 0) {
-                    ReClientCache.playerInventory = pck;
+                    ReClientCache.playerInventory = pck.getItems();
                 }
             }
             if (event.getRecievedPacket() instanceof ServerBlockChangePacket) {
@@ -515,7 +513,7 @@ public class ReClient implements SessionListener {
         /**
          * Player inventory
          */
-        public static ServerWindowItemsPacket playerInventory;
+        public static ItemStack[] playerInventory;
         public static int heldItem = 0;
         /**
          * Player position

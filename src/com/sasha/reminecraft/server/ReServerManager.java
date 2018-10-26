@@ -4,6 +4,7 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.ServerLoginHandler;
+import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
 import com.github.steveice10.mc.protocol.data.game.world.WorldType;
 import com.github.steveice10.mc.protocol.data.message.Message;
@@ -18,7 +19,6 @@ import com.github.steveice10.packetlib.event.server.ServerAdapter;
 import com.github.steveice10.packetlib.event.server.SessionAddedEvent;
 import com.github.steveice10.packetlib.event.server.SessionRemovedEvent;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
-import com.sasha.reminecraft.Configuration;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
@@ -64,7 +64,7 @@ public class ReServerManager extends ServerAdapter {
                             public ServerStatusInfo buildInfo(Session session) {
                                 return new ServerStatusInfo(
                                         new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
-                                        new PlayerInfo(420, ReMinecraft.INSTANCE.childClients.size(), new GameProfile[]{}),
+                                        new PlayerInfo(420, (int) ReMinecraft.INSTANCE.childClients.stream().filter(e -> ((MinecraftProtocol) e.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.STATUS).count(), new GameProfile[]{}),
                                         Message.fromString(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
                                         null);
                             }

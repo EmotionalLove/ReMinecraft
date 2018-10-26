@@ -13,6 +13,7 @@ import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.command.game.TestCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
+import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 
@@ -50,7 +51,9 @@ public class ReMinecraft {
     public MinecraftProtocol protocol;
     public List<ChildReClient> childClients = new ArrayList<>();
     public LinkedHashMap<ChildReClient, SessionListener> childAdapters = new LinkedHashMap<>();
-    
+    private boolean isShuttingDownCompletely = false;
+    private boolean isRelaunching = false;
+
     /**
      * The command line command processor
      */
@@ -131,7 +134,7 @@ public class ReMinecraft {
             authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
             authServ.setPassword(MAIN_CONFIG.var_mojangPassword);
             authServ.login();
-            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId,authServ.getAccessToken());
+            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
         } catch (RequestException e) {
@@ -170,6 +173,7 @@ public class ReMinecraft {
 
     private void registerCommands() throws InstantiationException, IllegalAccessException {
         TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
+        TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
         INGAME_CMD_PROCESSOR.register(TestCommand.class);
     }
 
@@ -181,8 +185,10 @@ public class ReMinecraft {
      * Stop and close RE:Minecraft
      */
     public void stop() {
+        isShuttingDownCompletely = true;
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
         logger.log("Stopping RE:Minecraft...");
+        minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
@@ -190,13 +196,24 @@ public class ReMinecraft {
     }
 
     public void stopSoft() {
+        isShuttingDownCompletely = true;
         logger.log("Stopping RE:Minecraft...");
+        minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
     }
 
+    /**
+     * Invoked if the player gets kicked from the remote server
+     */
     public void reLaunch() {
+        if (isShuttingDownCompletely) return;
+        if (isRelaunching) return;
+        isRelaunching = true;
+        if (minecraftClient.getSession().isConnected())
+            minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
+        minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
         ReClient.ReClientCache.chunkCache.clear();
         ReClient.ReClientCache.entityCache.clear();
         ReClient.ReClientCache.player = null;
@@ -213,6 +230,12 @@ public class ReMinecraft {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+            try {
+                Runtime.getRuntime().removeShutdownHook(shutdownThread);
+                ReMinecraft.main(new String[]{});
+            } catch (IllegalAccessException | InstantiationException e) {
+                e.printStackTrace();
             }
         }).start();
     }

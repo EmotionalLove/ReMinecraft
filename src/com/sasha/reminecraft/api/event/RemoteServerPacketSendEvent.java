@@ -4,7 +4,7 @@ import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.eventsys.SimpleCancellableEvent;
 
 /**
- * Invoked when we send a client-bound packet from the remote server
+ * Invoked when we send a server-bound packet to the remote server
  */
 public class RemoteServerPacketSendEvent extends SimpleCancellableEvent {
 

@@ -9,11 +9,10 @@ import com.github.steveice10.packetlib.event.session.SessionListener;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.eventsys.SimpleEventManager;
-import com.sasha.reminecraft.client.ReListener;
+import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.command.game.TestCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
-import com.sasha.reminecraft.server.ReServer;
 import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 
@@ -37,6 +36,8 @@ public class ReMinecraft {
      */
     public static ReMinecraft INSTANCE;
     public static final String DATA_FILE = "ReMinecraft.yml";
+    private List<Configuration> configurations = new ArrayList<>();
+    public Configuration MAIN_CONFIG = new Configuration();
 
     /**
      * Current software version of Re:Minecraft
@@ -61,7 +62,7 @@ public class ReMinecraft {
     /**
      * The event manager for Re:Minecraft
      */
-    public static final SimpleEventManager EVENT_BUS = new SimpleEventManager();
+    public final SimpleEventManager EVENT_BUS = new SimpleEventManager();
 
     /**
      * Launch Re:Minecraft and and setup the console command system.
@@ -89,37 +90,32 @@ public class ReMinecraft {
         INSTANCE = this;
         logger.log("Starting RE:Minecraft " + VERSION + "");
         this.registerCommands();
-        Configuration.configure(); // set config vars
+        this.registerConfigurations();
+        configurations.forEach(Configuration::configure); // set config vars
         authenticate(); // log into mc
-        minecraftClient = new Client(Configuration.var_remoteServerIp,
-                Configuration.var_remoteServerPort,
+        minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
+                MAIN_CONFIG.var_remoteServerPort,
                 protocol,
                 new TcpSessionFactory(/*todo proxies?*/));
-        minecraftClient.getSession().addListener(new ReListener());
+        minecraftClient.getSession().addListener(new ReClient());
         this.logger.log("Connecting...");
         minecraftClient.getSession().connect(true); // connect to the remote server
         this.logger.log("Connected!");
-        this.logger.log("Starting server on " + Configuration.var_hostServerIp + ":" +
-                Configuration.var_hostServerPort);
-        minecraftServer = ReServer.prepareServer();
-        minecraftServer.addListener(new ReServer());
-        minecraftServer.bind(true);
-        this.logger.log("Server started!");
     }
 
     /**
      * Authenticate with Mojang, first via session token, then via email/password
      */
     public AuthenticationService authenticate() {
-        if (!Configuration.var_sessionId.equalsIgnoreCase("[no default]")) {
+        if (!MAIN_CONFIG.var_sessionId.equalsIgnoreCase("[no default]")) {
             try {
                 // try authing with session id first, since it [appears] to be present
                 ReMinecraft.INSTANCE.logger.log("Attempting to log in with session token");
-                var authServ = new AuthenticationService(Configuration.var_clientId, Proxy.NO_PROXY);
-                authServ.setUsername(Configuration.var_mojangEmail);
-                authServ.setAccessToken(Configuration.var_sessionId);
+                var authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
+                authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
+                authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
                 authServ.login();
-                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), Configuration.var_clientId, authServ.getAccessToken());
+                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 return authServ;
@@ -131,11 +127,11 @@ public class ReMinecraft {
         // log in normally w username and password
         ReMinecraft.INSTANCE.logger.log("Attemping to log in with email and password");
         try {
-            var authServ = new AuthenticationService(Configuration.var_clientId, Proxy.NO_PROXY);
-            authServ.setUsername(Configuration.var_mojangEmail);
-            authServ.setPassword(Configuration.var_mojangPassword);
+            var authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
+            authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
+            authServ.setPassword(MAIN_CONFIG.var_mojangPassword);
             authServ.login();
-            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), Configuration.var_clientId,authServ.getAccessToken());
+            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId,authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
         } catch (RequestException e) {
@@ -177,6 +173,10 @@ public class ReMinecraft {
         INGAME_CMD_PROCESSOR.register(TestCommand.class);
     }
 
+    private void registerConfigurations() {
+        configurations.add(MAIN_CONFIG);
+    }
+
     /**
      * Stop and close RE:Minecraft
      */
@@ -197,7 +197,23 @@ public class ReMinecraft {
     }
 
     public void reLaunch() {
-
+        ReClient.ReClientCache.chunkCache.clear();
+        ReClient.ReClientCache.entityCache.clear();
+        ReClient.ReClientCache.player = null;
+        ReClient.ReClientCache.posX = 0;
+        ReClient.ReClientCache.posY = 0;
+        ReClient.ReClientCache.posZ = 0;
+        ReClient.ReClientCache.entityId = 0;
+        ReClient.ReClientCache.playerListEntries.clear();
+        new Thread(() -> {
+            for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
+                ReMinecraft.INSTANCE.logger.logWarning("Reconnecting in " + i + " seconds");
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
-
 }

@@ -9,6 +9,7 @@ public abstract class RePlugin {
     private String[] pluginAuthors;
     private String pluginVersion;
 
+    public abstract void onPluginInit();
     public abstract void onPluginEnable();
     public abstract void onPluginDisable();
     public abstract void registerCommands();

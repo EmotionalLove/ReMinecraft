@@ -3,8 +3,6 @@ package com.sasha.reminecraft.client.children;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.packetlib.Session;
-import com.github.steveice10.packetlib.event.session.SessionListener;
-import com.sasha.reminecraft.server.ReAdapter;
 
 /**
  * The child client that is trying to play on the logged in Mojang account

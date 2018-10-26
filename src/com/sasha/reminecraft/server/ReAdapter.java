@@ -6,8 +6,6 @@ import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
-import com.github.steveice10.mc.protocol.data.game.world.WorldType;
 import com.github.steveice10.mc.protocol.data.message.TextMessage;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
@@ -101,15 +99,6 @@ public class ReAdapter extends SessionAdapter {
         if (event.getPacket() instanceof LoginSuccessPacket) {
             var pck = (LoginSuccessPacket) event.getPacket();
             ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
-            /*this.child.getSession().send(new ServerJoinGamePacket(
-                    ReListener.ReListenerCache.entityId,
-                    false,
-                    ReListener.ReListenerCache.gameMode,
-                    ReListener.ReListenerCache.dimension,
-                    Difficulty.NORMAL,
-                    1,
-                    WorldType.DEFAULT,
-                    true));*/
         }
         if (event.getPacket() instanceof ServerJoinGamePacket) {
             ReListener.ReListenerCache.chunkCache.forEach((hash, chunk) -> {

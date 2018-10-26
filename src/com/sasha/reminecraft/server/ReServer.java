@@ -4,18 +4,14 @@ import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.ServerLoginHandler;
-import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
 import com.github.steveice10.mc.protocol.data.game.world.WorldType;
-import com.github.steveice10.mc.protocol.data.message.TextMessage;
+import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
 import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import com.github.steveice10.mc.protocol.packet.status.client.StatusQueryPacket;
-import com.github.steveice10.mc.protocol.packet.status.server.StatusPongPacket;
-import com.github.steveice10.mc.protocol.packet.status.server.StatusResponsePacket;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.server.ServerAdapter;
@@ -28,7 +24,6 @@ import com.sasha.reminecraft.client.ReListener;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.image.BufferedImage;
 import java.net.Proxy;
 
 public class ReServer extends ServerAdapter {
@@ -64,27 +59,26 @@ public class ReServer extends ServerAdapter {
         server.setGlobalFlag(MinecraftConstants.AUTH_PROXY_KEY, Proxy.NO_PROXY);
         server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, Configuration.var_onlineModeServer);
         server.setGlobalFlag
-                (MinecraftConstants.SERVER_INFO_HANDLER_KEY,
-                        (ServerInfoBuilder) session -> new ServerStatusInfo(
-                                new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
-                                new PlayerInfo(1, 0, new GameProfile[]{}),
-                                new TextMessage(Configuration.var_messageOfTheDay),
-                                new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)));
-        server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
-        server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new ServerLoginHandler() {
-            @Override
-            public void loggedIn(Session session) {
-                session.send(new ServerJoinGamePacket(
-                        ReListener.ReListenerCache.entityId,
-                        false,
-                        ReListener.ReListenerCache.gameMode,
-                        ReListener.ReListenerCache.dimension,
-                        Difficulty.NORMAL,
-                        1,
-                        WorldType.DEFAULT,
-                        true));
-            }
-        });
+                (MinecraftConstants.SERVER_INFO_BUILDER_KEY, new ServerInfoBuilder() {
+                            @Override
+                            public ServerStatusInfo buildInfo(Session session) {
+                                return new ServerStatusInfo(
+                                        new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
+                                        new PlayerInfo(420, ReMinecraft.INSTANCE.childClients.size(), new GameProfile[]{}),
+                                        Message.fromString(Configuration.var_messageOfTheDay),
+                                        null);
+                            }
+                        });
+                        server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
+        server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, (ServerLoginHandler) session -> session.send(new ServerJoinGamePacket(
+                ReListener.ReListenerCache.entityId,
+                false,
+                ReListener.ReListenerCache.gameMode,
+                ReListener.ReListenerCache.dimension,
+                Difficulty.NORMAL,
+                1,
+                WorldType.DEFAULT,
+                true)));
         return server;
     }
 

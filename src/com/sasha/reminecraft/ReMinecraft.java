@@ -38,7 +38,7 @@ public class ReMinecraft {
     public static ReMinecraft INSTANCE;
     public static final String DATA_FILE = "ReMinecraft.yml";
     private List<Configuration> configurations = new ArrayList<>();
-    public Configuration MAIN_CONFIG = new Configuration();
+    public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
 
     /**
      * Current software version of Re:Minecraft
@@ -161,6 +161,17 @@ public class ReMinecraft {
 
     public File getDataFile() {
         File file = new File(DATA_FILE);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
+    }
+    public File getDataFile(String s) {
+        File file = new File(s);
         if (!file.exists()) {
             try {
                 file.createNewFile();

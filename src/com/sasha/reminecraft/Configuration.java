@@ -16,6 +16,8 @@ import java.util.UUID;
  */
 public class Configuration {
 
+    private String configName;
+
     /**
      * The global configuration vars
      * Format:
@@ -46,12 +48,16 @@ public class Configuration {
     @ConfigSetting
     public int var_reconnectDelaySeconds = 5;
 
+    public Configuration(String configName) {
+        this.configName = configName;
+    }
+
     /**
      * Fill the above fields and version the config.
      */
     protected final void configure() {
         try {
-            File file = ReMinecraft.INSTANCE.getDataFile();
+            File file = ReMinecraft.INSTANCE.getDataFile(configName);
             YML yml = new YML(file);
             for (Field declaredField : this.getClass().getDeclaredFields()) {
                 if (declaredField.getAnnotation(ConfigSetting.class) == null) continue;

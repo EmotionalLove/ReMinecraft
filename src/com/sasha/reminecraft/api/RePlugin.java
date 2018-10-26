@@ -13,6 +13,7 @@ public abstract class RePlugin {
     public abstract void onPluginEnable();
     public abstract void onPluginDisable();
     public abstract void registerCommands();
+    public abstract void registerConfig();
 
     public ReMinecraft getReMinecraft() {
         return ReMinecraft.INSTANCE;

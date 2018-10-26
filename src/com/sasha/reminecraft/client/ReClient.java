@@ -1,5 +1,6 @@
 package com.sasha.reminecraft.client;
 
+import com.github.steveice10.mc.protocol.data.game.ClientRequest;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
@@ -8,6 +9,7 @@ import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.game.world.block.BlockChangeRecord;
 import com.github.steveice10.mc.protocol.data.game.world.notify.ClientNotification;
 import com.github.steveice10.mc.protocol.data.message.Message;
+import com.github.steveice10.mc.protocol.packet.ingame.client.ClientRequestPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
@@ -55,8 +57,8 @@ public class ReClient implements SessionListener {
                 ReClientCache.health = pck.getHealth();
                 ReClientCache.food = pck.getFood();
                 ReClientCache.saturation = pck.getSaturation();
-                if (ReClientCache.health <= 0f) {
-                    // todo autorespawn
+                if (ReClientCache.health <= 0.0f) {
+                    ReMinecraft.INSTANCE.minecraftClient.getSession().send(new ClientRequestPacket(ClientRequest.RESPAWN));
                 }
             }
             if (event.getRecievedPacket() instanceof ServerPlayerListEntryPacket) {

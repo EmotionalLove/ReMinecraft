@@ -228,29 +228,31 @@ public class YML {
     public boolean save(Boolean async) {
         if (this.file == null) throw new IllegalStateException("Failed to save Config. File object is undefined.");
         if (this.correct) {
-            String content = "";
+            StringBuilder content = new StringBuilder();
             switch (this.type) {
                 case YML.PROPERTIES:
-                    content = this.writeProperties();
+                    content = new StringBuilder(this.writeProperties());
                     break;
                 case YML.JSON:
-                    content = new GsonBuilder().setPrettyPrinting().create().toJson(this.config);
+                    content = new StringBuilder(new GsonBuilder().setPrettyPrinting().create().toJson(this.config));
                     break;
                 case YML.YAML:
                     DumperOptions dumperOptions = new DumperOptions();
                     dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
                     Yaml yaml = new Yaml(dumperOptions);
-                    content = yaml.dump(this.config);
+                    content = new StringBuilder(yaml.dump(this.config));
                     break;
                 case YML.ENUM:
                     for (Object o : this.config.entrySet()) {
                         Map.Entry entry = (Map.Entry) o;
-                        content += String.valueOf(entry.getKey()) + "\r\n";
+                        content.append(String.valueOf(entry.getKey())).append("\r\n");
                     }
+                    break;
+                default:
                     break;
             }
             try {
-                FileUtils.writeFile(this.file, content);
+                FileUtils.writeFile(this.file, content.toString());
             } catch (IOException e) {
             }
             return true;
@@ -484,8 +486,6 @@ public class YML {
                 String k = b[0];
                 String v = b[1].trim();
                 String v_lower = v.toLowerCase();
-                if (this.config.containsKey(k)) {
-                }
                 switch (v_lower) {
                     case "on":
                     case "true":
@@ -554,11 +554,7 @@ public class YML {
                 dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
                 Yaml yaml = new Yaml(dumperOptions);
                 this.config = new ConfigSection(yaml.loadAs(content, LinkedHashMap.class));
-                if (this.config == null) {
-                    this.config = new ConfigSection();
-                }
                 break;
-            // case Config.SERIALIZED
             case YML.ENUM:
                 this.parseList(content);
                 break;

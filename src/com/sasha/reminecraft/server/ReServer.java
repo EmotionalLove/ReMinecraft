@@ -3,11 +3,19 @@ package com.sasha.reminecraft.server;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.mc.protocol.ServerLoginHandler;
+import com.github.steveice10.mc.protocol.data.SubProtocol;
+import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
+import com.github.steveice10.mc.protocol.data.game.world.WorldType;
 import com.github.steveice10.mc.protocol.data.message.TextMessage;
 import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
 import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
 import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
+import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import com.github.steveice10.mc.protocol.packet.status.client.StatusQueryPacket;
+import com.github.steveice10.mc.protocol.packet.status.server.StatusPongPacket;
+import com.github.steveice10.mc.protocol.packet.status.server.StatusResponsePacket;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.Session;
 import com.github.steveice10.packetlib.event.server.ServerAdapter;
@@ -16,6 +24,7 @@ import com.github.steveice10.packetlib.event.server.SessionRemovedEvent;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.reminecraft.Configuration;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.client.ReListener;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,18 +34,25 @@ import java.net.Proxy;
 public class ReServer extends ServerAdapter {
 
     public void sessionAdded(SessionAddedEvent event) {
-        ReMinecraft.INSTANCE.childClients.add(new ChildReClient(event.getSession()));
+        var var = (MinecraftProtocol) event.getSession().getPacketProtocol();
+        var cli = new ChildReClient(event.getSession());
+        var adapter = new ReAdapter(cli);
+        ReMinecraft.INSTANCE.childClients.add(cli);
+        ReMinecraft.INSTANCE.childAdapters.put(cli, adapter);
+        event.getSession().addListener(adapter);
     }
 
     public void sessionRemoved(SessionRemovedEvent event) {
         getClientBySession(event.getSession()).setPlaying(false);
         ReMinecraft.INSTANCE.childClients.remove(getClientBySession(event.getSession()));
+        event.getSession().removeListener(ReMinecraft.INSTANCE.childAdapters.get(getClientBySession(event.getSession())));
     }
 
     @Nullable
     public static ChildReClient getClientBySession(Session session) {
         for (ChildReClient childClient : ReMinecraft.INSTANCE.childClients) {
-            if (childClient.getSession() == session) {
+            if (childClient.getSession().getHost().equals(session.getHost())
+                    && childClient.getSession().getPort() == session.getPort()) {
                 return childClient;
             }
         }
@@ -48,13 +64,27 @@ public class ReServer extends ServerAdapter {
         server.setGlobalFlag(MinecraftConstants.AUTH_PROXY_KEY, Proxy.NO_PROXY);
         server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, Configuration.var_onlineModeServer);
         server.setGlobalFlag
-                ("info-builder",
+                (MinecraftConstants.SERVER_INFO_HANDLER_KEY,
                         (ServerInfoBuilder) session -> new ServerStatusInfo(
                                 new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
                                 new PlayerInfo(1, 0, new GameProfile[]{}),
                                 new TextMessage(Configuration.var_messageOfTheDay),
                                 new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)));
         server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
+        server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new ServerLoginHandler() {
+            @Override
+            public void loggedIn(Session session) {
+                session.send(new ServerJoinGamePacket(
+                        ReListener.ReListenerCache.entityId,
+                        false,
+                        ReListener.ReListenerCache.gameMode,
+                        ReListener.ReListenerCache.dimension,
+                        Difficulty.NORMAL,
+                        1,
+                        WorldType.DEFAULT,
+                        true));
+            }
+        });
         return server;
     }
 

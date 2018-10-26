@@ -5,10 +5,12 @@ import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
+import com.github.steveice10.packetlib.event.session.SessionListener;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.reminecraft.client.ReListener;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.command.ExitCommand;
+import com.sasha.reminecraft.server.ReAdapter;
 import com.sasha.reminecraft.server.ReServer;
 import com.sasha.reminecraft.util.YML;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
@@ -17,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -44,6 +47,7 @@ public class ReMinecraft {
     public Server minecraftServer = null;
     public MinecraftProtocol protocol;
     public List<ChildReClient> childClients = new ArrayList<>();
+    public LinkedHashMap<ChildReClient, SessionListener> childAdapters = new LinkedHashMap<>();
 
     /**
      * Launch Re:Minecraft and and setup the console command system.

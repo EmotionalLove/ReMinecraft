@@ -3,6 +3,7 @@ package com.sasha.reminecraft.client.children;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.packetlib.Session;
+import com.github.steveice10.packetlib.event.session.SessionListener;
 import com.sasha.reminecraft.server.ReAdapter;
 
 /**
@@ -15,7 +16,6 @@ public class ChildReClient {
 
     public ChildReClient(Session session) {
         this.session = session;
-        this.session.addListener(new ReAdapter(this));
     }
 
     public Session getSession() {
@@ -25,6 +25,7 @@ public class ChildReClient {
     public void setPlaying(boolean playing) {
         this.playing = playing;
     }
+
 
     public boolean isPlaying() {
         var pckprot = (MinecraftProtocol) session.getPacketProtocol();

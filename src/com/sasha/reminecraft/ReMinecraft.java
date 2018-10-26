@@ -9,6 +9,8 @@ import com.github.steveice10.packetlib.event.session.SessionListener;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.eventsys.SimpleEventManager;
+import com.sasha.reminecraft.api.RePlugin;
+import com.sasha.reminecraft.api.RePluginLoader;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.command.game.TestCommand;
@@ -70,7 +72,7 @@ public class ReMinecraft {
     /**
      * Launch Re:Minecraft and and setup the console command system.
      */
-    public static void main(String[] args) throws IllegalAccessException, InstantiationException {
+    public static void main(String[] args) throws IllegalAccessException, InstantiationException, IOException {
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
         Scanner scanner = new Scanner(System.in);
@@ -89,9 +91,12 @@ public class ReMinecraft {
     /**
      * Launch (or relaunch) Re:Minecraft
      */
-    public void start(String[] args) throws InstantiationException, IllegalAccessException {
+    public void start(String[] args) throws InstantiationException, IllegalAccessException, IOException {
         INSTANCE = this;
         logger.log("Starting RE:Minecraft " + VERSION + "");
+        var loader = new RePluginLoader();
+        loader.preparePlugins(loader.findPlugins());
+        loader.loadPlugins();
         this.registerCommands();
         this.registerConfigurations();
         configurations.forEach(Configuration::configure); // set config vars
@@ -102,6 +107,7 @@ public class ReMinecraft {
                 new TcpSessionFactory(/*todo proxies?*/));
         minecraftClient.getSession().addListener(new ReClient());
         this.logger.log("Connecting...");
+        RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
         minecraftClient.getSession().connect(true); // connect to the remote server
         this.logger.log("Connected!");
     }
@@ -199,6 +205,8 @@ public class ReMinecraft {
         isShuttingDownCompletely = true;
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
         logger.log("Stopping RE:Minecraft...");
+        RePluginLoader.shutdownPlugins();
+        RePluginLoader.getPluginList().clear();
         minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
@@ -209,6 +217,8 @@ public class ReMinecraft {
     public void stopSoft() {
         isShuttingDownCompletely = true;
         logger.log("Stopping RE:Minecraft...");
+        RePluginLoader.shutdownPlugins();
+        RePluginLoader.getPluginList().clear();
         minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
@@ -222,7 +232,9 @@ public class ReMinecraft {
         if (isShuttingDownCompletely) return;
         if (isRelaunching) return;
         isRelaunching = true;
-        if (minecraftClient.getSession().isConnected())
+        RePluginLoader.shutdownPlugins();
+        RePluginLoader.getPluginList().clear();
+        if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
         minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
         ReClient.ReClientCache.chunkCache.clear();
@@ -245,7 +257,7 @@ public class ReMinecraft {
             try {
                 Runtime.getRuntime().removeShutdownHook(shutdownThread);
                 ReMinecraft.main(new String[]{});
-            } catch (IllegalAccessException | InstantiationException e) {
+            } catch (IllegalAccessException | InstantiationException | IOException e) {
                 e.printStackTrace();
             }
         }).start();

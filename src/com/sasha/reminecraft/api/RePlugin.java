@@ -4,10 +4,10 @@ import com.sasha.reminecraft.ReMinecraft;
 
 public abstract class RePlugin {
 
-    private String pluginName;
-    private String pluginDescription;
-    private String[] pluginAuthors;
-    private String pluginVersion;
+    protected String pluginName;
+    protected String pluginDescription;
+    protected String[] pluginAuthors;
+    protected String pluginVersion;
 
     public abstract void onPluginInit();
     public abstract void onPluginEnable();

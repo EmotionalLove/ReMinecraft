@@ -24,7 +24,10 @@ import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPack
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.api.event.ChatRecievedEvent;
+import com.sasha.reminecraft.api.event.PlayerDamagedEvent;
 import com.sasha.reminecraft.api.event.RemoteServerPacketRecieveEvent;
+import com.sasha.reminecraft.api.event.ServerResetPlayerPositionEvent;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.server.ReServerManager;
 import com.sasha.reminecraft.util.ChunkUtil;
@@ -49,11 +52,16 @@ public class ReClient implements SessionListener {
         if (event.isCancelled()) return;
         try {
             if (event.getRecievedPacket() instanceof ServerChatPacket) {
+                var pck = (ServerChatPacket) event.getRecievedPacket();
+                var chatEvent = new ChatRecievedEvent(pck.getMessage().getFullText(), System.currentTimeMillis());
+                ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(chatEvent);
                 ReMinecraft.INSTANCE.logger.log("(CHAT) " + ((ServerChatPacket) event.getRecievedPacket()).getMessage().getFullText());
             }
             if (event.getRecievedPacket() instanceof ServerPlayerHealthPacket) {
                 //update player health
                 var pck = (ServerPlayerHealthPacket) event.getRecievedPacket();
+                PlayerDamagedEvent damagedEvent = new PlayerDamagedEvent(ReClientCache.health, pck.getHealth());
+                ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(damagedEvent);
                 ReClientCache.health = pck.getHealth();
                 ReClientCache.food = pck.getFood();
                 ReClientCache.saturation = pck.getSaturation();
@@ -142,6 +150,8 @@ public class ReClient implements SessionListener {
             }
             if (event.getRecievedPacket() instanceof ServerPlayerPositionRotationPacket) {
                 var pck = (ServerPlayerPositionRotationPacket) event.getRecievedPacket();
+                var resetEvent = new ServerResetPlayerPositionEvent(pck.getX(), pck.getY(), pck.getZ(), pck.getYaw(), pck.getPitch());
+                ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(resetEvent);
                 ReClientCache.posX = pck.getX();
                 ReClientCache.posY = pck.getY();
                 ReClientCache.posZ = pck.getZ();

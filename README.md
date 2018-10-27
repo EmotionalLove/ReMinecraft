@@ -19,7 +19,7 @@ Basically, it'll keep you logged in even when you disconnect your Minecraft clie
 - SimpleCommandSystem
 
 ### Thank you's
-[DaPorkChop_](https://github.com/DaMatrix/Pork2b2tBot) - As I used insignificant portions of their code as a guide for determining what needs to be cached and how to properly connect the client to the server instance.
+[DaPorkChop_](https://github.com/DaMatrix/Pork2b2tBot) - As I reviewed insignificant portions of their code as a guide for determining what needs to be cached and how to properly connect the client to the server instance.
 
 SnakeYAML - For YAML parsing.
 

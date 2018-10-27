@@ -38,6 +38,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Random;
@@ -55,11 +56,11 @@ public class ReServer extends SessionAdapter {
      */
     @Override
     public void packetReceived(PacketReceivedEvent ev) {
-        var event = new ChildServerPacketRecieveEvent(this.child, ev.getPacket());
+        ChildServerPacketRecieveEvent event = new ChildServerPacketRecieveEvent(this.child, ev.getPacket());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
-        var protocol = (MinecraftProtocol) child.getSession().getPacketProtocol();
+        MinecraftProtocol protocol = (MinecraftProtocol) child.getSession().getPacketProtocol();
         if (event.getRecievedPacket() instanceof LoginStartPacket && (protocol.getSubProtocol() == SubProtocol.LOGIN || protocol.getSubProtocol() == SubProtocol.HANDSHAKE)) {
-            var pck = (LoginStartPacket) event.getRecievedPacket();
+            LoginStartPacket pck = (LoginStartPacket) event.getRecievedPacket();
             ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
         }
         if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
@@ -67,10 +68,13 @@ public class ReServer extends SessionAdapter {
                 return;
             }
             if (event.getRecievedPacket() instanceof ClientChatPacket) {
-
+                ClientChatPacket pck = (ClientChatPacket) event.getRecievedPacket();
+                if (ReMinecraft.INSTANCE.processInGameCommand(pck.getMessage())) {
+                    return;
+                }
             }
             if (event.getRecievedPacket() instanceof ClientPlayerPositionPacket) {
-                var pck = (ClientPlayerPositionPacket) event.getRecievedPacket();
+                ClientPlayerPositionPacket pck = (ClientPlayerPositionPacket) event.getRecievedPacket();
                 ReClient.ReClientCache.posX = pck.getX();
                 ReClient.ReClientCache.player.posX = pck.getX();
                 ReClient.ReClientCache.posY = pck.getY();
@@ -80,7 +84,7 @@ public class ReServer extends SessionAdapter {
                 ReClient.ReClientCache.onGround = pck.isOnGround();
             }
             if (event.getRecievedPacket() instanceof ClientPlayerPositionRotationPacket) {
-                var pck = (ClientPlayerPositionRotationPacket) event.getRecievedPacket();
+                ClientPlayerPositionRotationPacket pck = (ClientPlayerPositionRotationPacket) event.getRecievedPacket();
                 ReClient.ReClientCache.posX = pck.getX();
                 ReClient.ReClientCache.player.posX = pck.getX();
                 ReClient.ReClientCache.posY = pck.getY();
@@ -110,7 +114,7 @@ public class ReServer extends SessionAdapter {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         if (event.isCancelled()) return;
         if (event.getSendingPacket() instanceof LoginSuccessPacket) {
-            var pck = (LoginSuccessPacket) event.getSendingPacket();
+            LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
         }
         if (event.getSendingPacket() instanceof ServerJoinGamePacket) {
@@ -131,11 +135,11 @@ public class ReServer extends SessionAdapter {
                     .filter(entry -> entry.getProfile() != null)
                     .forEach(entry -> {
                                 try {
-                                    var field = PlayerListEntry.class.getDeclaredField("displayName");
+                                    Field field = PlayerListEntry.class.getDeclaredField("displayName");
                                     field.setAccessible(true);
                                     field.set(entry, Message.fromString(entry.getProfile().getName()));
                                     if (entry.getProfile().getName() == null) {
-                                        var f = GameProfile.class.getDeclaredField("name");
+                                        Field f = GameProfile.class.getDeclaredField("name");
                                         f.setAccessible(true);
                                         f.set(entry.getProfile(), "???");
                                     }

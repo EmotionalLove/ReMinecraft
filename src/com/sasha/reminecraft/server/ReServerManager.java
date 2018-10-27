@@ -29,9 +29,9 @@ import java.net.Proxy;
 public class ReServerManager extends ServerAdapter {
 
     public void sessionAdded(SessionAddedEvent event) {
-        var var = (MinecraftProtocol) event.getSession().getPacketProtocol();
-        var cli = new ChildReClient(event.getSession());
-        var adapter = new ReServer(cli);
+        MinecraftProtocol var = (MinecraftProtocol) event.getSession().getPacketProtocol();
+        ChildReClient cli = new ChildReClient(event.getSession());
+        ReServer adapter = new ReServer(cli);
         ReMinecraft.INSTANCE.childClients.add(cli);
         ReMinecraft.INSTANCE.childAdapters.put(cli, adapter);
         event.getSession().addListener(adapter);

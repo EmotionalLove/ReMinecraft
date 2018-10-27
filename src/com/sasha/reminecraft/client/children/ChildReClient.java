@@ -26,7 +26,7 @@ public class ChildReClient {
 
 
     public boolean isPlaying() {
-        var pckprot = (MinecraftProtocol) session.getPacketProtocol();
+        MinecraftProtocol pckprot = (MinecraftProtocol) session.getPacketProtocol();
         return playing && pckprot.getSubProtocol() == SubProtocol.GAME;
     }
 }

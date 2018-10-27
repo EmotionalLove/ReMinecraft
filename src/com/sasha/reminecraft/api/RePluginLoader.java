@@ -54,15 +54,15 @@ public class RePluginLoader {
                 LOGGER.logError(file.getName() + " is missing it's plugin.yml");
                 continue; // invalid plugin
             }
-            var info = new PluginInfo();
+            PluginInfo info = new PluginInfo();
             File tmp = new File("tmp_plugin.yml");
             if (tmp.exists()) {
                 tmp.delete();
                 tmp.createNewFile();
             }
-            var out = new FileWriter(tmp, true);
-            var in = new InputStreamReader(jar.getInputStream(entry));
-            var buffin = new BufferedReader(in);
+            FileWriter out = new FileWriter(tmp, true);
+            InputStreamReader in = new InputStreamReader(jar.getInputStream(entry));
+            BufferedReader buffin = new BufferedReader(in);
             String line;
             while ((line = buffin.readLine()) != null) {
                 out.write(line + System.lineSeparator());

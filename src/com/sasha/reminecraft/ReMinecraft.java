@@ -95,7 +95,7 @@ public class ReMinecraft {
     public void start(String[] args) throws InstantiationException, IllegalAccessException, IOException {
         INSTANCE = this;
         logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft 1.12.2");
-        var loader = new RePluginLoader();
+        RePluginLoader loader = new RePluginLoader();
         loader.preparePlugins(loader.findPlugins());
         loader.loadPlugins();
         this.registerCommands();
@@ -126,7 +126,7 @@ public class ReMinecraft {
                 }
                 // try authing with session id first, since it [appears] to be present
                 ReMinecraft.INSTANCE.logger.log("Attempting to log in with session token");
-                var authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
+                AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
                 authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
                 authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
                 authServ.login();
@@ -151,7 +151,7 @@ public class ReMinecraft {
             MojangAuthenticateEvent.Pre event = new MojangAuthenticateEvent.Pre(MojangAuthenticateEvent.Method.EMAILPASS);
             this.EVENT_BUS.invokeEvent(event);
             if (event.isCancelled()) return null;
-            var authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
+            AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
             authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
             authServ.setPassword(MAIN_CONFIG.var_mojangPassword);
             authServ.login();
@@ -217,11 +217,12 @@ public class ReMinecraft {
         RePluginLoader.getPluginList().forEach(RePlugin::registerCommands);
     }
 
-    public void processInGameCommand(String s) {
+    public boolean processInGameCommand(String s) {
         if (!s.startsWith("\\")) {
-            return;
+            return false;
         }
         INGAME_CMD_PROCESSOR.processCommand(s);
+        return true;
     }
 
     private void registerConfigurations() {

@@ -65,7 +65,7 @@ public class Configuration {
                 if (!yml.exists("config-version")) {
                     yml.set("config-version", 0);
                 }
-                var target = declaredField.getName().replace("var_", "");
+                String target = declaredField.getName().replace("var_", "");
                 if (!yml.exists(target)) {
                     yml.set(target, declaredField.get(this) == null ? "[no default]" : declaredField.get(this));
                     declaredField.set(this, declaredField.get(this) == null ? "[no default]" : declaredField.get(this));
@@ -82,7 +82,7 @@ public class Configuration {
             }
             yml.save();
         } catch (IllegalAccessException ex) {
-            var exc = new ReMinecraftPluginConfigurationException("Configuration error while reading " + this.getClass().getSimpleName());
+            ReMinecraftPluginConfigurationException exc = new ReMinecraftPluginConfigurationException("Configuration error while reading " + this.getClass().getSimpleName());
             exc.setStackTrace(ex.getStackTrace());
             throw exc;
         }

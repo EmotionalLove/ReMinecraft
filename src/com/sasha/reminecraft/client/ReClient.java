@@ -34,6 +34,7 @@ import com.sasha.reminecraft.util.ChunkUtil;
 import com.sasha.reminecraft.util.entity.*;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,19 +48,19 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void packetReceived(PacketReceivedEvent ev) {
-        var event = new RemoteServerPacketRecieveEvent(ev.getPacket());
+        RemoteServerPacketRecieveEvent event = new RemoteServerPacketRecieveEvent(ev.getPacket());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         if (event.isCancelled()) return;
         try {
             if (event.getRecievedPacket() instanceof ServerChatPacket) {
-                var pck = (ServerChatPacket) event.getRecievedPacket();
-                var chatEvent = new ChatRecievedEvent(pck.getMessage().getFullText(), System.currentTimeMillis());
+                ServerChatPacket pck = (ServerChatPacket) event.getRecievedPacket();
+                ChatRecievedEvent chatEvent = new ChatRecievedEvent(pck.getMessage().getFullText(), System.currentTimeMillis());
                 ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(chatEvent);
                 ReMinecraft.INSTANCE.logger.log("(CHAT) " + ((ServerChatPacket) event.getRecievedPacket()).getMessage().getFullText());
             }
             if (event.getRecievedPacket() instanceof ServerPlayerHealthPacket) {
                 //update player health
-                var pck = (ServerPlayerHealthPacket) event.getRecievedPacket();
+                ServerPlayerHealthPacket pck = (ServerPlayerHealthPacket) event.getRecievedPacket();
                 PlayerDamagedEvent damagedEvent = new PlayerDamagedEvent(ReClientCache.health, pck.getHealth());
                 ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(damagedEvent);
                 ReClientCache.health = pck.getHealth();
@@ -70,7 +71,7 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerPlayerListEntryPacket) {
-                var pck = (ServerPlayerListEntryPacket) event.getRecievedPacket();
+                ServerPlayerListEntryPacket pck = (ServerPlayerListEntryPacket) event.getRecievedPacket();
                 switch (pck.getAction()) {
                     case ADD_PLAYER:
                         Arrays.stream(pck.getEntries())
@@ -91,7 +92,7 @@ public class ReClient implements SessionListener {
                             for (PlayerListEntry playerListEntry : ReClientCache.playerListEntries) {
                                 if (playerListEntry.getProfile().getId().equals(id)) {
                                     try {
-                                        var field = playerListEntry.getClass().getDeclaredField("displayName");
+                                        Field field = playerListEntry.getClass().getDeclaredField("displayName");
                                         field.setAccessible(true);
                                         field.set(playerListEntry, msg);
                                     } catch (Exception e) {
@@ -110,7 +111,7 @@ public class ReClient implements SessionListener {
                             for (PlayerListEntry playerListEntry : ReClientCache.playerListEntries) {
                                 if (playerListEntry.getProfile().getId().equals(id)) {
                                     try {
-                                        var field = playerListEntry.getClass().getDeclaredField("ping");
+                                        Field field = playerListEntry.getClass().getDeclaredField("ping");
                                         field.setAccessible(true);
                                         field.set(playerListEntry, ping);
                                     } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -129,7 +130,7 @@ public class ReClient implements SessionListener {
                             for (PlayerListEntry playerListEntry : ReClientCache.playerListEntries) {
                                 if (playerListEntry.getProfile().getId().equals(id)) {
                                     try {
-                                        var field = playerListEntry.getClass().getDeclaredField("gameMode");
+                                        Field field = playerListEntry.getClass().getDeclaredField("gameMode");
                                         field.setAccessible(true);
                                         field.set(playerListEntry, gm);
                                     } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -149,8 +150,8 @@ public class ReClient implements SessionListener {
                 ReClientCache.tabFooter = ((ServerPlayerListDataPacket) event.getRecievedPacket()).getFooter();
             }
             if (event.getRecievedPacket() instanceof ServerPlayerPositionRotationPacket) {
-                var pck = (ServerPlayerPositionRotationPacket) event.getRecievedPacket();
-                var resetEvent = new ServerResetPlayerPositionEvent(pck.getX(), pck.getY(), pck.getZ(), pck.getYaw(), pck.getPitch());
+                ServerPlayerPositionRotationPacket pck = (ServerPlayerPositionRotationPacket) event.getRecievedPacket();
+                ServerResetPlayerPositionEvent resetEvent = new ServerResetPlayerPositionEvent(pck.getX(), pck.getY(), pck.getZ(), pck.getYaw(), pck.getPitch());
                 ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(resetEvent);
                 ReClientCache.posX = pck.getX();
                 ReClientCache.posY = pck.getY();
@@ -167,7 +168,7 @@ public class ReClient implements SessionListener {
                 // do not actually push them correctly. This is apparent with big chunks and newly generated ones
                 // that need to be dispersed over multiple packets. Trust me, it's really gay.
                 // btw i love phi <33333333333333333 hes like super nice
-                var pck = (ServerChunkDataPacket) event.getRecievedPacket();
+                ServerChunkDataPacket pck = (ServerChunkDataPacket) event.getRecievedPacket();
                 Column column = pck.getColumn();
                 long hash = ChunkUtil.getChunkHashFromXZ(column.getX(), column.getZ());
                 if (!column.hasBiomeData()) {
@@ -188,12 +189,12 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerUnloadChunkPacket) {
-                var pck = (ServerUnloadChunkPacket) event.getRecievedPacket();
+                ServerUnloadChunkPacket pck = (ServerUnloadChunkPacket) event.getRecievedPacket();
                 long hash = ChunkUtil.getChunkHashFromXZ(pck.getX(), pck.getZ());
                 ReClientCache.chunkCache.remove(hash);
             }
             if (event.getRecievedPacket() instanceof ServerWindowItemsPacket) {
-                var pck = (ServerWindowItemsPacket) event.getRecievedPacket();
+                ServerWindowItemsPacket pck = (ServerWindowItemsPacket) event.getRecievedPacket();
                 if (pck.getWindowId() == 0) {
                     ReClientCache.playerInventory = pck.getItems();
                 }
@@ -201,7 +202,7 @@ public class ReClient implements SessionListener {
             if (event.getRecievedPacket() instanceof ServerBlockChangePacket) {
                 // update the cached chunks
                 // sometimes inaccurate (i think?)
-                var pck = (ServerBlockChangePacket) event.getRecievedPacket();
+                ServerBlockChangePacket pck = (ServerBlockChangePacket) event.getRecievedPacket();
                 int chunkX = pck.getRecord().getPosition().getX() >> 4;
                 int chunkZ = pck.getRecord().getPosition().getZ() >> 4;
                 int cubeY = ChunkUtil.clamp(pck.getRecord().getPosition().getY() >> 4, 0, 15);
@@ -225,7 +226,7 @@ public class ReClient implements SessionListener {
             }
             if (event.getRecievedPacket() instanceof ServerMultiBlockChangePacket) {
                 // this is more complicated
-                var pck = (ServerMultiBlockChangePacket) event.getRecievedPacket();
+                ServerMultiBlockChangePacket pck = (ServerMultiBlockChangePacket) event.getRecievedPacket();
                 int chunkX = pck.getRecords()[0].getPosition().getX() >> 4;
                 int chunkZ = pck.getRecords()[0].getPosition().getZ() >> 4;
                 Column column = ReClientCache.chunkCache.getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
@@ -251,7 +252,7 @@ public class ReClient implements SessionListener {
             }
             if (event.getRecievedPacket() instanceof ServerJoinGamePacket) {
                 // this is when YOU join the server, not another player
-                var pck = (ServerJoinGamePacket) event.getRecievedPacket();
+                ServerJoinGamePacket pck = (ServerJoinGamePacket) event.getRecievedPacket();
                 ReClientCache.dimension = pck.getDimension();
                 ReClientCache.entityId = pck.getEntityId();
                 ReClientCache.gameMode = pck.getGameMode();
@@ -266,14 +267,14 @@ public class ReClient implements SessionListener {
                 ReClientCache.uuid = ((LoginSuccessPacket) event.getRecievedPacket()).getProfile().getId();
             }
             if (event.getRecievedPacket() instanceof ServerNotifyClientPacket) {
-                var pck = (ServerNotifyClientPacket) event.getRecievedPacket();
+                ServerNotifyClientPacket pck = (ServerNotifyClientPacket) event.getRecievedPacket();
                 if (pck.getNotification() == ClientNotification.CHANGE_GAMEMODE) {
                     ReClientCache.gameMode = (GameMode) pck.getValue();
                 }
             }
             if (event.getRecievedPacket() instanceof ServerRespawnPacket) {
                 // clear everything because none of it matters now :smiling_imp:
-                var pck = (ServerRespawnPacket) event.getRecievedPacket();
+                ServerRespawnPacket pck = (ServerRespawnPacket) event.getRecievedPacket();
                 ReClientCache.dimension = pck.getDimension();
                 ReClientCache.gameMode = pck.getGameMode();
                 ReClientCache.chunkCache.clear();
@@ -282,12 +283,12 @@ public class ReClient implements SessionListener {
                 ReClientCache.player.potionEffects.clear();
             }
             if (event.getRecievedPacket() instanceof LoginDisconnectPacket) {
-                var pck = (LoginDisconnectPacket) event.getRecievedPacket();
+                LoginDisconnectPacket pck = (LoginDisconnectPacket) event.getRecievedPacket();
                 ReMinecraft.INSTANCE.logger.logError("Kicked whilst logging in: " + pck.getReason().getFullText());
                 ReMinecraft.INSTANCE.minecraftClient.getSession().disconnect(pck.getReason().getFullText(), true);
             }
             if (event.getRecievedPacket() instanceof ServerSpawnMobPacket) {
-                var pck = (ServerSpawnMobPacket) event.getRecievedPacket();
+                ServerSpawnMobPacket pck = (ServerSpawnMobPacket) event.getRecievedPacket();
                 EntityMob e = new EntityMob();
                 e.type = EntityType.MOB;
                 e.entityId = pck.getEntityId();
@@ -306,7 +307,7 @@ public class ReClient implements SessionListener {
                 ReClientCache.entityCache.put(e.entityId, e);
             }
             if (event.getRecievedPacket() instanceof ServerSpawnObjectPacket) {
-                var pck = (ServerSpawnObjectPacket) event.getRecievedPacket();
+                ServerSpawnObjectPacket pck = (ServerSpawnObjectPacket) event.getRecievedPacket();
                 EntityObject e = new EntityObject();
                 e.type = EntityType.OBJECT;
                 e.entityId = pck.getEntityId();
@@ -324,13 +325,13 @@ public class ReClient implements SessionListener {
                 ReClientCache.entityCache.put(e.entityId, e);
             }
             if (event.getRecievedPacket() instanceof ServerEntityDestroyPacket) {
-                var pck = (ServerEntityDestroyPacket) event.getRecievedPacket();
+                ServerEntityDestroyPacket pck = (ServerEntityDestroyPacket) event.getRecievedPacket();
                 for (int entityId : pck.getEntityIds()) {
                     ReClientCache.entityCache.remove(entityId);
                 }
             }
             if (event.getRecievedPacket() instanceof ServerEntityAttachPacket) {
-                var pck = (ServerEntityAttachPacket) event.getRecievedPacket();
+                ServerEntityAttachPacket pck = (ServerEntityAttachPacket) event.getRecievedPacket();
                 EntityRotation entityRotation = (EntityRotation) ReClientCache.entityCache.get(pck.getEntityId());
                 if (pck.getAttachedToId() == -1) {
                     entityRotation.isLeashed = false;
@@ -341,11 +342,11 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerEntityCollectItemPacket) {
-                var pck = (ServerEntityCollectItemPacket) event.getRecievedPacket();
+                ServerEntityCollectItemPacket pck = (ServerEntityCollectItemPacket) event.getRecievedPacket();
                 ReClientCache.entityCache.remove(pck.getCollectedEntityId());
             }
             if (event.getRecievedPacket() instanceof ServerEntityEffectPacket) {
-                var pck = (ServerEntityEffectPacket) event.getRecievedPacket();
+                ServerEntityEffectPacket pck = (ServerEntityEffectPacket) event.getRecievedPacket();
                 PotionEffect effect = new PotionEffect();
                 effect.effect = pck.getEffect();
                 effect.amplifier = pck.getAmplifier();
@@ -355,7 +356,7 @@ public class ReClient implements SessionListener {
                 ((EntityEquipment) ReClientCache.entityCache.get(pck.getEntityId())).potionEffects.add(effect);
             }
             if (event.getRecievedPacket() instanceof ServerEntityEquipmentPacket) {
-                var pck = (ServerEntityEquipmentPacket) event.getRecievedPacket();
+                ServerEntityEquipmentPacket pck = (ServerEntityEquipmentPacket) event.getRecievedPacket();
                 Entity entity = ReClientCache.entityCache.get(pck.getEntityId());
                 if (entity instanceof EntityObject) {
                     ReMinecraft.INSTANCE.logger.logError("Server tried adding equipment to an EntityObject! Ignoring.");
@@ -365,7 +366,7 @@ public class ReClient implements SessionListener {
                 equipment.equipment.put(pck.getSlot(), pck.getItem());
             }
             if (event.getRecievedPacket() instanceof ServerEntityHeadLookPacket) {
-                var pck = (ServerEntityHeadLookPacket) event.getRecievedPacket();
+                ServerEntityHeadLookPacket pck = (ServerEntityHeadLookPacket) event.getRecievedPacket();
                 EntityRotation e = (EntityRotation) ReClientCache.entityCache.get(pck.getEntityId());
                 if (e == null) {
                     ReMinecraft.INSTANCE.logger.logDebug
@@ -376,7 +377,7 @@ public class ReClient implements SessionListener {
                 e.headYaw = pck.getHeadYaw();
             }
             if (event.getRecievedPacket() instanceof ServerEntityMovementPacket) {
-                var pck = (ServerEntityMovementPacket) event.getRecievedPacket();
+                ServerEntityMovementPacket pck = (ServerEntityMovementPacket) event.getRecievedPacket();
                 Entity e = ReClientCache.entityCache.get(pck.getEntityId());
                 if (e == null) {
                     ReMinecraft.INSTANCE.logger.logDebug
@@ -388,7 +389,7 @@ public class ReClient implements SessionListener {
                 e.posY += pck.getMovementY() / 4096d;
                 e.posZ += pck.getMovementZ() / 4096d;
                 boolean flag;
-                var field = ServerEntityMovementPacket.class.getDeclaredField("rot");
+                Field field = ServerEntityMovementPacket.class.getDeclaredField("rot");
                 field.setAccessible(true); // leet hax
                 flag = (boolean) field.get(pck);
                 if (flag && e instanceof EntityRotation) {
@@ -397,7 +398,7 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerEntityPropertiesPacket) {
-                var pck = (ServerEntityPropertiesPacket) event.getRecievedPacket();
+                ServerEntityPropertiesPacket pck = (ServerEntityPropertiesPacket) event.getRecievedPacket();
                 EntityRotation rotation = (EntityRotation) ReClientCache.entityCache.get(pck.getEntityId());
                 if (rotation == null) {
                     ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());
@@ -406,12 +407,12 @@ public class ReClient implements SessionListener {
                 rotation.properties.addAll(pck.getAttributes());
             }
             if (event.getRecievedPacket() instanceof ServerEntityRemoveEffectPacket) {
-                var pck = (ServerEntityRemoveEffectPacket) event.getRecievedPacket();
+                ServerEntityRemoveEffectPacket pck = (ServerEntityRemoveEffectPacket) event.getRecievedPacket();
                 EntityEquipment e = (EntityEquipment) ReClientCache.entityCache.get(pck.getEntityId());
                 e.potionEffects.remove(pck.getEffect());
             }
             if (event.getRecievedPacket() instanceof ServerEntitySetPassengersPacket) {
-                var pck = (ServerEntitySetPassengersPacket) event.getRecievedPacket();
+                ServerEntitySetPassengersPacket pck = (ServerEntitySetPassengersPacket) event.getRecievedPacket();
                 EntityEquipment equipment = (EntityEquipment) ReClientCache.entityCache.get(pck.getEntityId());
                 if (pck.getPassengerIds() == null || pck.getPassengerIds().length == 0) {
                     equipment.passengerIds = null;
@@ -420,7 +421,7 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerEntityTeleportPacket) {
-                var pck = (ServerEntityTeleportPacket) event.getRecievedPacket();
+                ServerEntityTeleportPacket pck = (ServerEntityTeleportPacket) event.getRecievedPacket();
                 Entity entity = ReClientCache.entityCache.get(pck.getEntityId());
                 if (entity == null) {
                     ReMinecraft.INSTANCE.logger.logDebug
@@ -439,7 +440,7 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerVehicleMovePacket) {
-                var pck = (ServerVehicleMovePacket) event.getRecievedPacket();
+                ServerVehicleMovePacket pck = (ServerVehicleMovePacket) event.getRecievedPacket();
                 Entity entity = Entity.getEntityBeingRiddenBy(ReClientCache.entityId);
                 if (entity == null) {
                     return;
@@ -453,7 +454,7 @@ public class ReClient implements SessionListener {
                 }
             }
             if (event.getRecievedPacket() instanceof ServerPlayerChangeHeldItemPacket) {
-                var pck = (ServerPlayerChangeHeldItemPacket) event.getRecievedPacket();
+                ServerPlayerChangeHeldItemPacket pck = (ServerPlayerChangeHeldItemPacket) event.getRecievedPacket();
                 ReClientCache.heldItem = pck.getSlot();
             }
             ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());

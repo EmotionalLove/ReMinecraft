@@ -23,4 +23,4 @@ Basically, it'll keep you logged in even when you disconnect your Minecraft clie
 
 SnakeYAML - For YAML parsing.
 
-MCProtocolLib - For the minecraft protocol library for Java.
+[MCProtocolLib](https://github.com/Steveice10/MCProtocolLib) - For the minecraft protocol library for Java.

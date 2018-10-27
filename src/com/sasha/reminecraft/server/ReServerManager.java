@@ -56,6 +56,7 @@ public class ReServerManager extends ServerAdapter {
 
     /**
      * Build an instance of the server
+     *
      * @return the built server
      */
     public static Server prepareServer() {
@@ -64,16 +65,16 @@ public class ReServerManager extends ServerAdapter {
         server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, ReMinecraft.INSTANCE.MAIN_CONFIG.var_onlineModeServer);
         server.setGlobalFlag
                 (MinecraftConstants.SERVER_INFO_BUILDER_KEY, new ServerInfoBuilder() {
-                            @Override
-                            public ServerStatusInfo buildInfo(Session session) {
-                                return new ServerStatusInfo(
-                                        new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
-                                        new PlayerInfo(420, (int) ReMinecraft.INSTANCE.childClients.stream().filter(e -> ((MinecraftProtocol) e.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.STATUS).count(), new GameProfile[]{}),
-                                        Message.fromString(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
-                                        null);
-                            }
-                        });
-                        server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
+                    @Override
+                    public ServerStatusInfo buildInfo(Session session) {
+                        return new ServerStatusInfo(
+                                new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
+                                new PlayerInfo(420, (int) ReMinecraft.INSTANCE.childClients.stream().filter(e -> ((MinecraftProtocol) e.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.STATUS).count(), new GameProfile[]{}),
+                                Message.fromString(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
+                                null);
+                    }
+                });
+        server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
         server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, (ServerLoginHandler) session -> session.send(new ServerJoinGamePacket(
                 ReClient.ReClientCache.entityId,
                 false,

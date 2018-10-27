@@ -1,5 +1,6 @@
 # *RE:Minecraft* - Starting life on another server
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4ca4742ac61a40ccabcfca8d22645cf7)](https://app.codacy.com/app/EmotionalLove/ReMinecraft?utm_source=github.com&utm_medium=referral&utm_content=EmotionalLove/ReMinecraft&utm_campaign=Badge_Grade_Settings)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cc9a743afb654f488f6cdaca3bcad60c)](https://app.codacy.com/app/EmotionalLove/ReMinecraft?utm_source=github.com&utm_medium=referral&utm_content=EmotionalLove/ReMinecraft&utm_campaign=Badge_Grade_Settings)
 
 A headless Minecraft bouncer written in Java

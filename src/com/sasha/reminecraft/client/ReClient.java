@@ -94,7 +94,7 @@ public class ReClient implements SessionListener {
                                         var field = playerListEntry.getClass().getDeclaredField("displayName");
                                         field.setAccessible(true);
                                         field.set(playerListEntry, msg);
-                                    }catch (Exception e) {
+                                    } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -209,7 +209,7 @@ public class ReClient implements SessionListener {
                         .getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
                 if (column == null) {
                     // not ignoring this can leak memory in the notchian client
-                    ReMinecraft.INSTANCE.logger.logWarning("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
+                    ReMinecraft.INSTANCE.logger.logDebug("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
                     return;
                 }
                 Chunk subChunk = column.getChunks()[cubeY];
@@ -231,7 +231,7 @@ public class ReClient implements SessionListener {
                 Column column = ReClientCache.chunkCache.getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
                 if (column == null) {
                     // not ignoring this can leak memory in the notchian client
-                    ReMinecraft.INSTANCE.logger.logWarning("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
+                    ReMinecraft.INSTANCE.logger.logDebug("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
                     return;
                 }
                 for (BlockChangeRecord record : pck.getRecords()) {
@@ -368,7 +368,7 @@ public class ReClient implements SessionListener {
                 var pck = (ServerEntityHeadLookPacket) event.getRecievedPacket();
                 EntityRotation e = (EntityRotation) ReClientCache.entityCache.get(pck.getEntityId());
                 if (e == null) {
-                    ReMinecraft.INSTANCE.logger.logError
+                    ReMinecraft.INSTANCE.logger.logDebug
                             ("Null entity with entity id " + pck.getEntityId());
                     ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());
                     return;
@@ -379,7 +379,7 @@ public class ReClient implements SessionListener {
                 var pck = (ServerEntityMovementPacket) event.getRecievedPacket();
                 Entity e = ReClientCache.entityCache.get(pck.getEntityId());
                 if (e == null) {
-                    ReMinecraft.INSTANCE.logger.logError
+                    ReMinecraft.INSTANCE.logger.logDebug
                             ("Null entity with entity id " + pck.getEntityId());
                     ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());
                     return;
@@ -390,7 +390,7 @@ public class ReClient implements SessionListener {
                 boolean flag;
                 var field = ServerEntityMovementPacket.class.getDeclaredField("rot");
                 field.setAccessible(true); // leet hax
-                flag = (boolean)field.get(pck);
+                flag = (boolean) field.get(pck);
                 if (flag && e instanceof EntityRotation) {
                     ((EntityRotation) e).yaw = pck.getYaw();
                     ((EntityRotation) e).pitch = pck.getPitch();
@@ -423,7 +423,7 @@ public class ReClient implements SessionListener {
                 var pck = (ServerEntityTeleportPacket) event.getRecievedPacket();
                 Entity entity = ReClientCache.entityCache.get(pck.getEntityId());
                 if (entity == null) {
-                    ReMinecraft.INSTANCE.logger.logError
+                    ReMinecraft.INSTANCE.logger.logDebug
                             ("Null entity with entity id " + pck.getEntityId());
                     ReMinecraft.INSTANCE.childClients.stream()
                             .filter(ChildReClient::isPlaying)

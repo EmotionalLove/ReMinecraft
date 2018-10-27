@@ -248,7 +248,7 @@ public class ReServer extends SessionAdapter {
                             object.motionZ));
                     continue;
                 }
-                ReMinecraft.INSTANCE.logger.log("??? There's a problem, Sasha!");
+                ReMinecraft.INSTANCE.logger.logDebug("???");
             }
             for (Entity entity : ReClient.ReClientCache.entityCache.values()) {
                 if (entity instanceof EntityEquipment && ((EntityEquipment) entity).passengerIds.length > 0) {

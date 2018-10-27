@@ -93,7 +93,7 @@ public class ReMinecraft {
      */
     public void start(String[] args) throws InstantiationException, IllegalAccessException, IOException {
         INSTANCE = this;
-        logger.log("Starting RE:Minecraft " + VERSION + "");
+        logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft 1.12.2");
         var loader = new RePluginLoader();
         loader.preparePlugins(loader.findPlugins());
         loader.loadPlugins();

@@ -14,6 +14,7 @@ import com.sasha.reminecraft.api.RePluginLoader;
 import com.sasha.reminecraft.api.event.MojangAuthenticateEvent;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.command.game.AboutCommand;
 import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
@@ -215,6 +216,7 @@ public class ReMinecraft {
         TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
         TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
         INGAME_CMD_PROCESSOR.register(PluginsCommand.class);
+        INGAME_CMD_PROCESSOR.register(AboutCommand.class);
         RePluginLoader.getPluginList().forEach(RePlugin::registerCommands);
     }
 

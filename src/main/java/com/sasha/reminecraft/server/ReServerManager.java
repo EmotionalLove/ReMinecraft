@@ -22,7 +22,6 @@ import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
-import org.jetbrains.annotations.Nullable;
 
 import java.net.Proxy;
 
@@ -43,7 +42,6 @@ public class ReServerManager extends ServerAdapter {
         event.getSession().removeListener(ReMinecraft.INSTANCE.childAdapters.get(getClientBySession(event.getSession())));
     }
 
-    @Nullable
     public static ChildReClient getClientBySession(Session session) {
         for (ChildReClient childClient : ReMinecraft.INSTANCE.childClients) {
             if (childClient.getSession().getHost().equals(session.getHost())

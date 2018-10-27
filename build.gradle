@@ -2,6 +2,19 @@ plugins {
     id 'java'
 }
 
+def urlFile = { url, name ->
+    File file = new File("$buildDir/download/${name}.jar")
+    file.parentFile.mkdirs()
+    if (!file.exists()) {
+        new URL(url).withInputStream { downloadStream ->
+            file.withOutputStream { fileOut ->
+                fileOut << downloadStream
+            }
+        }
+    }
+    files(file.absolutePath)
+}
+
 group 'com.sasha.reminecraft'
 version '1.0.1'
 
@@ -9,8 +22,12 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'com.github.Steveice10:MCProtocolLib:1.12.2-2'
+    implementation files(urlFile("https://github.com/EmotionalLove/SimpleEventSystem/releases/download/1.2.1/SimpleEventSystem.jar", "SimpleEventSystem"))
+    implementation files(urlFile("https://github.com/EmotionalLove/SimpleCommandSystem/releases/download/1.0.2/SimpleCommandSystem.jar", "SimpleCommandSystem"))
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
 }

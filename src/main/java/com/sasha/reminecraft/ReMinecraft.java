@@ -131,7 +131,7 @@ public class ReMinecraft {
                 authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
                 authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
                 authServ.login();
-                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
+                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
                 MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
                 this.EVENT_BUS.invokeEvent(postEvent);
@@ -156,7 +156,7 @@ public class ReMinecraft {
             authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
             authServ.setPassword(MAIN_CONFIG.var_mojangPassword);
             authServ.login();
-            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
+            protocol = new MinecraftProtocol(authServ.getSelectedProfile(), authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
             ReClient.ReClientCache.playerName = authServ.getSelectedProfile().getName();

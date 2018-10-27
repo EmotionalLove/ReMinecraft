@@ -39,7 +39,7 @@ public class ReMinecraft {
      */
     public static ReMinecraft INSTANCE;
     public static final String DATA_FILE = "ReMinecraft.yml";
-    private List<Configuration> configurations = new ArrayList<>();
+    public List<Configuration> configurations = new ArrayList<>();
     public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
 
     /**

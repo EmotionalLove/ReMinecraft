@@ -9,6 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -44,9 +45,23 @@ public class Configuration {
     @ConfigSetting
     public boolean var_onlineModeServer = true;
     @ConfigSetting
+    public boolean var_useWhitelist = false;
+    @ConfigSetting
+    public ArrayList<String> var_whitelistServer = new ArrayList<>();
+    @ConfigSetting
     public String var_messageOfTheDay = "\247dRE:Minecraft \2477" + ReMinecraft.VERSION;
     @ConfigSetting
     public int var_reconnectDelaySeconds = 5;
+    @ConfigSetting
+    public String var_socksProxy = null;
+    @ConfigSetting
+    public int var_socksPort = -1;
+    {
+        var_whitelistServer.add("Phi_Phi");
+        var_whitelistServer.add("Color");
+        var_whitelistServer.add("086");
+        var_whitelistServer.add("minecart26");
+    }
 
     public Configuration(String configName) {
         this.configName = configName;

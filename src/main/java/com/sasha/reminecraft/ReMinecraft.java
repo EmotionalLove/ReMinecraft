@@ -23,7 +23,10 @@ import com.sasha.simplecmdsys.SimpleCommandProcessor;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -102,13 +105,15 @@ public class ReMinecraft {
         this.registerCommands();
         this.registerConfigurations();
         configurations.forEach(Configuration::configure); // set config vars
-        if (authenticate() == null) {
-
-        } // log into mc
+        Proxy proxy = Proxy.NO_PROXY;
+        if (!MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
+            proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
+        }
+        authenticate(proxy);// log into mc
         minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
                 MAIN_CONFIG.var_remoteServerPort,
                 protocol,
-                new TcpSessionFactory(/*todo proxies?*/));
+                new TcpSessionFactory(proxy));
         minecraftClient.getSession().addListener(new ReClient());
         this.logger.log("Connecting...");
         RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
@@ -119,7 +124,7 @@ public class ReMinecraft {
     /**
      * Authenticate with Mojang, first via session token, then via email/password
      */
-    public AuthenticationService authenticate() {
+    public AuthenticationService authenticate(Proxy proxy) {
         if (!MAIN_CONFIG.var_sessionId.equalsIgnoreCase("[no default]")) {
             try {
                 MojangAuthenticateEvent.Pre event = new MojangAuthenticateEvent.Pre(MojangAuthenticateEvent.Method.SESSIONID);
@@ -129,7 +134,7 @@ public class ReMinecraft {
                 }
                 // try authing with session id first, since it [appears] to be present
                 ReMinecraft.INSTANCE.logger.log("Attempting to log in with session token");
-                AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
+                AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, proxy);
                 authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
                 authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
                 authServ.login();
@@ -154,7 +159,7 @@ public class ReMinecraft {
             MojangAuthenticateEvent.Pre event = new MojangAuthenticateEvent.Pre(MojangAuthenticateEvent.Method.EMAILPASS);
             this.EVENT_BUS.invokeEvent(event);
             if (event.isCancelled()) return null;
-            AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
+            AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, proxy);
             authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
             authServ.setPassword(MAIN_CONFIG.var_mojangPassword);
             authServ.login();
@@ -182,7 +187,7 @@ public class ReMinecraft {
             MAIN_CONFIG.var_mojangEmail = email;
             MAIN_CONFIG.var_mojangPassword = password;
             MAIN_CONFIG.save();
-            authenticate();
+            authenticate(proxy);
         }
         return null;
     }
@@ -191,9 +196,7 @@ public class ReMinecraft {
      * Update the session token inside ReMinecraft.yml
      */
     private void updateToken(String token) {
-        YML yml = new YML(getDataFile());
-        yml.set("sessionId", token);
-        yml.save();
+        MAIN_CONFIG.var_sessionId = token;
     }
 
     public boolean areChildrenConnected() {

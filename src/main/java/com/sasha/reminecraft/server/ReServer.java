@@ -12,10 +12,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPluginMessagePacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerChangeHeldItemPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
@@ -26,6 +23,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.Serve
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
+import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.sasha.reminecraft.ReMinecraft;
@@ -42,6 +40,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ReServer extends SessionAdapter {
 
@@ -62,6 +61,7 @@ public class ReServer extends SessionAdapter {
         if (event.getRecievedPacket() instanceof LoginStartPacket && (protocol.getSubProtocol() == SubProtocol.LOGIN || protocol.getSubProtocol() == SubProtocol.HANDSHAKE)) {
             LoginStartPacket pck = (LoginStartPacket) event.getRecievedPacket();
             ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
+            runWhitelist(pck.getUsername());
         }
         if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
             if (event.getRecievedPacket() instanceof ClientKeepAlivePacket) {
@@ -116,6 +116,7 @@ public class ReServer extends SessionAdapter {
         if (event.getSendingPacket() instanceof LoginSuccessPacket) {
             LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
+            runWhitelist(pck.getProfile().getName());
         }
         if (event.getSendingPacket() instanceof ServerJoinGamePacket) {
             ReClient.ReClientCache.chunkCache.forEach((hash, chunk) -> {
@@ -289,6 +290,27 @@ public class ReServer extends SessionAdapter {
         ReMinecraft.INSTANCE.logger.log("Child disconnected due to " + event.getReason());
     }
 
+    private void runWhitelist(String name) {
+        boolean flag = ReMinecraft.INSTANCE.MAIN_CONFIG.var_useWhitelist && !ReMinecraft.INSTANCE.MAIN_CONFIG.var_whitelistServer
+                .stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList())
+                .contains(name.toLowerCase());
+        if (flag) {
+            ReMinecraft.INSTANCE.logger.logWarning(name + " isn't whitelisted.");
+            SubProtocol proto = ((MinecraftProtocol) this.child.getSession().getPacketProtocol()).getSubProtocol();
+            switch (proto){
+                case LOGIN:
+                    this.child.getSession().send(new LoginDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    break;
+                case GAME:
+                    this.child.getSession().send(new ServerDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    break;
+            }
+            this.child.getSession().disconnect("Not whitelisted!");
+            return;
+        }
+    }
 }
 
 class ServerBranding {

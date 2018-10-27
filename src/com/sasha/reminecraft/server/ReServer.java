@@ -8,6 +8,7 @@ import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
 import com.github.steveice10.mc.protocol.data.message.Message;
+import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
@@ -64,6 +65,9 @@ public class ReServer extends SessionAdapter {
         if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
             if (event.getRecievedPacket() instanceof ClientKeepAlivePacket) {
                 return;
+            }
+            if (event.getRecievedPacket() instanceof ClientChatPacket) {
+
             }
             if (event.getRecievedPacket() instanceof ClientPlayerPositionPacket) {
                 var pck = (ClientPlayerPositionPacket) event.getRecievedPacket();

@@ -518,6 +518,9 @@ public class ReClient implements SessionListener {
      * For caching importing information, like chunks and inventory data
      */
     public static class ReClientCache {
+
+        public static String playerName;
+        public static UUID playerUuid;
         /**
          * Player object
          */

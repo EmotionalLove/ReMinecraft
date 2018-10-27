@@ -11,6 +11,7 @@ import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.eventsys.SimpleEventManager;
 import com.sasha.reminecraft.api.RePlugin;
 import com.sasha.reminecraft.api.RePluginLoader;
+import com.sasha.reminecraft.api.event.MojangAuthenticateEvent;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.children.ChildReClient;
 import com.sasha.reminecraft.command.game.TestCommand;
@@ -118,6 +119,11 @@ public class ReMinecraft {
     public AuthenticationService authenticate() {
         if (!MAIN_CONFIG.var_sessionId.equalsIgnoreCase("[no default]")) {
             try {
+                MojangAuthenticateEvent.Pre event = new MojangAuthenticateEvent.Pre(MojangAuthenticateEvent.Method.SESSIONID);
+                this.EVENT_BUS.invokeEvent(event);
+                if (event.isCancelled()) {
+                    return null;
+                }
                 // try authing with session id first, since it [appears] to be present
                 ReMinecraft.INSTANCE.logger.log("Attempting to log in with session token");
                 var authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
@@ -126,16 +132,25 @@ public class ReMinecraft {
                 authServ.login();
                 protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
+                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
+                this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
+                ReClient.ReClientCache.playerName = authServ.getSelectedProfile().getName();
+                ReClient.ReClientCache.playerUuid = authServ.getSelectedProfile().getId();
                 return authServ;
             } catch (RequestException ex) {
                 // the session token is invalid
+                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(false);
+                this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.logError("Session token was invalid!");
             }
         }
         // log in normally w username and password
         ReMinecraft.INSTANCE.logger.log("Attemping to log in with email and password");
         try {
+            MojangAuthenticateEvent.Pre event = new MojangAuthenticateEvent.Pre(MojangAuthenticateEvent.Method.EMAILPASS);
+            this.EVENT_BUS.invokeEvent(event);
+            if (event.isCancelled()) return null;
             var authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, Proxy.NO_PROXY);
             authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
             authServ.setPassword(MAIN_CONFIG.var_mojangPassword);
@@ -143,9 +158,16 @@ public class ReMinecraft {
             protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
+            ReClient.ReClientCache.playerName = authServ.getSelectedProfile().getName();
+            ReClient.ReClientCache.playerUuid = authServ.getSelectedProfile().getId();
+            MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
+            this.EVENT_BUS.invokeEvent(postEvent);
+            return authServ;
         } catch (RequestException e) {
             // login completely failed
-            e.printStackTrace();
+            MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(false);
+            this.EVENT_BUS.invokeEvent(postEvent);
+            ReMinecraft.INSTANCE.logger.logError(e.getMessage());
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
             ReMinecraft.INSTANCE.stop();
         }
@@ -193,6 +215,13 @@ public class ReMinecraft {
         TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
         INGAME_CMD_PROCESSOR.register(TestCommand.class);
         RePluginLoader.getPluginList().forEach(RePlugin::registerCommands);
+    }
+
+    public void processInGameCommand(String s) {
+        if (!s.startsWith("\\")) {
+            return;
+        }
+        INGAME_CMD_PROCESSOR.processCommand(s);
     }
 
     private void registerConfigurations() {

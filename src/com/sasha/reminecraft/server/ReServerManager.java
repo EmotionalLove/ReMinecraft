@@ -54,6 +54,10 @@ public class ReServerManager extends ServerAdapter {
         return null;
     }
 
+    /**
+     * Build an instance of the server
+     * @return the built server
+     */
     public static Server prepareServer() {
         Server server = new Server(ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerIp, ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerPort, MinecraftProtocol.class, new TcpSessionFactory());
         server.setGlobalFlag(MinecraftConstants.AUTH_PROXY_KEY, Proxy.NO_PROXY);

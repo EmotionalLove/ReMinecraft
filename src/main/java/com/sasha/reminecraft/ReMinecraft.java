@@ -256,7 +256,7 @@ public class ReMinecraft {
         logger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
-        minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
+        if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");

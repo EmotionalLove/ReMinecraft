@@ -321,6 +321,13 @@ public class YML {
     public double getDouble(String key, double defaultValue) {
         return this.correct ? this.config.getDouble(key, defaultValue) : defaultValue;
     }
+    public float getFloat(String key) {
+        return (float)this.getDouble(key, 0);
+    }
+
+    public float getFloat(String key, double defaultValue) {
+        return (float)(this.correct ? this.config.getDouble(key, defaultValue) : defaultValue);
+    }
 
     public boolean isDouble(String key) {
         return config.isDouble(key);

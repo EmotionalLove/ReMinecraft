@@ -38,7 +38,7 @@ public class ReMinecraft {
      * Singleton of this Re:Minecraft
      */
     public static ReMinecraft INSTANCE;
-    public static final String DATA_FILE = "ReMinecraft.yml";
+    public static final String DATA_FILE = "ReMinecraft";
     public List<Configuration> configurations = new ArrayList<>();
     public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
 
@@ -166,7 +166,7 @@ public class ReMinecraft {
     }
 
     public File getDataFile() {
-        File file = new File(DATA_FILE);
+        File file = new File(DATA_FILE + ".yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -177,7 +177,7 @@ public class ReMinecraft {
         return file;
     }
     public File getDataFile(String s) {
-        File file = new File(s);
+        File file = new File(s + ".yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -192,10 +192,12 @@ public class ReMinecraft {
         TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
         TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
         INGAME_CMD_PROCESSOR.register(TestCommand.class);
+        RePluginLoader.getPluginList().forEach(RePlugin::registerCommands);
     }
 
     private void registerConfigurations() {
         configurations.add(MAIN_CONFIG);
+        RePluginLoader.getPluginList().forEach(RePlugin::registerConfig);
     }
 
     /**

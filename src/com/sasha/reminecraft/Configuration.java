@@ -61,6 +61,7 @@ public class Configuration {
             YML yml = new YML(file);
             for (Field declaredField : this.getClass().getDeclaredFields()) {
                 if (declaredField.getAnnotation(ConfigSetting.class) == null) continue;
+                declaredField.setAccessible(true);
                 if (!yml.exists("config-version")) {
                     yml.set("config-version", 0);
                 }
@@ -71,7 +72,12 @@ public class Configuration {
                     ReMinecraft.INSTANCE.logger.log("Created " + target);
                     continue;
                 }
-                declaredField.set(this, yml.get(target));
+                if (declaredField.getType() == float.class) {
+                    declaredField.set(this, yml.getFloat(target));
+                }
+                else {
+                    declaredField.set(this, yml.get(target));
+                }
                 ReMinecraft.INSTANCE.logger.log("Set " + target);
             }
             yml.save();
@@ -84,13 +90,13 @@ public class Configuration {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    @interface ConfigSetting {
+    public @interface ConfigSetting {
 
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    @interface Removed {
+    public @interface Removed {
 
     }
 }

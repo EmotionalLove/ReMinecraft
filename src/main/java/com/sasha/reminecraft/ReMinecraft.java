@@ -102,7 +102,9 @@ public class ReMinecraft {
         this.registerCommands();
         this.registerConfigurations();
         configurations.forEach(Configuration::configure); // set config vars
-        authenticate(); // log into mc
+        if (authenticate() == null) {
+
+        } // log into mc
         minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
                 MAIN_CONFIG.var_remoteServerPort,
                 protocol,
@@ -170,7 +172,17 @@ public class ReMinecraft {
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
-            ReMinecraft.INSTANCE.stop();
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("mojang email > ");
+            String email = scanner.nextLine();
+            System.out.print("\n");
+            System.out.print("mojang password > ");
+            String password = scanner.nextLine();
+            //scanner.close();
+            MAIN_CONFIG.var_mojangEmail = email;
+            MAIN_CONFIG.var_mojangPassword = password;
+            MAIN_CONFIG.save();
+            authenticate();
         }
         return null;
     }
@@ -237,7 +249,9 @@ public class ReMinecraft {
      * Stop and close RE:Minecraft
      */
     public void stop() {
+        if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
+        configurations.forEach(Configuration::save);
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
         logger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
@@ -250,11 +264,13 @@ public class ReMinecraft {
     }
 
     public void stopSoft() {
+        if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
+        configurations.forEach(Configuration::save);
         logger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
-        minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
+        if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
@@ -267,11 +283,12 @@ public class ReMinecraft {
         if (isShuttingDownCompletely) return;
         if (isRelaunching) return;
         isRelaunching = true;
+        configurations.forEach(Configuration::save);
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
-        minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
+        if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
         ReClient.ReClientCache.chunkCache.clear();
         ReClient.ReClientCache.entityCache.clear();
         ReClient.ReClientCache.player = null;

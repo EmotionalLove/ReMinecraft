@@ -74,8 +74,7 @@ public class Configuration {
                 }
                 if (declaredField.getType() == float.class) {
                     declaredField.set(this, yml.getFloat(target));
-                }
-                else {
+                } else {
                     declaredField.set(this, yml.get(target));
                 }
                 ReMinecraft.INSTANCE.logger.log("Set " + target);
@@ -87,6 +86,29 @@ public class Configuration {
             throw exc;
         }
     }
+
+    protected final void save() {
+        try {
+            File file = ReMinecraft.INSTANCE.getDataFile(configName);
+            YML yml = new YML(file);
+            for (Field declaredField : this.getClass().getDeclaredFields()) {
+                if (declaredField.getAnnotation(ConfigSetting.class) == null) continue;
+                declaredField.setAccessible(true);
+                if (!yml.exists("config-version")) {
+                    yml.set("config-version", 0);
+                }
+                String target = declaredField.getName().replace("var_" ,"");
+                yml.set(target, declaredField.get(this));
+                ReMinecraft.INSTANCE.logger.log("Saved " + target);
+            }
+            yml.save();
+        } catch (IllegalAccessException ex) {
+            ReMinecraftPluginConfigurationException exc = new ReMinecraftPluginConfigurationException("Configuration error while writing " + this.getClass().getSimpleName());
+            exc.setStackTrace(ex.getStackTrace());
+            throw exc;
+        }
+    }
+
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)

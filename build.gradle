@@ -26,8 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.Steveice10:MCProtocolLib:1.12.2-2'
-    implementation 'com.github.Steveice10:opennbt:1.1'
+    implementation 'com.github.Steveice10:MCProtocolLib:4b29ec1'
     implementation files(urlFile("https://github.com/EmotionalLove/SimpleEventSystem/releases/download/1.2.1/SimpleEventSystem.jar", "SimpleEventSystem"))
     implementation files(urlFile("https://github.com/EmotionalLove/SimpleCommandSystem/releases/download/1.0.2/SimpleCommandSystem.jar", "SimpleCommandSystem"))
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'

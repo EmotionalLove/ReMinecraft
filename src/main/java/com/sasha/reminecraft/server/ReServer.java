@@ -79,9 +79,6 @@ public class ReServer extends SessionAdapter {
                     ReClient.ReClientCache.wasRecipeBookOpened = pck.isCraftingBookOpen();
                 }
             }
-            if (event.getRecievedPacket() instanceof ClientPrepareCraftingGridPacket) {
-                return;
-            }
             if (event.getRecievedPacket() instanceof ClientChatPacket) {
                 ClientChatPacket pck = (ClientChatPacket) event.getRecievedPacket();
                 if (ReMinecraft.INSTANCE.processInGameCommand(pck.getMessage())) {

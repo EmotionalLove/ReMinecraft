@@ -12,6 +12,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.window.ClientCraftingBookDataPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.client.window.ClientPrepareCraftingGridPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerChangeHeldItemPacket;
@@ -65,6 +67,14 @@ public class ReServer extends SessionAdapter {
         }
         if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
             if (event.getRecievedPacket() instanceof ClientKeepAlivePacket) {
+                return;
+            }
+            if (event.getRecievedPacket() instanceof ClientCraftingBookDataPacket) {
+                // the recipe book packets seem to cause crash issues on notchian clients right now.
+                // todo properly handle and cache recipes?
+                return;
+            }
+            if (event.getRecievedPacket() instanceof ClientPrepareCraftingGridPacket) {
                 return;
             }
             if (event.getRecievedPacket() instanceof ClientChatPacket) {

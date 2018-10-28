@@ -18,6 +18,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerPreparedCraftingGridPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.*;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
@@ -52,6 +53,9 @@ public class ReClient implements SessionListener {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         if (event.isCancelled()) return;
         try {
+            if (event.getRecievedPacket() instanceof ServerPreparedCraftingGridPacket) {
+                return;
+            }
             if (event.getRecievedPacket() instanceof ServerChatPacket) {
                 ServerChatPacket pck = (ServerChatPacket) event.getRecievedPacket();
                 ChatRecievedEvent chatEvent = new ChatRecievedEvent(pck.getMessage().getFullText(), System.currentTimeMillis());

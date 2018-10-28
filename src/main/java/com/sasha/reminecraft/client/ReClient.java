@@ -2,6 +2,7 @@ package com.sasha.reminecraft.client;
 
 import com.github.steveice10.mc.protocol.data.game.ClientRequest;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
+import com.github.steveice10.mc.protocol.data.game.UnlockRecipesAction;
 import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
@@ -53,8 +54,41 @@ public class ReClient implements SessionListener {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         if (event.isCancelled()) return;
         try {
-            if (event.getRecievedPacket() instanceof ServerPreparedCraftingGridPacket) {
-                return;
+            if (event.getRecievedPacket() instanceof ServerUnlockRecipesPacket) {
+                ServerUnlockRecipesPacket pck = (ServerUnlockRecipesPacket) event.getRecievedPacket();
+                switch (pck.getAction()) {
+                    case ADD:
+                        for (Integer recipe : pck.getRecipes()) {
+                            if (ReClientCache.recipeCache.contains(recipe)) continue;
+                            ReClientCache.recipeCache.add(recipe);
+                        }
+                        break;
+                    case REMOVE:
+                        for (Integer recipe : pck.getRecipes()) {
+                            if (!ReClientCache.recipeCache.contains(recipe)) continue;
+                            ReClientCache.recipeCache.remove(recipe);
+                        }
+                        break;
+                    case INIT:
+                        for (Integer alreadyKnownRecipe : pck.getAlreadyKnownRecipes()) {
+                            if (ReClientCache.recipeCache.contains(alreadyKnownRecipe)) continue;
+                            ReClientCache.recipeCache.add(alreadyKnownRecipe);
+                        }
+                        for (Integer recipe : pck.getRecipes()) {
+                            if (!ReClientCache.recipeCache.contains(recipe)) continue;
+                            ReClientCache.recipeCache.remove(recipe);
+                        }
+                        break;
+                    default:
+                        for (Integer alreadyKnownRecipe : pck.getAlreadyKnownRecipes()) {
+                            if (ReClientCache.recipeCache.contains(alreadyKnownRecipe)) continue;
+                            ReClientCache.recipeCache.add(alreadyKnownRecipe);
+                        }
+                        for (Integer recipe : pck.getRecipes()) {
+                            if (!ReClientCache.recipeCache.contains(recipe)) continue;
+                            ReClientCache.recipeCache.remove(recipe);
+                        }
+                }
             }
             if (event.getRecievedPacket() instanceof ServerChatPacket) {
                 ServerChatPacket pck = (ServerChatPacket) event.getRecievedPacket();
@@ -534,6 +568,9 @@ public class ReClient implements SessionListener {
          * Player inventory
          */
         public static ItemStack[] playerInventory;
+        public static boolean wasFilteringRecipes;
+        public static boolean wasRecipeBookOpened;
+        public static List<Integer> recipeCache = new ArrayList<>();
         public static int heldItem = 0;
         /**
          * Player position

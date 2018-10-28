@@ -5,8 +5,10 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
+import com.github.steveice10.mc.protocol.data.game.UnlockRecipesAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
+import com.github.steveice10.mc.protocol.data.game.window.CraftingBookDataType;
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
@@ -22,6 +24,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerPreparedCraftingGridPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
@@ -70,9 +73,11 @@ public class ReServer extends SessionAdapter {
                 return;
             }
             if (event.getRecievedPacket() instanceof ClientCraftingBookDataPacket) {
-                // the recipe book packets seem to cause crash issues on notchian clients right now.
-                // todo properly handle and cache recipes?
-                return;
+                ClientCraftingBookDataPacket pck = (ClientCraftingBookDataPacket) event.getRecievedPacket();
+                if (pck.getType() == CraftingBookDataType.CRAFTING_BOOK_STATUS) {
+                    ReClient.ReClientCache.wasFilteringRecipes = pck.isFilterActive();
+                    ReClient.ReClientCache.wasRecipeBookOpened = pck.isCraftingBookOpen();
+                }
             }
             if (event.getRecievedPacket() instanceof ClientPrepareCraftingGridPacket) {
                 return;
@@ -282,6 +287,7 @@ public class ReServer extends SessionAdapter {
                     }
                 }
             }
+            this.child.getSession().send(new ServerUnlockRecipesPacket(ReClient.ReClientCache.wasRecipeBookOpened, ReClient.ReClientCache.wasFilteringRecipes, ReClient.ReClientCache.recipeCache, UnlockRecipesAction.ADD));
             this.child.setPlaying(true);
         }
     }

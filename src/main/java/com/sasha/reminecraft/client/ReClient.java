@@ -118,8 +118,9 @@ public class ReClient implements SessionListener {
                         break;
                     case REMOVE_PLAYER:
                         for (PlayerListEntry entry : pck.getEntries()) {
+                            String uuid = entry.getProfile().getId().toString();
                             for (PlayerListEntry playerListEntry : ReClientCache.playerListEntries) {
-                                if (playerListEntry.getProfile().getId() == entry.getProfile().getId()) {
+                                if (uuid.equalsIgnoreCase(entry.getProfile().getId().toString())) {
                                     ReClientCache.playerListEntries.remove(playerListEntry);
                                     break;
                                 }

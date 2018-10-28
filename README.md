@@ -14,7 +14,7 @@ Basically, it'll keep you logged in even when you disconnect your Minecraft clie
 
 - Gson
 - SnakeYAML
-- McProtocolLib (the one in /libraries)
+- McProtocolLib (and it's dependencies)
 - SimpleEventSystem
 - SimpleCommandSystem
 

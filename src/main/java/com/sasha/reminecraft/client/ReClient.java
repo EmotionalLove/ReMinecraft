@@ -117,15 +117,17 @@ public class ReClient implements SessionListener {
                                 .forEach(entry -> ReClientCache.playerListEntries.add(entry));
                         break;
                     case REMOVE_PLAYER:
-                        for (PlayerListEntry entry : pck.getEntries()) {
-                            String uuid = entry.getProfile().getId().toString();
-                            for (PlayerListEntry playerListEntry : ReClientCache.playerListEntries) {
-                                if (uuid.equalsIgnoreCase(entry.getProfile().getId().toString())) {
-                                    ReClientCache.playerListEntries.remove(playerListEntry);
-                                    break;
-                                }
+                        List<String> toRemove = new ArrayList<>();
+                        List<Integer> removalIndexes = new ArrayList<>();
+                        Arrays.stream(pck.getEntries()).forEach(entry -> toRemove.add(entry.getProfile().getId().toString()));
+                        ReClientCache.playerListEntries.forEach(entry -> {
+                            if (toRemove.contains(entry.getProfile().getId().toString())) {
+                                removalIndexes.add(ReClientCache.playerListEntries.indexOf(entry));
                             }
-                        }
+                        });
+                        removalIndexes.forEach(index -> {
+                            ReClientCache.playerListEntries.remove((int)index);
+                        });
                         break;
                     case UPDATE_DISPLAY_NAME:
                         LinkedHashMap<UUID, Message> changeMap = new LinkedHashMap<>();

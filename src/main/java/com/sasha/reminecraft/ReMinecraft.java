@@ -109,16 +109,18 @@ public class ReMinecraft {
         if (!MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
             proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
         }
-        authenticate(proxy);// log into mc
-        minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
-                MAIN_CONFIG.var_remoteServerPort,
-                protocol,
-                new TcpSessionFactory(proxy));
-        minecraftClient.getSession().addListener(new ReClient());
-        this.logger.log("Connecting...");
-        RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
-        minecraftClient.getSession().connect(true); // connect to the remote server
-        this.logger.log("Connected!");
+        AuthenticationService service = authenticate(proxy);// log into mc
+        if (service != null) {
+            minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
+                    MAIN_CONFIG.var_remoteServerPort,
+                    protocol,
+                    new TcpSessionFactory(proxy));
+            minecraftClient.getSession().addListener(new ReClient());
+            this.logger.log("Connecting...");
+            RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
+            minecraftClient.getSession().connect(true); // connect to the remote server
+            this.logger.log("Connected!");
+        }
     }
 
     /**

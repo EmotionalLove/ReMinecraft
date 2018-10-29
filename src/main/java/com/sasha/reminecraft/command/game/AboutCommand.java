@@ -20,7 +20,7 @@ public class AboutCommand extends SimpleCommand {
     @Override
     public void onCommand() {
         if (this.getArguments() == null || this.getArguments().length == 0) {
-            Message line0 = Message.fromString("\247d\247lRE:Minecraft\247r\247d - Starting life on another server");
+            Message line0 = Message.fromString("\247d\247lRE:Minecraft \2475{}\247r\247d - Starting life on another server".replace("{}", ReMinecraft.VERSION));
             Message line1 = Message.fromString("\2477https://github.com/EmotionalLove/ReMinecraft");
             Message line2 = Message.fromString("\2477Written by Sasha");
             ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(line0));

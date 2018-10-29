@@ -111,6 +111,7 @@ public class ReMinecraft {
         }
         AuthenticationService service = authenticate(proxy);// log into mc
         if (service != null) {
+            new ReClient.ReClientCache();
             minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
                     MAIN_CONFIG.var_remoteServerPort,
                     protocol,
@@ -145,8 +146,8 @@ public class ReMinecraft {
                 MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
                 this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
-                ReClient.ReClientCache.playerName = authServ.getSelectedProfile().getName();
-                ReClient.ReClientCache.playerUuid = authServ.getSelectedProfile().getId();
+                ReClient.ReClientCache.INSTANCE.INSTANCE.playerName = authServ.getSelectedProfile().getName();
+                ReClient.ReClientCache.INSTANCE.INSTANCE.playerUuid = authServ.getSelectedProfile().getId();
                 return authServ;
             } catch (RequestException ex) {
                 // the session token is invalid
@@ -168,8 +169,8 @@ public class ReMinecraft {
             protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
-            ReClient.ReClientCache.playerName = authServ.getSelectedProfile().getName();
-            ReClient.ReClientCache.playerUuid = authServ.getSelectedProfile().getId();
+            ReClient.ReClientCache.INSTANCE.INSTANCE.playerName = authServ.getSelectedProfile().getName();
+            ReClient.ReClientCache.INSTANCE.INSTANCE.playerUuid = authServ.getSelectedProfile().getId();
             MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
             this.EVENT_BUS.invokeEvent(postEvent);
             return authServ;
@@ -294,14 +295,14 @@ public class ReMinecraft {
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
         if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
-        ReClient.ReClientCache.chunkCache.clear();
-        ReClient.ReClientCache.entityCache.clear();
-        ReClient.ReClientCache.player = null;
-        ReClient.ReClientCache.posX = 0;
-        ReClient.ReClientCache.posY = 0;
-        ReClient.ReClientCache.posZ = 0;
-        ReClient.ReClientCache.entityId = 0;
-        ReClient.ReClientCache.playerListEntries.clear();
+        ReClient.ReClientCache.INSTANCE.INSTANCE.chunkCache.clear();
+        ReClient.ReClientCache.INSTANCE.INSTANCE.entityCache.clear();
+        ReClient.ReClientCache.INSTANCE.INSTANCE.player = null;
+        ReClient.ReClientCache.INSTANCE.INSTANCE.posX = 0;
+        ReClient.ReClientCache.INSTANCE.INSTANCE.posY = 0;
+        ReClient.ReClientCache.INSTANCE.INSTANCE.posZ = 0;
+        ReClient.ReClientCache.INSTANCE.INSTANCE.entityId = 0;
+        ReClient.ReClientCache.INSTANCE.INSTANCE.playerListEntries.clear();
         new Thread(() -> {
             for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
                 ReMinecraft.INSTANCE.logger.logWarning("Reconnecting in " + i + " seconds");

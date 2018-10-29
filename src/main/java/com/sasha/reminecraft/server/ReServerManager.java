@@ -73,10 +73,10 @@ public class ReServerManager extends ServerAdapter {
                 });
         server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
         server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, (ServerLoginHandler) session -> session.send(new ServerJoinGamePacket(
-                ReClient.ReClientCache.entityId,
+                ReClient.ReClientCache.INSTANCE.entityId,
                 false,
-                ReClient.ReClientCache.gameMode,
-                ReClient.ReClientCache.dimension,
+                ReClient.ReClientCache.INSTANCE.gameMode,
+                ReClient.ReClientCache.INSTANCE.dimension,
                 Difficulty.NORMAL,
                 1,
                 WorldType.DEFAULT,

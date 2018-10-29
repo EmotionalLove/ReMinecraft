@@ -75,8 +75,8 @@ public class ReServer extends SessionAdapter {
             if (event.getRecievedPacket() instanceof ClientCraftingBookDataPacket) {
                 ClientCraftingBookDataPacket pck = (ClientCraftingBookDataPacket) event.getRecievedPacket();
                 if (pck.getType() == CraftingBookDataType.CRAFTING_BOOK_STATUS) {
-                    ReClient.ReClientCache.wasFilteringRecipes = pck.isFilterActive();
-                    ReClient.ReClientCache.wasRecipeBookOpened = pck.isCraftingBookOpen();
+                    ReClient.ReClientCache.INSTANCE.wasFilteringRecipes = pck.isFilterActive();
+                    ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened = pck.isCraftingBookOpen();
                 }
             }
             if (event.getRecievedPacket() instanceof ClientChatPacket) {
@@ -87,27 +87,27 @@ public class ReServer extends SessionAdapter {
             }
             if (event.getRecievedPacket() instanceof ClientPlayerPositionPacket) {
                 ClientPlayerPositionPacket pck = (ClientPlayerPositionPacket) event.getRecievedPacket();
-                ReClient.ReClientCache.posX = pck.getX();
-                ReClient.ReClientCache.player.posX = pck.getX();
-                ReClient.ReClientCache.posY = pck.getY();
-                ReClient.ReClientCache.player.posY = pck.getY();
-                ReClient.ReClientCache.posZ = pck.getZ();
-                ReClient.ReClientCache.player.posZ = pck.getZ();
-                ReClient.ReClientCache.onGround = pck.isOnGround();
+                ReClient.ReClientCache.INSTANCE.posX = pck.getX();
+                ReClient.ReClientCache.INSTANCE.player.posX = pck.getX();
+                ReClient.ReClientCache.INSTANCE.posY = pck.getY();
+                ReClient.ReClientCache.INSTANCE.player.posY = pck.getY();
+                ReClient.ReClientCache.INSTANCE.posZ = pck.getZ();
+                ReClient.ReClientCache.INSTANCE.player.posZ = pck.getZ();
+                ReClient.ReClientCache.INSTANCE.onGround = pck.isOnGround();
             }
             if (event.getRecievedPacket() instanceof ClientPlayerPositionRotationPacket) {
                 ClientPlayerPositionRotationPacket pck = (ClientPlayerPositionRotationPacket) event.getRecievedPacket();
-                ReClient.ReClientCache.posX = pck.getX();
-                ReClient.ReClientCache.player.posX = pck.getX();
-                ReClient.ReClientCache.posY = pck.getY();
-                ReClient.ReClientCache.player.posY = pck.getY();
-                ReClient.ReClientCache.posZ = pck.getZ();
-                ReClient.ReClientCache.player.posZ = pck.getZ();
-                ReClient.ReClientCache.yaw = (float) pck.getYaw();
-                ReClient.ReClientCache.player.yaw = (float) pck.getYaw();
-                ReClient.ReClientCache.pitch = (float) pck.getPitch();
-                ReClient.ReClientCache.player.pitch = (float) pck.getPitch();
-                ReClient.ReClientCache.onGround = pck.isOnGround();
+                ReClient.ReClientCache.INSTANCE.posX = pck.getX();
+                ReClient.ReClientCache.INSTANCE.player.posX = pck.getX();
+                ReClient.ReClientCache.INSTANCE.posY = pck.getY();
+                ReClient.ReClientCache.INSTANCE.player.posY = pck.getY();
+                ReClient.ReClientCache.INSTANCE.posZ = pck.getZ();
+                ReClient.ReClientCache.INSTANCE.player.posZ = pck.getZ();
+                ReClient.ReClientCache.INSTANCE.yaw = (float) pck.getYaw();
+                ReClient.ReClientCache.INSTANCE.player.yaw = (float) pck.getYaw();
+                ReClient.ReClientCache.INSTANCE.pitch = (float) pck.getPitch();
+                ReClient.ReClientCache.INSTANCE.player.pitch = (float) pck.getPitch();
+                ReClient.ReClientCache.INSTANCE.onGround = pck.isOnGround();
             }
             ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket());
         }
@@ -131,7 +131,7 @@ public class ReServer extends SessionAdapter {
             runWhitelist(pck.getProfile().getName());
         }
         if (event.getSendingPacket() instanceof ServerJoinGamePacket) {
-            ReClient.ReClientCache.chunkCache.forEach((hash, chunk) -> {
+            ReClient.ReClientCache.INSTANCE.chunkCache.forEach((hash, chunk) -> {
                 this.child.getSession().send(new ServerChunkDataPacket(chunk));
                 try {
                     Thread.sleep(5L);
@@ -139,12 +139,12 @@ public class ReServer extends SessionAdapter {
                     e.printStackTrace();
                 }
             });
-            ReMinecraft.INSTANCE.logger.log("Sent " + ReClient.ReClientCache.chunkCache.size() + " chunks");
+            ReMinecraft.INSTANCE.logger.log("Sent " + ReClient.ReClientCache.INSTANCE.chunkCache.size() + " chunks");
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
-            this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReClient.ReClientCache.heldItem));
-            this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReClient.ReClientCache.posX, ReClient.ReClientCache.posY, ReClient.ReClientCache.posZ, ReClient.ReClientCache.yaw, ReClient.ReClientCache.pitch, new Random().nextInt(1000) + 10));
-            this.child.getSession().send(new ServerWindowItemsPacket(0, ReClient.ReClientCache.playerInventory));
-            ReClient.ReClientCache.playerListEntries.stream()
+            this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReClient.ReClientCache.INSTANCE.heldItem));
+            this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReClient.ReClientCache.INSTANCE.posX, ReClient.ReClientCache.INSTANCE.posY, ReClient.ReClientCache.INSTANCE.posZ, ReClient.ReClientCache.INSTANCE.yaw, ReClient.ReClientCache.INSTANCE.pitch, new Random().nextInt(1000) + 10));
+            this.child.getSession().send(new ServerWindowItemsPacket(0, ReClient.ReClientCache.INSTANCE.playerInventory));
+            ReClient.ReClientCache.INSTANCE.playerListEntries.stream()
                     .filter(entry -> entry.getProfile() != null)
                     .forEach(entry -> {
                                 try {
@@ -162,10 +162,10 @@ public class ReServer extends SessionAdapter {
                                 }
                             }
                     );
-            //this.child.getSession().send(ReClient.ReClientCache.playerInventory);
-            this.child.getSession().send(new ServerPlayerListDataPacket(ReClient.ReClientCache.tabHeader, ReClient.ReClientCache.tabFooter));
-            this.child.getSession().send(new ServerPlayerHealthPacket(ReClient.ReClientCache.health, ReClient.ReClientCache.food, ReClient.ReClientCache.saturation));
-            for (Entity entity : ReClient.ReClientCache.entityCache.values()) {
+            //this.child.getSession().send(ReClient.ReClientCache.INSTANCE.playerInventory);
+            this.child.getSession().send(new ServerPlayerListDataPacket(ReClient.ReClientCache.INSTANCE.tabHeader, ReClient.ReClientCache.INSTANCE.tabFooter));
+            this.child.getSession().send(new ServerPlayerHealthPacket(ReClient.ReClientCache.INSTANCE.health, ReClient.ReClientCache.INSTANCE.food, ReClient.ReClientCache.INSTANCE.saturation));
+            for (Entity entity : ReClient.ReClientCache.INSTANCE.entityCache.values()) {
                 if (entity == null) continue;
                 if (entity.type == EntityType.MOB && entity instanceof EntityMob) {
                     EntityMob mob = (EntityMob) entity;
@@ -271,7 +271,7 @@ public class ReServer extends SessionAdapter {
                 }
                 ReMinecraft.INSTANCE.logger.logDebug("???");
             }
-            for (Entity entity : ReClient.ReClientCache.entityCache.values()) {
+            for (Entity entity : ReClient.ReClientCache.INSTANCE.entityCache.values()) {
                 if (entity instanceof EntityEquipment && ((EntityEquipment) entity).passengerIds.length > 0) {
                     this.child.getSession().send(new ServerEntitySetPassengersPacket(entity.entityId,
                             ((EntityEquipment) entity).passengerIds));
@@ -284,7 +284,7 @@ public class ReServer extends SessionAdapter {
                     }
                 }
             }
-            this.child.getSession().send(new ServerUnlockRecipesPacket(ReClient.ReClientCache.wasRecipeBookOpened, ReClient.ReClientCache.wasFilteringRecipes, ReClient.ReClientCache.recipeCache, UnlockRecipesAction.ADD));
+            this.child.getSession().send(new ServerUnlockRecipesPacket(ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened, ReClient.ReClientCache.INSTANCE.wasFilteringRecipes, ReClient.ReClientCache.INSTANCE.recipeCache, UnlockRecipesAction.ADD));
             this.child.setPlaying(true);
         }
     }

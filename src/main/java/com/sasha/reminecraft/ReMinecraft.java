@@ -98,6 +98,7 @@ public class ReMinecraft {
      */
     public void start(String[] args) throws InstantiationException, IllegalAccessException, IOException {
         INSTANCE = this;
+        new ReClient.ReClientCache();
         logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft 1.12.2");
         RePluginLoader loader = new RePluginLoader();
         loader.preparePlugins(loader.findPlugins());
@@ -111,7 +112,6 @@ public class ReMinecraft {
         }
         AuthenticationService service = authenticate(proxy);// log into mc
         if (service != null) {
-            new ReClient.ReClientCache();
             minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
                     MAIN_CONFIG.var_remoteServerPort,
                     protocol,

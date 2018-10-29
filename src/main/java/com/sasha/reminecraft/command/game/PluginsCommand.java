@@ -27,6 +27,7 @@ public class PluginsCommand extends SimpleCommand {
         RePluginLoader.getPluginList().forEach(pl -> {
             if (c.get() == 0) {
                 builder.append(pl.pluginName);
+                c.getAndIncrement();
                 return;
             }
             builder.append(", ").append(pl.pluginName);

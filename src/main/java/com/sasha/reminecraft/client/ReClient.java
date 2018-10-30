@@ -56,6 +56,8 @@ public class ReClient implements SessionListener {
         try {
             if (event.getRecievedPacket() instanceof ServerUnlockRecipesPacket) {
                 ServerUnlockRecipesPacket pck = (ServerUnlockRecipesPacket) event.getRecievedPacket();
+                ReClientCache.INSTANCE.wasRecipeBookOpened = pck.getOpenCraftingBook();
+                ReClientCache.INSTANCE.wasFilteringRecipes = pck.getActivateFiltering();
                 switch (pck.getAction()) {
                     case ADD:
                         for (Integer recipe : pck.getRecipes()) {

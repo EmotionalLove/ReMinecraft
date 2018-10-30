@@ -28,7 +28,7 @@ def urlFile = { url, name ->
 }
 
 group 'com.sasha.reminecraft'
-version '1.0.1'
+version '1.0.3'
 
 sourceCompatibility = 1.8
 
@@ -44,19 +44,15 @@ dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
 }
 
-build {
-    shadowJar
-}
+build.dependsOn(shadowJar)
 
 shadowJar {
-    baseName = 'full'
+    baseName = 'reminecraft-1.0.3'
     classifier = null
     version = null
     dependencies {
         File cmd = new File("$buildDir/download/SimpleCommandSystem.jar")
         File ev = new File("$buildDir/download/SimpleEventSystem.jar")
-        from project.file(cmd)
-        from project.file(ev)
-
+        include(dependency(files(cmd, ev)))
     }
 }

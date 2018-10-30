@@ -1,6 +1,18 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.2'
+    }
+}
+
+
 plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
     id 'java'
 }
+
 
 def urlFile = { url, name ->
     File file = new File("$buildDir/download/${name}.jar")
@@ -30,4 +42,21 @@ dependencies {
     implementation files(urlFile("https://github.com/EmotionalLove/SimpleEventSystem/releases/download/1.2.1/SimpleEventSystem.jar", "SimpleEventSystem"))
     implementation files(urlFile("https://github.com/EmotionalLove/SimpleCommandSystem/releases/download/1.0.2/SimpleCommandSystem.jar", "SimpleCommandSystem"))
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.23'
+}
+
+build {
+    shadowJar
+}
+
+shadowJar {
+    baseName = 'full'
+    classifier = null
+    version = null
+    dependencies {
+        File cmd = new File("$buildDir/download/SimpleCommandSystem.jar")
+        File ev = new File("$buildDir/download/SimpleEventSystem.jar")
+        from project.file(cmd)
+        from project.file(ev)
+
+    }
 }

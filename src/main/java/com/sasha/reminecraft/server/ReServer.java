@@ -73,7 +73,8 @@ public class ReServer extends SessionAdapter {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         try {
             if (!reactionRegistry.containsKey(ev.getPacket().getClass())) { // so we aren't blocking packets that dont need special processing
-                ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());
+                if (((MinecraftProtocol)this.child.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME) return;
+                ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket());
                 return;
             }
             this.reactionRegistry.forEach((pck, reactor) -> { // iterate over the registered reactions
@@ -82,7 +83,8 @@ public class ReServer extends SessionAdapter {
                     boolean flag = reactor.takeAction(ev.getPacket());
                     if (flag
                             && ReMinecraft.INSTANCE.minecraftClient != null
-                            && ReMinecraft.INSTANCE.minecraftClient.getSession().isConnected()) // perform the action
+                            && ReMinecraft.INSTANCE.minecraftClient.getSession().isConnected()
+                            && ((MinecraftProtocol)this.child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) // perform the action
                         ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket()); // send the packet to server if true
                 } //ez
             });

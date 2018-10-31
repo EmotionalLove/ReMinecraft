@@ -8,7 +8,6 @@ import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.UnlockRecipesAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.mc.protocol.data.game.window.CraftingBookDataType;
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
@@ -29,11 +28,15 @@ import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
+import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.ChildServerPacketRecieveEvent;
 import com.sasha.reminecraft.api.event.ChildServerPacketSendEvent;
-import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.ChildReClient;
+import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.AbstractChildPacketReactor;
+import com.sasha.reminecraft.reaction.IPacketReactor;
+import com.sasha.reminecraft.reaction.server.*;
 import com.sasha.reminecraft.util.entity.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,16 +44,24 @@ import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 public class ReServer extends SessionAdapter {
 
+    private LinkedHashMap<Class<? extends Packet>, IPacketReactor<?>> reactionRegistry = new LinkedHashMap<>();
     private ChildReClient child;
 
     public ReServer(ChildReClient child) {
         this.child = child;
+        this.reactionRegistry.put(ClientChatPacket.class, new ClientChatReaction());
+        this.reactionRegistry.put(ClientCraftingBookDataPacket.class, new ClientCraftingBookDataReaction());
+        this.reactionRegistry.put(ClientKeepAlivePacket.class, new ClientKeepAliveReaction());
+        this.reactionRegistry.put(ClientPlayerPositionPacket.class, new ClientPlayerPositionReaction());
+        this.reactionRegistry.put(ClientPlayerPositionRotationPacket.class, new ClientPlayerPositionRotationReaction());
+        this.reactionRegistry.put(LoginStartPacket.class, new LoginStartReaction());
     }
 
     /**
@@ -60,54 +71,24 @@ public class ReServer extends SessionAdapter {
     public void packetReceived(PacketReceivedEvent ev) {
         ChildServerPacketRecieveEvent event = new ChildServerPacketRecieveEvent(this.child, ev.getPacket());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
-        MinecraftProtocol protocol = (MinecraftProtocol) child.getSession().getPacketProtocol();
-        if (event.getRecievedPacket() instanceof LoginStartPacket && (protocol.getSubProtocol() == SubProtocol.LOGIN || protocol.getSubProtocol() == SubProtocol.HANDSHAKE)) {
-            LoginStartPacket pck = (LoginStartPacket) event.getRecievedPacket();
-            ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", pck.getUsername()));
-            runWhitelist(pck.getUsername());
-        }
-        if (((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) {
-            if (event.getRecievedPacket() instanceof ClientKeepAlivePacket) {
+        try {
+            if (!reactionRegistry.containsKey(ev.getPacket().getClass())) { // so we aren't blocking packets that dont need special processing
+                ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());
                 return;
             }
-            if (event.getRecievedPacket() instanceof ClientCraftingBookDataPacket) {
-                ClientCraftingBookDataPacket pck = (ClientCraftingBookDataPacket) event.getRecievedPacket();
-                if (pck.getType() == CraftingBookDataType.CRAFTING_BOOK_STATUS) {
-                    ReClient.ReClientCache.INSTANCE.wasFilteringRecipes = pck.isFilterActive();
-                    ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened = pck.isCraftingBookOpen();
-                }
-            }
-            if (event.getRecievedPacket() instanceof ClientChatPacket) {
-                ClientChatPacket pck = (ClientChatPacket) event.getRecievedPacket();
-                if (ReMinecraft.INSTANCE.processInGameCommand(pck.getMessage())) {
-                    return;
-                }
-            }
-            if (event.getRecievedPacket() instanceof ClientPlayerPositionPacket) {
-                ClientPlayerPositionPacket pck = (ClientPlayerPositionPacket) event.getRecievedPacket();
-                ReClient.ReClientCache.INSTANCE.posX = pck.getX();
-                ReClient.ReClientCache.INSTANCE.player.posX = pck.getX();
-                ReClient.ReClientCache.INSTANCE.posY = pck.getY();
-                ReClient.ReClientCache.INSTANCE.player.posY = pck.getY();
-                ReClient.ReClientCache.INSTANCE.posZ = pck.getZ();
-                ReClient.ReClientCache.INSTANCE.player.posZ = pck.getZ();
-                ReClient.ReClientCache.INSTANCE.onGround = pck.isOnGround();
-            }
-            if (event.getRecievedPacket() instanceof ClientPlayerPositionRotationPacket) {
-                ClientPlayerPositionRotationPacket pck = (ClientPlayerPositionRotationPacket) event.getRecievedPacket();
-                ReClient.ReClientCache.INSTANCE.posX = pck.getX();
-                ReClient.ReClientCache.INSTANCE.player.posX = pck.getX();
-                ReClient.ReClientCache.INSTANCE.posY = pck.getY();
-                ReClient.ReClientCache.INSTANCE.player.posY = pck.getY();
-                ReClient.ReClientCache.INSTANCE.posZ = pck.getZ();
-                ReClient.ReClientCache.INSTANCE.player.posZ = pck.getZ();
-                ReClient.ReClientCache.INSTANCE.yaw = (float) pck.getYaw();
-                ReClient.ReClientCache.INSTANCE.player.yaw = (float) pck.getYaw();
-                ReClient.ReClientCache.INSTANCE.pitch = (float) pck.getPitch();
-                ReClient.ReClientCache.INSTANCE.player.pitch = (float) pck.getPitch();
-                ReClient.ReClientCache.INSTANCE.onGround = pck.isOnGround();
-            }
-            ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket());
+            this.reactionRegistry.forEach((pck, reactor) -> { // iterate over the registered reactions
+                if (pck == ev.getPacket().getClass()) { // if the reaction is paired with pck's clas
+                    if (reactor instanceof AbstractChildPacketReactor) ((AbstractChildPacketReactor) reactor).setChild(this.child);
+                    boolean flag = reactor.takeAction(ev.getPacket());
+                    if (flag
+                            && ReMinecraft.INSTANCE.minecraftClient != null
+                            && ReMinecraft.INSTANCE.minecraftClient.getSession().isConnected()) // perform the action
+                        ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket()); // send the packet to server if true
+                } //ez
+            });
+        } catch (Exception e) {
+            System.err.println("A severe error occured during a recieved child client packet's procesing!");
+            e.printStackTrace();
         }
     }
 
@@ -126,7 +107,7 @@ public class ReServer extends SessionAdapter {
         if (event.getSendingPacket() instanceof LoginSuccessPacket) {
             LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
-            runWhitelist(pck.getProfile().getName());
+            runWhitelist(pck.getProfile().getName(), this.child);
         }
         if (event.getSendingPacket() instanceof ServerJoinGamePacket) {
             ReClient.ReClientCache.INSTANCE.chunkCache.forEach((hash, chunk) -> {
@@ -301,7 +282,7 @@ public class ReServer extends SessionAdapter {
         ReMinecraft.INSTANCE.logger.log("Child disconnected due to " + event.getReason());
     }
 
-    private void runWhitelist(String name) {
+    public static void runWhitelist(String name, ChildReClient child) {
         boolean flag = ReMinecraft.INSTANCE.MAIN_CONFIG.var_useWhitelist && !ReMinecraft.INSTANCE.MAIN_CONFIG.var_whitelistServer
                 .stream()
                 .map(String::toLowerCase)
@@ -309,16 +290,16 @@ public class ReServer extends SessionAdapter {
                 .contains(name.toLowerCase());
         if (flag) {
             ReMinecraft.INSTANCE.logger.logWarning(name + " isn't whitelisted.");
-            SubProtocol proto = ((MinecraftProtocol) this.child.getSession().getPacketProtocol()).getSubProtocol();
+            SubProtocol proto = ((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol();
             switch (proto){
                 case LOGIN:
-                    this.child.getSession().send(new LoginDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    child.getSession().send(new LoginDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;
                 case GAME:
-                    this.child.getSession().send(new ServerDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    child.getSession().send(new ServerDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;
             }
-            this.child.getSession().disconnect("Not whitelisted!");
+            child.getSession().disconnect("Not whitelisted!");
             return;
         }
     }

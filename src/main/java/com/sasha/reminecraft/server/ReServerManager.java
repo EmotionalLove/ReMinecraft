@@ -21,7 +21,7 @@ import com.github.steveice10.packetlib.event.server.SessionRemovedEvent;
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.ReClient;
-import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.client.ChildReClient;
 
 import java.net.Proxy;
 

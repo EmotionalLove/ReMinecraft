@@ -13,7 +13,7 @@ import com.sasha.reminecraft.api.RePlugin;
 import com.sasha.reminecraft.api.RePluginLoader;
 import com.sasha.reminecraft.api.event.MojangAuthenticateEvent;
 import com.sasha.reminecraft.client.ReClient;
-import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.client.ChildReClient;
 import com.sasha.reminecraft.command.game.AboutCommand;
 import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;

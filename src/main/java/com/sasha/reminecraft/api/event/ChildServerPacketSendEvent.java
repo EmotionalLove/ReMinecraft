@@ -2,7 +2,7 @@ package com.sasha.reminecraft.api.event;
 
 import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.eventsys.SimpleCancellableEvent;
-import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.client.ChildReClient;
 
 /**
  * Invoked when we send a client-bound packet to a child client

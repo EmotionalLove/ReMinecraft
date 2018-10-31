@@ -15,7 +15,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePac
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.window.ClientCraftingBookDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.client.window.ClientPrepareCraftingGridPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.*;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerChangeHeldItemPacket;
@@ -24,7 +23,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerPreparedCraftingGridPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
@@ -35,7 +33,7 @@ import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.ChildServerPacketRecieveEvent;
 import com.sasha.reminecraft.api.event.ChildServerPacketSendEvent;
 import com.sasha.reminecraft.client.ReClient;
-import com.sasha.reminecraft.client.children.ChildReClient;
+import com.sasha.reminecraft.client.ChildReClient;
 import com.sasha.reminecraft.util.entity.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

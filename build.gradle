@@ -47,7 +47,7 @@ dependencies {
 build.dependsOn(shadowJar)
 
 shadowJar {
-    baseName = 'reminecraft-1.0.3'
+    baseName = "$gradle.jarName-production-1.0.3"
     classifier = null
     version = null
     dependencies {

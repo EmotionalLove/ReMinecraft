@@ -8,14 +8,14 @@ import com.sasha.reminecraft.util.entity.PotionEffect;
 
 public class ServerEntityEffectReaction implements IPacketReactor<ServerEntityEffectPacket> {
     @Override
-    public boolean takeAction(ServerEntityEffectPacket pck) {
+    public boolean takeAction(ServerEntityEffectPacket packet) {
         PotionEffect effect = new PotionEffect();
-        effect.effect = pck.getEffect();
-        effect.amplifier = pck.getAmplifier();
-        effect.duration = pck.getDuration();
-        effect.ambient = pck.isAmbient();
-        effect.showParticles = pck.getShowParticles();
-        ((EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId())).potionEffects.add(effect);
+        effect.effect = packet.getEffect();
+        effect.amplifier = packet.getAmplifier();
+        effect.duration = packet.getDuration();
+        effect.ambient = packet.isAmbient();
+        effect.showParticles = packet.getShowParticles();
+        ((EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId())).potionEffects.add(effect);
         return true;
     }
 }

@@ -6,8 +6,8 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerPlayerChangeHeldItemReaction implements IPacketReactor<ServerPlayerChangeHeldItemPacket> {
     @Override
-    public boolean takeAction(ServerPlayerChangeHeldItemPacket pck) {
-        ReClient.ReClientCache.INSTANCE.heldItem = pck.getSlot();
+    public boolean takeAction(ServerPlayerChangeHeldItemPacket packet) {
+        ReClient.ReClientCache.INSTANCE.heldItem = packet.getSlot();
         return true;
     }
 }

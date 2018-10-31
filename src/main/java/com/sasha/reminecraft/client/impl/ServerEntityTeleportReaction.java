@@ -10,22 +10,22 @@ import com.sasha.reminecraft.util.entity.EntityRotation;
 
 public class ServerEntityTeleportReaction implements IPacketReactor<ServerEntityTeleportPacket> {
     @Override
-    public boolean takeAction(ServerEntityTeleportPacket pck) {
-        Entity entity = ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
+    public boolean takeAction(ServerEntityTeleportPacket packet) {
+        Entity entity = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (entity == null) {
             ReMinecraft.INSTANCE.logger.logDebug
-                    ("Null entity with entity id " + pck.getEntityId());
+                    ("Null entity with entity id " + packet.getEntityId());
             ReMinecraft.INSTANCE.childClients.stream()
                     .filter(ChildReClient::isPlaying)
-                    .forEach(client -> client.getSession().send(pck));
+                    .forEach(client -> client.getSession().send(packet));
             return false;
         }
-        entity.posX = pck.getX();
-        entity.posY = pck.getY();
-        entity.posZ = pck.getZ();
+        entity.posX = packet.getX();
+        entity.posY = packet.getY();
+        entity.posZ = packet.getZ();
         if (entity instanceof EntityRotation) {
-            ((EntityRotation) entity).yaw = pck.getYaw();
-            ((EntityRotation) entity).pitch = pck.getPitch();
+            ((EntityRotation) entity).yaw = packet.getYaw();
+            ((EntityRotation) entity).pitch = packet.getPitch();
         }
         return true;
     }

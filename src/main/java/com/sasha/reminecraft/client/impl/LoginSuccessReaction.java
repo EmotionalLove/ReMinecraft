@@ -6,8 +6,8 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class LoginSuccessReaction implements IPacketReactor<LoginSuccessPacket> {
     @Override
-    public boolean takeAction(LoginSuccessPacket pck) {
-        ReClient.ReClientCache.INSTANCE.uuid = pck.getProfile().getId();
+    public boolean takeAction(LoginSuccessPacket packet) {
+        ReClient.ReClientCache.INSTANCE.uuid = packet.getProfile().getId();
         return true;
     }
 }

@@ -6,9 +6,9 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerPlayerListDataReaction implements IPacketReactor<ServerPlayerListDataPacket> {
     @Override
-    public boolean takeAction(ServerPlayerListDataPacket pck) {
-        ReClient.ReClientCache.INSTANCE.tabHeader = pck.getHeader();
-        ReClient.ReClientCache.INSTANCE.tabFooter = pck.getFooter();
+    public boolean takeAction(ServerPlayerListDataPacket packet) {
+        ReClient.ReClientCache.INSTANCE.tabHeader = packet.getHeader();
+        ReClient.ReClientCache.INSTANCE.tabFooter = packet.getFooter();
         return true;
     }
 }

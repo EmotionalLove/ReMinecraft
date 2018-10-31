@@ -8,17 +8,17 @@ import com.sasha.reminecraft.util.entity.EntityRotation;
 
 public class ServerVehicleMoveReaction implements IPacketReactor<ServerVehicleMovePacket> {
     @Override
-    public boolean takeAction(ServerVehicleMovePacket pck) {
+    public boolean takeAction(ServerVehicleMovePacket packet) {
         Entity entity = Entity.getEntityBeingRiddenBy(ReClient.ReClientCache.INSTANCE.entityId);
         if (entity == null) {
             return false;
         }
-        entity.posX = pck.getX();
-        entity.posY = pck.getY();
-        entity.posZ = pck.getZ();
+        entity.posX = packet.getX();
+        entity.posY = packet.getY();
+        entity.posZ = packet.getZ();
         if (entity instanceof EntityRotation) {
-            ((EntityRotation) entity).yaw = pck.getYaw();
-            ((EntityRotation) entity).pitch = pck.getPitch();
+            ((EntityRotation) entity).yaw = packet.getYaw();
+            ((EntityRotation) entity).pitch = packet.getPitch();
         }
         return true;
     }

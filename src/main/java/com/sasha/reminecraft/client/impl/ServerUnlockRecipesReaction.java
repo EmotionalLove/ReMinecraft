@@ -6,38 +6,38 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerUnlockRecipesReaction implements IPacketReactor<ServerUnlockRecipesPacket> {
     @Override
-    public boolean takeAction(ServerUnlockRecipesPacket pck) {
-        ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened = pck.getOpenCraftingBook();
-        ReClient.ReClientCache.INSTANCE.wasFilteringRecipes = pck.getActivateFiltering();
-        switch (pck.getAction()) {
+    public boolean takeAction(ServerUnlockRecipesPacket packet) {
+        ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened = packet.getOpenCraftingBook();
+        ReClient.ReClientCache.INSTANCE.wasFilteringRecipes = packet.getActivateFiltering();
+        switch (packet.getAction()) {
             case ADD:
-                for (Integer recipe : pck.getRecipes()) {
+                for (Integer recipe : packet.getRecipes()) {
                     if (ReClient.ReClientCache.INSTANCE.recipeCache.contains(recipe)) continue;
                     ReClient.ReClientCache.INSTANCE.recipeCache.add(recipe);
                 }
                 break;
             case REMOVE:
-                for (Integer recipe : pck.getRecipes()) {
+                for (Integer recipe : packet.getRecipes()) {
                     if (!ReClient.ReClientCache.INSTANCE.recipeCache.contains(recipe)) continue;
                     ReClient.ReClientCache.INSTANCE.recipeCache.remove(recipe);
                 }
                 break;
             case INIT:
-                for (Integer alreadyKnownRecipe : pck.getAlreadyKnownRecipes()) {
+                for (Integer alreadyKnownRecipe : packet.getAlreadyKnownRecipes()) {
                     if (ReClient.ReClientCache.INSTANCE.recipeCache.contains(alreadyKnownRecipe)) continue;
                     ReClient.ReClientCache.INSTANCE.recipeCache.add(alreadyKnownRecipe);
                 }
-                for (Integer recipe : pck.getRecipes()) {
+                for (Integer recipe : packet.getRecipes()) {
                     if (!ReClient.ReClientCache.INSTANCE.recipeCache.contains(recipe)) continue;
                     ReClient.ReClientCache.INSTANCE.recipeCache.remove(recipe);
                 }
                 break;
             default:
-                for (Integer alreadyKnownRecipe : pck.getAlreadyKnownRecipes()) {
+                for (Integer alreadyKnownRecipe : packet.getAlreadyKnownRecipes()) {
                     if (ReClient.ReClientCache.INSTANCE.recipeCache.contains(alreadyKnownRecipe)) continue;
                     ReClient.ReClientCache.INSTANCE.recipeCache.add(alreadyKnownRecipe);
                 }
-                for (Integer recipe : pck.getRecipes()) {
+                for (Integer recipe : packet.getRecipes()) {
                     if (!ReClient.ReClientCache.INSTANCE.recipeCache.contains(recipe)) continue;
                     ReClient.ReClientCache.INSTANCE.recipeCache.remove(recipe);
                 }

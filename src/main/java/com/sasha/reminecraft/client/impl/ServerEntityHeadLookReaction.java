@@ -8,15 +8,15 @@ import com.sasha.reminecraft.util.entity.EntityRotation;
 
 public class ServerEntityHeadLookReaction implements IPacketReactor<ServerEntityHeadLookPacket> {
     @Override
-    public boolean takeAction(ServerEntityHeadLookPacket pck) {
-        EntityRotation e = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
+    public boolean takeAction(ServerEntityHeadLookPacket packet) {
+        EntityRotation e = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (e == null) {
             ReMinecraft.INSTANCE.logger.logDebug
-                    ("Null entity with entity id " + pck.getEntityId());
-            ReMinecraft.INSTANCE.sendToChildren(pck);
+                    ("Null entity with entity id " + packet.getEntityId());
+            ReMinecraft.INSTANCE.sendToChildren(packet);
             return false;
         }
-        e.headYaw = pck.getHeadYaw();
+        e.headYaw = packet.getHeadYaw();
         return true;
     }
 }

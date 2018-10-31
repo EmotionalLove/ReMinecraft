@@ -7,8 +7,8 @@ import com.sasha.reminecraft.util.ChunkUtil;
 
 public class ServerUnloadChunkReaction implements IPacketReactor<ServerUnloadChunkPacket> {
     @Override
-    public boolean takeAction(ServerUnloadChunkPacket pck) {
-        long hash = ChunkUtil.getChunkHashFromXZ(pck.getX(), pck.getZ());
+    public boolean takeAction(ServerUnloadChunkPacket packet) {
+        long hash = ChunkUtil.getChunkHashFromXZ(packet.getX(), packet.getZ());
         ReClient.ReClientCache.INSTANCE.chunkCache.remove(hash);
         return true;
     }

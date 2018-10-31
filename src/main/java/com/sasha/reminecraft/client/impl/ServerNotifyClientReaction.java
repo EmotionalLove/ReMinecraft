@@ -8,9 +8,9 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerNotifyClientReaction implements IPacketReactor<ServerNotifyClientPacket> {
     @Override
-    public boolean takeAction(ServerNotifyClientPacket pck) {
-        if (pck.getNotification() == ClientNotification.CHANGE_GAMEMODE) {
-            ReClient.ReClientCache.INSTANCE.gameMode = (GameMode) pck.getValue();
+    public boolean takeAction(ServerNotifyClientPacket packet) {
+        if (packet.getNotification() == ClientNotification.CHANGE_GAMEMODE) {
+            ReClient.ReClientCache.INSTANCE.gameMode = (GameMode) packet.getValue();
         }
         return true;
     }

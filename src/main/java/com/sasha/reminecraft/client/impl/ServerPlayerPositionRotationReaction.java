@@ -9,17 +9,17 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerPlayerPositionRotationReaction implements IPacketReactor<ServerPlayerPositionRotationPacket> {
     @Override
-    public boolean takeAction(ServerPlayerPositionRotationPacket pck) {
-        ServerResetPlayerPositionEvent resetEvent = new ServerResetPlayerPositionEvent(pck.getX(), pck.getY(), pck.getZ(), pck.getYaw(), pck.getPitch());
+    public boolean takeAction(ServerPlayerPositionRotationPacket packet) {
+        ServerResetPlayerPositionEvent resetEvent = new ServerResetPlayerPositionEvent(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(resetEvent);
-        ReClient.ReClientCache.INSTANCE.posX = pck.getX();
-        ReClient.ReClientCache.INSTANCE.posY = pck.getY();
-        ReClient.ReClientCache.INSTANCE.posZ = pck.getZ();
-        ReClient.ReClientCache.INSTANCE.pitch = pck.getPitch();
-        ReClient.ReClientCache.INSTANCE.yaw = pck.getYaw();
+        ReClient.ReClientCache.INSTANCE.posX = packet.getX();
+        ReClient.ReClientCache.INSTANCE.posY = packet.getY();
+        ReClient.ReClientCache.INSTANCE.posZ = packet.getZ();
+        ReClient.ReClientCache.INSTANCE.pitch = packet.getPitch();
+        ReClient.ReClientCache.INSTANCE.yaw = packet.getYaw();
         if (!ReMinecraft.INSTANCE.areChildrenConnected()) {
             // the notchian client will do this for us, if one is connected
-            ReMinecraft.INSTANCE.minecraftClient.getSession().send(new ClientTeleportConfirmPacket(pck.getTeleportId()));
+            ReMinecraft.INSTANCE.minecraftClient.getSession().send(new ClientTeleportConfirmPacket(packet.getTeleportId()));
         }
         return true;
     }

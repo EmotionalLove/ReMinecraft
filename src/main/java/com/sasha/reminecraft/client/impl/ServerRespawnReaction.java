@@ -7,9 +7,9 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerRespawnReaction implements IPacketReactor<ServerRespawnPacket> {
     @Override
-    public boolean takeAction(ServerRespawnPacket pck) {
-        ReClient.ReClientCache.INSTANCE.dimension = pck.getDimension();
-        ReClient.ReClientCache.INSTANCE.gameMode = pck.getGameMode();
+    public boolean takeAction(ServerRespawnPacket packet) {
+        ReClient.ReClientCache.INSTANCE.dimension = packet.getDimension();
+        ReClient.ReClientCache.INSTANCE.gameMode = packet.getGameMode();
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.entrySet().removeIf(integerEntityEntry -> integerEntityEntry.getKey() != ReClient.ReClientCache.INSTANCE.entityId);
         ReClient.ReClientCache.INSTANCE.cachedBossBars.clear();

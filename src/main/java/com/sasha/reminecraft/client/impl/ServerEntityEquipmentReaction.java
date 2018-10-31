@@ -10,14 +10,14 @@ import com.sasha.reminecraft.util.entity.EntityObject;
 
 public class ServerEntityEquipmentReaction implements IPacketReactor<ServerEntityEquipmentPacket> {
     @Override
-    public boolean takeAction(ServerEntityEquipmentPacket pck) {
-        Entity entity = ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
+    public boolean takeAction(ServerEntityEquipmentPacket packet) {
+        Entity entity = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (entity instanceof EntityObject) {
             ReMinecraft.INSTANCE.logger.logError("Server tried adding equipment to an EntityObject! Ignoring.");
             return false;
         }
         EntityEquipment equipment = (EntityEquipment) entity;
-        equipment.equipment.put(pck.getSlot(), pck.getItem());
+        equipment.equipment.put(packet.getSlot(), packet.getItem());
         return true;
     }
 }

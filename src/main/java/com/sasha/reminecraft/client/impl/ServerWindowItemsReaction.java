@@ -7,9 +7,9 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerWindowItemsReaction implements IPacketReactor<ServerWindowItemsPacket> {
     @Override
-    public boolean takeAction(ServerWindowItemsPacket pck) {
-        if (pck.getWindowId() == 0) {
-            ReClient.ReClientCache.INSTANCE.playerInventory = pck.getItems();
+    public boolean takeAction(ServerWindowItemsPacket packet) {
+        if (packet.getWindowId() == 0) {
+            ReClient.ReClientCache.INSTANCE.playerInventory = packet.getItems();
         }
         return true;
     }

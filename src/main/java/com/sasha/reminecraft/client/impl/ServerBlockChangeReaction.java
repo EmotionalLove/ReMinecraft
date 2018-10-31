@@ -10,10 +10,10 @@ import com.sasha.reminecraft.util.ChunkUtil;
 
 public class ServerBlockChangeReaction implements IPacketReactor<ServerBlockChangePacket> {
     @Override
-    public boolean takeAction(ServerBlockChangePacket pck) {
-        int chunkX = pck.getRecord().getPosition().getX() >> 4;
-        int chunkZ = pck.getRecord().getPosition().getZ() >> 4;
-        int cubeY = ChunkUtil.clamp(pck.getRecord().getPosition().getY() >> 4, 0, 15);
+    public boolean takeAction(ServerBlockChangePacket packet) {
+        int chunkX = packet.getRecord().getPosition().getX() >> 4;
+        int chunkZ = packet.getRecord().getPosition().getZ() >> 4;
+        int cubeY = ChunkUtil.clamp(packet.getRecord().getPosition().getY() >> 4, 0, 15);
         Column column = ReClient.ReClientCache.INSTANCE.chunkCache
                 .getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
         if (column == null) {
@@ -22,9 +22,9 @@ public class ServerBlockChangeReaction implements IPacketReactor<ServerBlockChan
             return false;
         }
         Chunk subChunk = column.getChunks()[cubeY];
-        int cubeRelY = Math.abs(pck.getRecord().getPosition().getY() - 16 * cubeY);
+        int cubeRelY = Math.abs(packet.getRecord().getPosition().getY() - 16 * cubeY);
         try {
-            subChunk.getBlocks().set(Math.abs(Math.abs(pck.getRecord().getPosition().getX()) - (Math.abs(Math.abs(pck.getRecord().getPosition().getX() >> 4)) * 16)), ChunkUtil.clamp(cubeRelY, 0, 15), Math.abs(Math.abs(pck.getRecord().getPosition().getZ()) - (Math.abs(Math.abs(pck.getRecord().getPosition().getZ() >> 4)) * 16)), pck.getRecord().getBlock());
+            subChunk.getBlocks().set(Math.abs(Math.abs(packet.getRecord().getPosition().getX()) - (Math.abs(Math.abs(packet.getRecord().getPosition().getX() >> 4)) * 16)), ChunkUtil.clamp(cubeRelY, 0, 15), Math.abs(Math.abs(packet.getRecord().getPosition().getZ()) - (Math.abs(Math.abs(packet.getRecord().getPosition().getZ() >> 4)) * 16)), packet.getRecord().getBlock());
             column.getChunks()[cubeY] = subChunk;
             ReClient.ReClientCache.INSTANCE.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
         } catch (Exception e) {

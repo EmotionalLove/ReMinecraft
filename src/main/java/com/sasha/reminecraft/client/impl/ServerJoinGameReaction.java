@@ -9,10 +9,10 @@ import com.sasha.reminecraft.util.entity.EntityType;
 
 public class ServerJoinGameReaction implements IPacketReactor<ServerJoinGamePacket> {
     @Override
-    public boolean takeAction(ServerJoinGamePacket pck) {
-        ReClient.ReClientCache.INSTANCE.dimension = pck.getDimension();
-        ReClient.ReClientCache.INSTANCE.entityId = pck.getEntityId();
-        ReClient.ReClientCache.INSTANCE.gameMode = pck.getGameMode();
+    public boolean takeAction(ServerJoinGamePacket packet) {
+        ReClient.ReClientCache.INSTANCE.dimension = packet.getDimension();
+        ReClient.ReClientCache.INSTANCE.entityId = packet.getEntityId();
+        ReClient.ReClientCache.INSTANCE.gameMode = packet.getGameMode();
         EntityPlayer player = new EntityPlayer();
         player.type = EntityType.REAL_PLAYER;
         player.entityId = ReClient.ReClientCache.INSTANCE.entityId;

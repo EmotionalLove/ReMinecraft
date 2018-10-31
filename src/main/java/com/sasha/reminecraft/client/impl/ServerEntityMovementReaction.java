@@ -11,25 +11,25 @@ import java.lang.reflect.Field;
 
 public class ServerEntityMovementReaction implements IPacketReactor<ServerEntityMovementPacket> {
     @Override
-    public boolean takeAction(ServerEntityMovementPacket pck) {
+    public boolean takeAction(ServerEntityMovementPacket packet) {
         try {
-            Entity e = ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
+            Entity e = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
             if (e == null) {
                 ReMinecraft.INSTANCE.logger.logDebug
-                        ("Null entity with entity id " + pck.getEntityId());
-                ReMinecraft.INSTANCE.sendToChildren(pck);
+                        ("Null entity with entity id " + packet.getEntityId());
+                ReMinecraft.INSTANCE.sendToChildren(packet);
                 return false;
             }
-            e.posX += pck.getMovementX() / 4096d;
-            e.posY += pck.getMovementY() / 4096d;
-            e.posZ += pck.getMovementZ() / 4096d;
+            e.posX += packet.getMovementX() / 4096d;
+            e.posY += packet.getMovementY() / 4096d;
+            e.posZ += packet.getMovementZ() / 4096d;
             boolean flag;
             Field field = ServerEntityMovementPacket.class.getDeclaredField("rot");
             field.setAccessible(true); // leet hax
-            flag = (boolean) field.get(pck);
+            flag = (boolean) field.get(packet);
             if (flag && e instanceof EntityRotation) {
-                ((EntityRotation) e).yaw = pck.getYaw();
-                ((EntityRotation) e).pitch = pck.getPitch();
+                ((EntityRotation) e).yaw = packet.getYaw();
+                ((EntityRotation) e).pitch = packet.getPitch();
             }
         }catch (NoSuchFieldException | IllegalAccessException ignored) {
             //

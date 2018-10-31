@@ -7,8 +7,8 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerEntityDestroyReaction implements IPacketReactor<ServerEntityDestroyPacket> {
     @Override
-    public boolean takeAction(ServerEntityDestroyPacket pck) {
-        for (int entityId : pck.getEntityIds()) {
+    public boolean takeAction(ServerEntityDestroyPacket packet) {
+        for (int entityId : packet.getEntityIds()) {
             ReClient.ReClientCache.INSTANCE.entityCache.remove(entityId);
         }
         return true;

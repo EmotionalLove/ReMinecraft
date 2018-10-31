@@ -10,12 +10,12 @@ import com.sasha.reminecraft.util.ChunkUtil;
 
 public class ServerChunkDataReaction implements IPacketReactor<ServerChunkDataPacket> {
     @Override
-    public boolean takeAction(ServerChunkDataPacket pck) {
+    public boolean takeAction(ServerChunkDataPacket packet) {
         // VERY IMPORTANT: Chunks will NOT RENDER correctly and be invisible on notchian clients if we
         // do not actually push them correctly. This is apparent with big chunks and newly generated ones
         // that need to be dispersed over multiple packets. Trust me, it's really gay.
         // btw i love phi <33333333333333333 hes like a super nice bf
-        Column column = pck.getColumn();
+        Column column = packet.getColumn();
         long hash = ChunkUtil.getChunkHashFromXZ(column.getX(), column.getZ());
         if (!column.hasBiomeData()) {
             // if the chunk is thicc or newly generated
@@ -31,7 +31,7 @@ public class ServerChunkDataReaction implements IPacketReactor<ServerChunkDataPa
                 ReMinecraft.INSTANCE.sendToChildren(new ServerChunkDataPacket(chunkToAddTo));
             }
         } else {
-            ReClient.ReClientCache.INSTANCE.chunkCache.put(hash, pck.getColumn());
+            ReClient.ReClientCache.INSTANCE.chunkCache.put(hash, packet.getColumn());
         }
         return true;
     }

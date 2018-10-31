@@ -6,8 +6,8 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerEntityCollectItemReaction implements IPacketReactor<ServerEntityCollectItemPacket> {
     @Override
-    public boolean takeAction(ServerEntityCollectItemPacket pck) {
-        ReClient.ReClientCache.INSTANCE.entityCache.remove(pck.getCollectedEntityId());
+    public boolean takeAction(ServerEntityCollectItemPacket packet) {
+        ReClient.ReClientCache.INSTANCE.entityCache.remove(packet.getCollectedEntityId());
         return true;
     }
 }

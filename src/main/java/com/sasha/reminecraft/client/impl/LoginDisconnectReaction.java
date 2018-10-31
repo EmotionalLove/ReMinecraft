@@ -6,9 +6,9 @@ import com.sasha.reminecraft.client.IPacketReactor;
 
 public class LoginDisconnectReaction implements IPacketReactor<LoginDisconnectPacket> {
     @Override
-    public boolean takeAction(LoginDisconnectPacket pck) {
-        ReMinecraft.INSTANCE.logger.logError("Kicked whilst logging in: " + pck.getReason().getFullText());
-        ReMinecraft.INSTANCE.minecraftClient.getSession().disconnect(pck.getReason().getFullText(), true);
+    public boolean takeAction(LoginDisconnectPacket packet) {
+        ReMinecraft.INSTANCE.logger.logError("Kicked whilst logging in: " + packet.getReason().getFullText());
+        ReMinecraft.INSTANCE.minecraftClient.getSession().disconnect(packet.getReason().getFullText(), true);
         return true;
     }
 }

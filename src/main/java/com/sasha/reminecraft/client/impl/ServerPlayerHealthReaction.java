@@ -10,12 +10,12 @@ import com.sasha.reminecraft.client.ReClient;
 
 public class ServerPlayerHealthReaction implements IPacketReactor<ServerPlayerHealthPacket> {
     @Override
-    public boolean takeAction(ServerPlayerHealthPacket pck) {
-        PlayerDamagedEvent damagedEvent = new PlayerDamagedEvent(ReClient.ReClientCache.INSTANCE.health, pck.getHealth());
+    public boolean takeAction(ServerPlayerHealthPacket packet) {
+        PlayerDamagedEvent damagedEvent = new PlayerDamagedEvent(ReClient.ReClientCache.INSTANCE.health, packet.getHealth());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(damagedEvent);
-        ReClient.ReClientCache.INSTANCE.health = pck.getHealth();
-        ReClient.ReClientCache.INSTANCE.food = pck.getFood();
-        ReClient.ReClientCache.INSTANCE.saturation = pck.getSaturation();
+        ReClient.ReClientCache.INSTANCE.health = packet.getHealth();
+        ReClient.ReClientCache.INSTANCE.food = packet.getFood();
+        ReClient.ReClientCache.INSTANCE.saturation = packet.getSaturation();
         if (ReClient.ReClientCache.INSTANCE.health <= 0.0f) {
             ReMinecraft.INSTANCE.minecraftClient.getSession().send(new ClientRequestPacket(ClientRequest.RESPAWN));
         }

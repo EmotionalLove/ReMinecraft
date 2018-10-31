@@ -8,13 +8,13 @@ import com.sasha.reminecraft.util.entity.EntityRotation;
 
 public class ServerEntityPropertiesReaction implements IPacketReactor<ServerEntityPropertiesPacket> {
     @Override
-    public boolean takeAction(ServerEntityPropertiesPacket pck) {
-        EntityRotation rotation = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
+    public boolean takeAction(ServerEntityPropertiesPacket packet) {
+        EntityRotation rotation = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (rotation == null) {
-            ReMinecraft.INSTANCE.sendToChildren(pck);
+            ReMinecraft.INSTANCE.sendToChildren(packet);
             return false;
         }
-        rotation.properties.addAll(pck.getAttributes());
+        rotation.properties.addAll(packet.getAttributes());
         return true;
     }
 }

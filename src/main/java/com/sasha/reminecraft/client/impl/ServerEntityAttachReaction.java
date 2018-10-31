@@ -7,14 +7,14 @@ import com.sasha.reminecraft.util.entity.EntityRotation;
 
 public class ServerEntityAttachReaction implements IPacketReactor<ServerEntityAttachPacket> {
     @Override
-    public boolean takeAction(ServerEntityAttachPacket pck) {
-        EntityRotation entityRotation = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
-        if (pck.getAttachedToId() == -1) {
+    public boolean takeAction(ServerEntityAttachPacket packet) {
+        EntityRotation entityRotation = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
+        if (packet.getAttachedToId() == -1) {
             entityRotation.isLeashed = false;
-            entityRotation.leashedID = pck.getAttachedToId();
+            entityRotation.leashedID = packet.getAttachedToId();
         } else {
             entityRotation.isLeashed = true;
-            entityRotation.leashedID = pck.getAttachedToId();
+            entityRotation.leashedID = packet.getAttachedToId();
         }
         return true;
     }

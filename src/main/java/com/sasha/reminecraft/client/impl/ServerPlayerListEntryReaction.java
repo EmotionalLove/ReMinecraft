@@ -13,17 +13,17 @@ import java.util.*;
 
 public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlayerListEntryPacket> {
     @Override
-    public boolean takeAction(ServerPlayerListEntryPacket pck) {
-        switch (pck.getAction()) {
+    public boolean takeAction(ServerPlayerListEntryPacket packet) {
+        switch (packet.getAction()) {
             case ADD_PLAYER:
-                Arrays.stream(pck.getEntries())
+                Arrays.stream(packet.getEntries())
                         .filter(e -> !ReClient.ReClientCache.INSTANCE.playerListEntries.contains(e))
                         .forEach(entry -> ReClient.ReClientCache.INSTANCE.playerListEntries.add(entry));
                 break;
             case REMOVE_PLAYER:
                 List<String> toRemove = new ArrayList<>();
                 List<Integer> removalIndexes = new ArrayList<>();
-                Arrays.stream(pck.getEntries()).forEach(entry -> toRemove.add(entry.getProfile().getId().toString()));
+                Arrays.stream(packet.getEntries()).forEach(entry -> toRemove.add(entry.getProfile().getId().toString()));
                 ReClient.ReClientCache.INSTANCE.playerListEntries.forEach(entry -> {
                     if (toRemove.contains(entry.getProfile().getId().toString())) {
                         removalIndexes.add(ReClient.ReClientCache.INSTANCE.playerListEntries.indexOf(entry));
@@ -35,7 +35,7 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                 break;
             case UPDATE_DISPLAY_NAME:
                 LinkedHashMap<UUID, Message> changeMap = new LinkedHashMap<>();
-                for (PlayerListEntry entry : pck.getEntries()) {
+                for (PlayerListEntry entry : packet.getEntries()) {
                     changeMap.put(entry.getProfile().getId(), entry.getDisplayName());
                 }
                 changeMap.forEach((id, msg) -> {
@@ -54,7 +54,7 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                 break;
             case UPDATE_LATENCY:
                 LinkedHashMap<UUID, Integer> pingMap = new LinkedHashMap<>();
-                for (PlayerListEntry entry : pck.getEntries()) {
+                for (PlayerListEntry entry : packet.getEntries()) {
                     pingMap.put(entry.getProfile().getId(), entry.getPing());
                 }
                 pingMap.forEach((id, ping) -> {
@@ -73,7 +73,7 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                 break;
             case UPDATE_GAMEMODE:
                 LinkedHashMap<UUID, GameMode> gamemodeMap = new LinkedHashMap<>();
-                for (PlayerListEntry entry : pck.getEntries()) {
+                for (PlayerListEntry entry : packet.getEntries()) {
                     gamemodeMap.put(entry.getProfile().getId(), entry.getGameMode());
                 }
                 gamemodeMap.forEach((id, gm) -> {

@@ -7,9 +7,9 @@ import com.sasha.reminecraft.util.entity.EntityEquipment;
 
 public class ServerEntityRemoveEffectReaction implements IPacketReactor<ServerEntityRemoveEffectPacket> {
     @Override
-    public boolean takeAction(ServerEntityRemoveEffectPacket pck) {
-        EntityEquipment e = (EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
-        e.potionEffects.remove(pck.getEffect());
+    public boolean takeAction(ServerEntityRemoveEffectPacket packet) {
+        EntityEquipment e = (EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
+        e.potionEffects.remove(packet.getEffect());
         return true;
     }
 }

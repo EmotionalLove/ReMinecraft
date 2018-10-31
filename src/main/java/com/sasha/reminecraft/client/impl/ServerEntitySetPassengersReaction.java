@@ -7,12 +7,12 @@ import com.sasha.reminecraft.util.entity.EntityEquipment;
 
 public class ServerEntitySetPassengersReaction implements IPacketReactor<ServerEntitySetPassengersPacket> {
     @Override
-    public boolean takeAction(ServerEntitySetPassengersPacket pck) {
-        EntityEquipment equipment = (EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId());
-        if (pck.getPassengerIds() == null || pck.getPassengerIds().length == 0) {
+    public boolean takeAction(ServerEntitySetPassengersPacket packet) {
+        EntityEquipment equipment = (EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
+        if (packet.getPassengerIds() == null || packet.getPassengerIds().length == 0) {
             equipment.passengerIds = null;
         } else {
-            equipment.passengerIds = pck.getPassengerIds();
+            equipment.passengerIds = packet.getPassengerIds();
         }
         return true;
     }

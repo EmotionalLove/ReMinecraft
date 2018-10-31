@@ -9,12 +9,12 @@ import com.sasha.reminecraft.client.IPacketReactor;
 
 public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
     @Override
-    public boolean takeAction(ServerChatPacket pck) {
-        ChatRecievedEvent chatEvent = new ChatRecievedEvent(pck.getMessage().getFullText(), System.currentTimeMillis());
+    public boolean takeAction(ServerChatPacket packet) {
+        ChatRecievedEvent chatEvent = new ChatRecievedEvent(packet.getMessage().getFullText(), System.currentTimeMillis());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(chatEvent);
-        ReMinecraft.INSTANCE.logger.log("(CHAT) " + pck.getMessage().getFullText());
-        JsonElement msg = pck.getMessage().toJson();
-        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromJson(msg), pck.getType()));
+        ReMinecraft.INSTANCE.logger.log("(CHAT) " + packet.getMessage().getFullText());
+        JsonElement msg = packet.getMessage().toJson();
+        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromJson(msg), packet.getType()));
         return false;
     }
 }

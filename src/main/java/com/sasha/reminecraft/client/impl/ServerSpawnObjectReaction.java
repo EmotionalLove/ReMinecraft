@@ -8,21 +8,21 @@ import com.sasha.reminecraft.util.entity.EntityType;
 
 public class ServerSpawnObjectReaction implements IPacketReactor<ServerSpawnObjectPacket> {
     @Override
-    public boolean takeAction(ServerSpawnObjectPacket pck) {
+    public boolean takeAction(ServerSpawnObjectPacket packet) {
         EntityObject e = new EntityObject();
         e.type = EntityType.OBJECT;
-        e.entityId = pck.getEntityId();
-        e.uuid = pck.getUUID();
-        e.objectType = pck.getType();
-        e.posX = pck.getX();
-        e.posY = pck.getY();
-        e.posZ = pck.getZ();
-        e.pitch = pck.getPitch();
-        e.yaw = pck.getYaw();
-        e.motionX = pck.getMotionX();
-        e.motionY = pck.getMotionY();
-        e.motionZ = pck.getMotionZ();
-        e.data = pck.getData();
+        e.entityId = packet.getEntityId();
+        e.uuid = packet.getUUID();
+        e.objectType = packet.getType();
+        e.posX = packet.getX();
+        e.posY = packet.getY();
+        e.posZ = packet.getZ();
+        e.pitch = packet.getPitch();
+        e.yaw = packet.getYaw();
+        e.motionX = packet.getMotionX();
+        e.motionY = packet.getMotionY();
+        e.motionZ = packet.getMotionZ();
+        e.data = packet.getData();
         ReClient.ReClientCache.INSTANCE.entityCache.put(e.entityId, e);
         return true;
     }

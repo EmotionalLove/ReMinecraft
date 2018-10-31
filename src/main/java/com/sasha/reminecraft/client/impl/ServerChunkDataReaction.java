@@ -1,7 +1,6 @@
 package com.sasha.reminecraft.client.impl;
 
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
-import com.github.steveice10.mc.protocol.packet.ingame.server.ServerUnlockRecipesPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerUnloadChunkPacket;
 import com.sasha.reminecraft.ReMinecraft;

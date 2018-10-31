@@ -11,6 +11,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.*;
@@ -62,6 +63,7 @@ public class ReClient implements SessionListener {
         this.reactionRegistry.put(ServerPlayerListEntryPacket.class, new ServerPlayerListEntryReaction());
         this.reactionRegistry.put(ServerRespawnPacket.class, new ServerRespawnReaction());
         this.reactionRegistry.put(ServerSpawnMobPacket.class, new ServerSpawnMobReaction());
+        this.reactionRegistry.put(ServerSpawnObjectPacket.class, new ServerSpawnObjectReaction());
         this.reactionRegistry.put(ServerUnloadChunkPacket.class, new ServerUnloadChunkReaction());
         this.reactionRegistry.put(ServerUnlockRecipesPacket.class, new ServerUnlockRecipesReaction());
         this.reactionRegistry.put(ServerVehicleMovePacket.class, new ServerVehicleMoveReaction());

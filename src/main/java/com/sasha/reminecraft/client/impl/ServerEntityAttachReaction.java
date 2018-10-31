@@ -1,7 +1,6 @@
 package com.sasha.reminecraft.client.impl;
 
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityAttachPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityDestroyPacket;
 import com.sasha.reminecraft.client.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.util.entity.EntityRotation;

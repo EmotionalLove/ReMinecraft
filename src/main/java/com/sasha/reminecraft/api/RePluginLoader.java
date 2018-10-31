@@ -20,7 +20,7 @@ public class RePluginLoader {
     private static LinkedHashMap<File /*jar*/, PluginInfo> theRawPlugins = new LinkedHashMap<>();
     private static List<RePlugin> pluginList = new ArrayList<>();
 
-    public List<File> findPlugins() throws IOException {
+    public List<File> findPlugins() {
         LOGGER.log("Finding plugins...");
         File dir = new File(DIR_NAME);
         if (!dir.exists()) {

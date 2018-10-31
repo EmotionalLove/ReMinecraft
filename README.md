@@ -13,11 +13,11 @@ RE:Minecraft is a headless Minecraft bouncer and bot API, all in one! RE:Minecra
 ## Getting started
 
 ### Users
-Please see the [Getting started page on tge wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Getting-started)
+Please see the ["Getting started" page on the wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Getting-started)
 
 ### Developers
 
-Coming soon...
+Please see the ["Using the Plugin API" page on the wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Using-the-plugin-API)
 
 ## Needed libaries
 

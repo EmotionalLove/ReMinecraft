@@ -7,8 +7,17 @@ A headless Minecraft bouncer written in Java
 ### Why is it called "RE:Minecraft"?
 It's a spin on the anime "RE:Zero"
 
-## Whaaaa
-Basically, it'll keep you logged in even when you disconnect your Minecraft client. It'll also have a useful events system and plugin loader, with an API, obviously. This is still a WIP. More documentation will be added when it actually does something. :heart:
+## About
+RE:Minecraft is a headless Minecraft bouncer and bot API, all in one! RE:Minecraft can run multiple plugins at once, and "mirror" the game that its logged into onto an Ip and port of your choice. RE:Minecraft is currently only compatible with Minecraft 1.12.2, but a 1.13.x version will be written soon.
+
+## Getting started
+
+### Users
+Please see the [Getting started page on tge wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Getting-started)
+
+### Developers
+
+Coming soon...
 
 ## Needed libaries
 

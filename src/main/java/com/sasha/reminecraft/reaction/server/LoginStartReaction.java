@@ -18,6 +18,6 @@ public class LoginStartReaction extends AbstractChildPacketReactor implements IP
         }
         ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", packet.getUsername()));
         ReServer.runWhitelist(packet.getUsername(), this.getChild());
-        return true;
+        return false;
     }
 }

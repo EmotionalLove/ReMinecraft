@@ -3,7 +3,6 @@ package com.sasha.reminecraft.client.impl;
 import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerUnloadChunkPacket;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
@@ -29,7 +28,7 @@ public class ServerBlockChangeReaction implements IPacketReactor<ServerBlockChan
             column.getChunks()[cubeY] = subChunk;
             ReClient.ReClientCache.INSTANCE.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
         } catch (Exception e) {
-            e.printStackTrace();
+            //
         }
         ReClient.ReClientCache.INSTANCE.chunkCache.put(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), column);
         return true;

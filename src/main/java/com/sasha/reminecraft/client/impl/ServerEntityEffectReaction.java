@@ -1,6 +1,5 @@
 package com.sasha.reminecraft.client.impl;
 
-import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityCollectItemPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEffectPacket;
 import com.sasha.reminecraft.client.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
@@ -17,6 +16,6 @@ public class ServerEntityEffectReaction implements IPacketReactor<ServerEntityEf
         effect.ambient = pck.isAmbient();
         effect.showParticles = pck.getShowParticles();
         ((EntityEquipment) ReClient.ReClientCache.INSTANCE.entityCache.get(pck.getEntityId())).potionEffects.add(effect);
-        return false;
+        return true;
     }
 }

@@ -77,9 +77,14 @@ public class ReClient implements SessionListener {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         if (event.isCancelled()) return;
         try {
+            if (!reactionRegistry.containsKey(ev.getPacket().getClass())) { // so we aren't blocking packets that dont need special processing
+                ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket());
+                return;
+            }
             this.reactionRegistry.forEach((pck, reactor) -> { // iterate over the registered reactions
-                if (pck == ev.getPacket().getClass()) { // if the reaction is paired with pck's class
-                    if (reactor.takeAction(ev.getPacket())) // perform the action
+                if (pck == ev.getPacket().getClass()) { // if the reaction is paired with pck's clas
+                    boolean flag = reactor.takeAction(ev.getPacket());
+                    if (flag) // perform the action
                         ReMinecraft.INSTANCE.sendToChildren(event.getRecievedPacket()); // send the packet to children if true
                 } //ez
             });

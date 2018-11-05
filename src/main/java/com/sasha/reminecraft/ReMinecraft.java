@@ -48,7 +48,7 @@ public class ReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static final String VERSION = "1.1.2";
+    public static final String VERSION = "1.1.3";
 
     public Logger logger = new Logger("RE:Minecraft " + VERSION);
     public Client minecraftClient = null;
@@ -260,7 +260,10 @@ public class ReMinecraft {
         logger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
-        if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
+        if (minecraftServer != null) {
+            minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
+            minecraftServer.close(true);
+        }
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
@@ -274,7 +277,10 @@ public class ReMinecraft {
         logger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
-        if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
+        if (minecraftServer != null) {
+            minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is shutting down!", true));
+            minecraftServer.close(true);
+        }
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
         logger.log("Stopped RE:Minecraft...");
@@ -292,15 +298,12 @@ public class ReMinecraft {
         RePluginLoader.getPluginList().clear();
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
-        if (minecraftServer != null) minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
+        if (minecraftServer != null) {
+            minecraftServer.getSessions().forEach(session -> session.disconnect("RE:Minecraft is restarting!", true));
+            minecraftServer.close(true);
+        }
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.clear();
-        ReClient.ReClientCache.INSTANCE.player = null;
-        ReClient.ReClientCache.INSTANCE.posX = 0;
-        ReClient.ReClientCache.INSTANCE.posY = 0;
-        ReClient.ReClientCache.INSTANCE.posZ = 0;
-        ReClient.ReClientCache.INSTANCE.entityId = 0;
-        ReClient.ReClientCache.INSTANCE.playerListEntries.clear();
         new Thread(() -> {
             for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
                 ReMinecraft.INSTANCE.logger.logWarning("Reconnecting in " + i + " seconds");

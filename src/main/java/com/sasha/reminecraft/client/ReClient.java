@@ -146,7 +146,6 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void disconnected(DisconnectedEvent disconnectedEvent) {
-        ReMinecraft.INSTANCE.minecraftServer.close(true);
         ReMinecraft.INSTANCE.logger.logWarning("Disconnected: " + disconnectedEvent.getReason());
         ReMinecraft.INSTANCE.reLaunch();
     }

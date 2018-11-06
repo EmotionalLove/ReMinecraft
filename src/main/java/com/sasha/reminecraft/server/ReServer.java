@@ -30,6 +30,7 @@ import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.api.event.ChildJoinEvent;
 import com.sasha.reminecraft.api.event.ChildServerPacketRecieveEvent;
 import com.sasha.reminecraft.api.event.ChildServerPacketSendEvent;
 import com.sasha.reminecraft.client.ChildReClient;
@@ -110,6 +111,13 @@ public class ReServer extends SessionAdapter {
             LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
             runWhitelist(pck.getProfile().getName(), this.child);
+            ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile());
+            ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(joinEvent);
+            if (joinEvent.isCancelled()) {
+                this.child.getSession().send(new ServerDisconnectPacket(Message.fromString(joinEvent.getCancelledKickMessage())));
+                this.child.getSession().disconnect(joinEvent.getCancelledKickMessage());
+                return;
+            }
         }
         if (event.getSendingPacket() instanceof ServerJoinGamePacket) {
             ReClient.ReClientCache.INSTANCE.chunkCache.forEach((hash, chunk) -> {
@@ -312,8 +320,8 @@ public class ReServer extends SessionAdapter {
 }
 
 class ServerBranding {
-    public static final String BRAND = "RE:Minecraft " + ReMinecraft.VERSION;
-    public static byte[] BRAND_ENCODED;
+    private static final String BRAND = "RE:Minecraft " + ReMinecraft.VERSION;
+    static byte[] BRAND_ENCODED;
 
     static {
         ByteBuf buf = Unpooled.buffer(5 + BRAND.length());

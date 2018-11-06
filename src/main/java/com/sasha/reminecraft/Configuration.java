@@ -92,7 +92,7 @@ public class Configuration {
                 } else {
                     declaredField.set(this, yml.get(target));
                 }
-                ReMinecraft.INSTANCE.logger.log("Set " + target);
+                ReMinecraft.INSTANCE.logger.logDebug("Set " + target);
             }
             yml.save();
         } catch (IllegalAccessException ex) {
@@ -114,7 +114,7 @@ public class Configuration {
                 }
                 String target = declaredField.getName().replace("var_" ,"");
                 yml.set(target, declaredField.get(this));
-                ReMinecraft.INSTANCE.logger.log("Saved " + target);
+                ReMinecraft.INSTANCE.logger.logDebug("Saved " + target);
             }
             yml.save();
         } catch (IllegalAccessException ex) {

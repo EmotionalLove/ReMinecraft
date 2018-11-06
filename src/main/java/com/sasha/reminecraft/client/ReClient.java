@@ -126,9 +126,14 @@ public class ReClient implements SessionListener {
                         + connectedEvent.getSession().getPort());
         ReMinecraft.INSTANCE.logger.log("Starting server on " + ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerIp + ":" +
                 ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerPort);
-        ReMinecraft.INSTANCE.minecraftServer = ReServerManager.prepareServer();
-        ReMinecraft.INSTANCE.minecraftServer.addListener(new ReServerManager());
-        ReMinecraft.INSTANCE.minecraftServer.bind(true);
+        try {
+            ReMinecraft.INSTANCE.minecraftServer = ReServerManager.prepareServer();
+            ReMinecraft.INSTANCE.minecraftServer.addListener(new ReServerManager());
+            ReMinecraft.INSTANCE.minecraftServer.bind(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ReMinecraft.INSTANCE.logger.logError("A severe exception occurred whilst creating the server! Maybe there's already a server running on the port?");
+        }
         ReMinecraft.INSTANCE.logger.log("Server started!");
     }
 

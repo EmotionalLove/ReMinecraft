@@ -24,7 +24,7 @@ public class Logger {
     }
 
     public void logError(String msg) {
-        System.out.println("[" + name + " / ERROR] " + msg);
+        System.err.println("[" + name + " / ERROR] " + msg);
     }
 
     public void logDebug(String msg) {

@@ -141,7 +141,7 @@ public class ReMinecraft {
                 authServ.login();
                 protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId,authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
-                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
+                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID,true);
                 this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 ReClient.ReClientCache.INSTANCE.playerName = authServ.getSelectedProfile().getName();
@@ -149,7 +149,7 @@ public class ReMinecraft {
                 return authServ;
             } catch (RequestException ex) {
                 // the session token is invalid
-                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(false);
+                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID, false);
                 this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.logError("Session token was invalid!");
             }
@@ -169,12 +169,12 @@ public class ReMinecraft {
             ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
             ReClient.ReClientCache.INSTANCE.playerName = authServ.getSelectedProfile().getName();
             ReClient.ReClientCache.INSTANCE.playerUuid = authServ.getSelectedProfile().getId();
-            MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(true);
+            MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, true);
             this.EVENT_BUS.invokeEvent(postEvent);
             return authServ;
         } catch (RequestException e) {
             // login completely failed
-            MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(false);
+            MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, false);
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");

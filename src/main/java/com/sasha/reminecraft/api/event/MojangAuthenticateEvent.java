@@ -19,9 +19,15 @@ public class MojangAuthenticateEvent {
 
     public static class Post extends SimpleEvent {
         private boolean success;
+        private Method method;
 
-        public Post(boolean success) {
+        public Post(Method method, boolean success) {
             this.success = success;
+            this.method = method;
+        }
+
+        public Method getMethod() {
+            return method;
         }
 
         public boolean isSuccessful() {

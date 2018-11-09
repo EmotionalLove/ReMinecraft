@@ -9,7 +9,7 @@ import com.sasha.simplecmdsys.SimpleCommandInfo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@SimpleCommandInfo(description = "Return a list of loaded plugins", syntax = {})
+@SimpleCommandInfo(description = "Return a list of loaded plugins", syntax = {""})
 public class PluginsCommand extends SimpleCommand {
 
     public PluginsCommand() {
@@ -37,6 +37,6 @@ public class PluginsCommand extends SimpleCommand {
         ReMinecraft.INSTANCE.sendToChildren(
                 new ServerChatPacket(
                         Message.fromString(
-                                c.get() + " plugin$s loaded".replace("$s", c.get() == 1 ? "" : "s"))));
+                                "\247e" + c.get() + " plugin$s loaded".replace("$s", c.get() == 1 ? "" : "s"))));
     }
 }

@@ -5,6 +5,8 @@ import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEntryPacket;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.api.event.ServerOtherPlayerJoinEvent;
+import com.sasha.reminecraft.api.event.ServerOtherPlayerQuitEvent;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
 
@@ -18,7 +20,11 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
             case ADD_PLAYER:
                 Arrays.stream(packet.getEntries())
                         .filter(e -> !ReClient.ReClientCache.INSTANCE.playerListEntries.contains(e))
-                        .forEach(entry -> ReClient.ReClientCache.INSTANCE.playerListEntries.add(entry));
+                        .forEach(entry -> {
+                            ReClient.ReClientCache.INSTANCE.playerListEntries.add(entry);
+                            ServerOtherPlayerJoinEvent event = new ServerOtherPlayerJoinEvent(entry.getProfile());
+                            ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
+                        });
                 break;
             case REMOVE_PLAYER:
                 List<String> toRemove = new ArrayList<>();
@@ -30,6 +36,8 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                     }
                 });
                 removalIndexes.forEach(index -> {
+                    ServerOtherPlayerQuitEvent event = new ServerOtherPlayerQuitEvent(ReClient.ReClientCache.INSTANCE.playerListEntries.get(index).getProfile());
+                    ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
                     ReClient.ReClientCache.INSTANCE.playerListEntries.remove((int)index);
                 });
                 break;

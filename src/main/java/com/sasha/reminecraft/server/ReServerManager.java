@@ -22,6 +22,7 @@ import com.github.steveice10.packetlib.tcp.TcpSessionFactory;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.ChildReClient;
+import com.sasha.reminecraft.util.TextMessageColoured;
 
 import java.net.Proxy;
 
@@ -67,7 +68,7 @@ public class ReServerManager extends ServerAdapter {
                         return new ServerStatusInfo(
                                 new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
                                 new PlayerInfo(420, (int) ReMinecraft.INSTANCE.childClients.stream().filter(e -> ((MinecraftProtocol) e.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.STATUS).count(), new GameProfile[]{}),
-                                Message.fromString(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
+                                TextMessageColoured.of(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
                                 null);
                     }
                 });

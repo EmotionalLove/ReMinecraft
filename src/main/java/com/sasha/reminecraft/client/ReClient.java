@@ -24,6 +24,7 @@ import com.sasha.reminecraft.api.event.RemoteServerPacketRecieveEvent;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.reaction.client.*;
 import com.sasha.reminecraft.server.ReServerManager;
+import com.sasha.reminecraft.util.TextMessageColoured;
 import com.sasha.reminecraft.util.entity.Entity;
 import com.sasha.reminecraft.util.entity.EntityPlayer;
 
@@ -206,8 +207,8 @@ public class ReClient implements SessionListener {
         /**
          * Tablist header/footer
          */
-        public Message tabHeader = Message.fromString("\n\2477RE:Minecraft \247d" + ReMinecraft.VERSION + "\n");
-        public Message tabFooter = Message.fromString("\n\2477Created by Sasha\nhttps://github.com/EmotionalLove/ReMinecraft\n");
+        public Message tabHeader = TextMessageColoured.of("\n&7RE:Minecraft &d" + ReMinecraft.VERSION + "\n");
+        public Message tabFooter = TextMessageColoured.of("\n&7Created by Sasha\nhttps://github.com/EmotionalLove/ReMinecraft\n");
         public List<PlayerListEntry> playerListEntries = new ArrayList<>();
 
         public ReClientCache() {

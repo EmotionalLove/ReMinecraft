@@ -38,6 +38,7 @@ import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.reaction.AbstractChildPacketReactor;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.reaction.server.*;
+import com.sasha.reminecraft.util.TextMessageColoured;
 import com.sasha.reminecraft.util.entity.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -114,7 +115,7 @@ public class ReServer extends SessionAdapter {
             ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile());
             ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(joinEvent);
             if (joinEvent.isCancelled()) {
-                this.child.getSession().send(new ServerDisconnectPacket(Message.fromString(joinEvent.getCancelledKickMessage())));
+                this.child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.of(joinEvent.getCancelledKickMessage())));
                 this.child.getSession().disconnect(joinEvent.getCancelledKickMessage());
                 return;
             }
@@ -139,7 +140,7 @@ public class ReServer extends SessionAdapter {
                                 try {
                                     Field field = PlayerListEntry.class.getDeclaredField("displayName");
                                     field.setAccessible(true);
-                                    field.set(entry, Message.fromString(entry.getProfile().getName()));
+                                    field.set(entry, TextMessageColoured.of(entry.getProfile().getName()));
                                     if (entry.getProfile().getName() == null) {
                                         Field f = GameProfile.class.getDeclaredField("name");
                                         f.setAccessible(true);
@@ -307,10 +308,10 @@ public class ReServer extends SessionAdapter {
             SubProtocol proto = ((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol();
             switch (proto){
                 case LOGIN:
-                    child.getSession().send(new LoginDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    child.getSession().send(new LoginDisconnectPacket(TextMessageColoured.of("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;
                 case GAME:
-                    child.getSession().send(new ServerDisconnectPacket(Message.fromString("\247cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.of("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;
             }
             child.getSession().disconnect("Not whitelisted!");

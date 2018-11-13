@@ -13,13 +13,17 @@ import com.sasha.eventsys.SimpleEventManager;
 import com.sasha.reminecraft.api.RePlugin;
 import com.sasha.reminecraft.api.RePluginLoader;
 import com.sasha.reminecraft.api.event.MojangAuthenticateEvent;
-import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.ChildReClient;
+import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.command.game.AboutCommand;
 import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +33,6 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * The main Re:Minecraft class, where the majority of essential startup functions will be stored.
@@ -79,9 +82,10 @@ public class ReMinecraft {
     public static void main(String[] args) throws IllegalAccessException, InstantiationException, IOException {
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
-        Scanner scanner = new Scanner(System.in);
-        String cmd = scanner.nextLine();
+        Terminal terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
+        LineReader lr = LineReaderBuilder.builder().terminal(terminal).build();
         while (true) {
+            String cmd = lr.readLine();
             TERMINAL_CMD_PROCESSOR.processCommand(cmd);
         }
     }
@@ -179,6 +183,7 @@ public class ReMinecraft {
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
+            /*todo jline
             Scanner scanner = new Scanner(System.in);
             System.out.print("mojang email > ");
             String email = scanner.nextLine();
@@ -190,6 +195,8 @@ public class ReMinecraft {
             MAIN_CONFIG.var_mojangPassword = password;
             MAIN_CONFIG.save();
             authenticate(proxy);
+            */
+            this.stop();
         }
         return null;
     }

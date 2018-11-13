@@ -2,6 +2,7 @@ package com.sasha.reminecraft;
 
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
+import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
@@ -97,7 +98,7 @@ public class ReMinecraft {
     public void start(String[] args) throws InstantiationException, IllegalAccessException, IOException {
         INSTANCE = this;
         new ReClient.ReClientCache();
-        logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft 1.12.2");
+        logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft " + MinecraftConstants.GAME_VERSION);
         RePluginLoader loader = new RePluginLoader();
         loader.preparePlugins(loader.findPlugins());
         loader.loadPlugins();

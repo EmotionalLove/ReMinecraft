@@ -49,7 +49,7 @@ public class Configuration {
     @ConfigSetting
     public ArrayList<String> var_whitelistServer = new ArrayList<>();
     @ConfigSetting
-    public String var_messageOfTheDay = "\247dRE:Minecraft \2477" + ReMinecraft.VERSION;
+    public String var_messageOfTheDay = "&dRE:Minecraft &7" + ReMinecraft.VERSION;
     @ConfigSetting
     public int var_reconnectDelaySeconds = 5;
     @ConfigSetting

@@ -33,10 +33,9 @@ public class PluginsCommand extends SimpleCommand {
             builder.append(", ").append(pl.pluginName);
             c.getAndIncrement();
         });
+
+        int i = c.get();
         ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromString(builder.toString())));
-        ReMinecraft.INSTANCE.sendToChildren(
-                new ServerChatPacket(
-                        Message.fromString(
-                                "\247e" + c.get() + " plugin$s loaded".replace("$s", c.get() == 1 ? "" : "s"))));
+        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromString("\247e" + c.get() + " plugin" + (i == 1 ? "" : "s") + " loaded")));
     }
 }

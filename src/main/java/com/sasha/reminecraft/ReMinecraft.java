@@ -104,6 +104,7 @@ public class ReMinecraft implements IReMinecraft {
         }
     }
 
+    @Override
     public void sendToChildren(Packet pck) {
         INSTANCE.childClients.stream()
                 .filter(ChildReClient::isPlaying)
@@ -113,6 +114,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Launch (or relaunch) Re:Minecraft
      */
+    @Override
     public void start(String[] args) {
         try {
             INSTANCE = this;
@@ -149,6 +151,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Authenticate with Mojang, first via session token, then via email/password
      */
+    @Override
     public AuthenticationService authenticate(Proxy proxy) {
         if (!MAIN_CONFIG.var_sessionId.equalsIgnoreCase("[no default]")) {
             try {
@@ -223,14 +226,17 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Update the session token inside ReMinecraft.yml
      */
+    @Override
     public void updateToken(String token) {
         MAIN_CONFIG.var_sessionId = token;
     }
 
+    @Override
     public boolean areChildrenConnected() {
         return !childClients.isEmpty();
     }
 
+    @Override
     public void registerCommands() {
         try {
             TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
@@ -243,6 +249,7 @@ public class ReMinecraft implements IReMinecraft {
         RePluginLoader.getPluginList().forEach(RePlugin::registerCommands);
     }
 
+    @Override
     public boolean processInGameCommand(String s) {
         if (!s.startsWith("\\")) {
             return false;
@@ -251,6 +258,7 @@ public class ReMinecraft implements IReMinecraft {
         return true;
     }
 
+    @Override
     public void registerConfigurations() {
         configurations.add(MAIN_CONFIG);
         RePluginLoader.getPluginList().forEach(RePlugin::registerConfig);
@@ -259,6 +267,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Stop and close RE:Minecraft
      */
+    @Override
     public void stop() {
         if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
@@ -277,6 +286,7 @@ public class ReMinecraft implements IReMinecraft {
         System.exit(0);
     }
 
+    @Override
     public void stopSoft() {
         if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
@@ -296,6 +306,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Invoked if the player gets kicked from the remote server
      */
+    @Override
     public void reLaunch() {
         if (isShuttingDownCompletely) return;
         if (isRelaunching) return;

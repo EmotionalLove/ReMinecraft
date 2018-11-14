@@ -1,5 +1,6 @@
 package com.sasha.reminecraft.client;
 
+import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
@@ -27,6 +28,7 @@ import com.sasha.reminecraft.server.ReServerManager;
 import com.sasha.reminecraft.util.TextMessageColoured;
 import com.sasha.reminecraft.util.entity.Entity;
 import com.sasha.reminecraft.util.entity.EntityPlayer;
+import com.sun.istack.internal.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -213,6 +215,36 @@ public class ReClient implements SessionListener {
 
         public ReClientCache() {
             INSTANCE = this;
+        }
+
+        /**
+         * Get a user's GameProfile via their UUID
+         * @param id The user's UUID
+         * @return their Gameprofile
+         * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST
+         */
+        public GameProfile getGameProfileByUuid(UUID id) {
+            for (PlayerListEntry playerListEntry : this.playerListEntries) {
+                if (playerListEntry.getProfile().getId() == id) {
+                    return playerListEntry.getProfile();
+                }
+            }
+            return null;
+        }
+        /**
+         * Get a user's GameProfile via their username
+         * @param name The user's username
+         * @return their Gameprofile
+         * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST
+         */
+
+        public GameProfile getGameProfileByName(String name) {
+            for (PlayerListEntry playerListEntry : this.playerListEntries) {
+                if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
+                    return playerListEntry.getProfile();
+                }
+            }
+            return null;
         }
 
 

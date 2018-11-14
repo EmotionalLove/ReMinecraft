@@ -7,7 +7,6 @@ import com.github.steveice10.mc.protocol.ServerLoginHandler;
 import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.mc.protocol.data.game.setting.Difficulty;
 import com.github.steveice10.mc.protocol.data.game.world.WorldType;
-import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
 import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
 import com.github.steveice10.mc.protocol.data.status.VersionInfo;
@@ -68,7 +67,7 @@ public class ReServerManager extends ServerAdapter {
                         return new ServerStatusInfo(
                                 new VersionInfo(MinecraftConstants.GAME_VERSION, MinecraftConstants.PROTOCOL_VERSION),
                                 new PlayerInfo(420, (int) ReMinecraft.INSTANCE.childClients.stream().filter(e -> ((MinecraftProtocol) e.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.STATUS).count(), new GameProfile[]{}),
-                                TextMessageColoured.of(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
+                                TextMessageColoured.from(ReMinecraft.INSTANCE.MAIN_CONFIG.var_messageOfTheDay),
                                 null);
                     }
                 });

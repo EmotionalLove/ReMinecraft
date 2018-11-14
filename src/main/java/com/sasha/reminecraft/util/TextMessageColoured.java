@@ -21,7 +21,7 @@ public class TextMessageColoured extends TextMessage {
         return COLOUR_REGEX.matcher(input).replaceAll(SECTION_SIGN + "$1");
     }
 
-    public static TextMessageColoured of(String text) {
+    public static TextMessageColoured from(String text) {
         return new TextMessageColoured(text);
     }
 

@@ -28,7 +28,6 @@ import com.sasha.reminecraft.server.ReServerManager;
 import com.sasha.reminecraft.util.TextMessageColoured;
 import com.sasha.reminecraft.util.entity.Entity;
 import com.sasha.reminecraft.util.entity.EntityPlayer;
-import com.sun.istack.internal.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -209,8 +208,8 @@ public class ReClient implements SessionListener {
         /**
          * Tablist header/footer
          */
-        public Message tabHeader = TextMessageColoured.of("\n&7RE:Minecraft &d" + ReMinecraft.VERSION + "\n");
-        public Message tabFooter = TextMessageColoured.of("\n&7Created by Sasha\nhttps://github.com/EmotionalLove/ReMinecraft\n");
+        public Message tabHeader = TextMessageColoured.from("\n&7RE:Minecraft &d" + ReMinecraft.VERSION + "\n");
+        public Message tabFooter = TextMessageColoured.from("\n&7Created by Sasha\nhttps://github.com/EmotionalLove/ReMinecraft\n");
         public List<PlayerListEntry> playerListEntries = new ArrayList<>();
 
         public ReClientCache() {

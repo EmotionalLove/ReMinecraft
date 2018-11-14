@@ -19,7 +19,7 @@ public abstract class ReUtil {
         return file;
     }
 
-    public static  File getDataFile(String s) {
+    public static File getDataFile(String s) {
         File file = new File(s + ".yml");
         if (!file.exists()) {
             try {

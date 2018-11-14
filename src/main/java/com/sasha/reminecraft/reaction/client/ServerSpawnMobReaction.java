@@ -1,6 +1,8 @@
 package com.sasha.reminecraft.reaction.client;
 
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
+import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.api.event.EntityInRangeEvent;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.util.entity.EntityMob;
@@ -25,6 +27,8 @@ public class ServerSpawnMobReaction implements IPacketReactor<ServerSpawnMobPack
         e.motionZ = packet.getMotionZ();
         e.metadata = packet.getMetadata();
         ReClient.ReClientCache.INSTANCE.entityCache.put(e.entityId, e);
+        EntityInRangeEvent.Entity event = new EntityInRangeEvent.Entity(e.uuid, e.entityId);
+        ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         return true;
     }
 }

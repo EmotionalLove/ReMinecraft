@@ -1,5 +1,9 @@
 package com.sasha.reminecraft.api.event;
 
+import com.github.steveice10.mc.auth.data.GameProfile;
+import com.sasha.eventsys.SimpleEvent;
+import com.sasha.reminecraft.client.ReClient;
+
 import java.util.UUID;
 
 public class EntityInRangeEvent {
@@ -7,7 +11,7 @@ public class EntityInRangeEvent {
     /**
      * Describes a Player that comes into range
      */
-    public static class Player {
+    public static class Player extends SimpleEvent {
 
         private String name;
         private UUID id;
@@ -16,8 +20,9 @@ public class EntityInRangeEvent {
         public Player(UUID id, int entityId) {
             this.id = id;
             this.entityId = entityId;
-            if (id != null) {
-
+            GameProfile profile = ReClient.ReClientCache.INSTANCE.getGameProfileByUuid(id);
+            if (profile != null && id != null) {
+                this.name = profile.getName();
             }
         }
 
@@ -37,7 +42,7 @@ public class EntityInRangeEvent {
     /**
      * Describes a generic entity that comes into range
      */
-    public static class Entity {
+    public static class Entity extends SimpleEvent {
 
         private UUID id;
         private int entityId;

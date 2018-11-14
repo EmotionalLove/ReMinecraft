@@ -22,6 +22,7 @@ import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -39,21 +40,41 @@ import java.util.List;
  */
 public class ReMinecraft {
 
-    private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
-
-    /**
-     * Singleton of this Re:Minecraft
-     */
-    public static ReMinecraft INSTANCE;
     public static final String DATA_FILE = "ReMinecraft";
-    public List<Configuration> configurations = new ArrayList<>();
-    public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
-
     /**
      * Current software version of Re:Minecraft
      */
     public static final String VERSION = "1.1.7";
+    /**
+     * The command line command processor
+     */
+    public static final SimpleCommandProcessor TERMINAL_CMD_PROCESSOR = new SimpleCommandProcessor("");
+    /**
+     * The in-game command processor
+     */
+    public static final SimpleCommandProcessor INGAME_CMD_PROCESSOR = new SimpleCommandProcessor("\\");
+    /**
+     * Singleton of this Re:Minecraft
+     */
+    public static ReMinecraft INSTANCE;
 
+    /**
+     * The JLine terminal instance
+     */
+    public static Terminal terminal;
+    /**
+     * The Jline reader instance
+     */
+    public static LineReader reader;
+
+
+    private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
+    /**
+     * The event manager for Re:Minecraft
+     */
+    public final SimpleEventManager EVENT_BUS = new SimpleEventManager();
+    public List<Configuration> configurations = new ArrayList<>();
+    public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
     public Logger logger = new Logger("RE:Minecraft " + VERSION);
     public Client minecraftClient = null;
     public Server minecraftServer = null;
@@ -64,29 +85,21 @@ public class ReMinecraft {
     private boolean isRelaunching = false;
 
     /**
-     * The command line command processor
-     */
-    public static final SimpleCommandProcessor TERMINAL_CMD_PROCESSOR = new SimpleCommandProcessor("");
-    /**
-     * The in-game command processor
-     */
-    public static final SimpleCommandProcessor INGAME_CMD_PROCESSOR = new SimpleCommandProcessor("\\");
-    /**
-     * The event manager for Re:Minecraft
-     */
-    public final SimpleEventManager EVENT_BUS = new SimpleEventManager();
-
-    /**
      * Launch Re:Minecraft and and setup the console command system.
      */
     public static void main(String[] args) throws IllegalAccessException, InstantiationException, IOException {
+        terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
+        reader = LineReaderBuilder.builder().terminal(terminal).build();
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
-        Terminal terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
-        LineReader lr = LineReaderBuilder.builder().terminal(terminal).build();
         while (true) {
-            String cmd = lr.readLine();
-            TERMINAL_CMD_PROCESSOR.processCommand(cmd);
+            try {
+                String cmd = reader.readLine(null, null, "> ");
+                TERMINAL_CMD_PROCESSOR.processCommand(cmd.trim().replace("> ", ""));
+            } catch (UserInterruptException | IllegalStateException ex) {
+                ReMinecraft.INSTANCE.stop();
+                return;
+            }
         }
     }
 
@@ -144,9 +157,9 @@ public class ReMinecraft {
                 authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
                 authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
                 authServ.login();
-                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId,authServ.getAccessToken());
+                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
-                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID,true);
+                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID, true);
                 this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 ReClient.ReClientCache.INSTANCE.playerName = authServ.getSelectedProfile().getName();

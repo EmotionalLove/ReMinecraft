@@ -1,6 +1,7 @@
 package com.sasha.reminecraft;
 
 import com.sasha.reminecraft.api.exception.ReMinecraftPluginConfigurationException;
+import com.sasha.reminecraft.util.ReUtil;
 import com.sasha.reminecraft.util.YML;
 
 import java.io.File;
@@ -72,7 +73,7 @@ public class Configuration {
      */
     protected final void configure() {
         try {
-            File file = ReMinecraft.INSTANCE.getDataFile(configName);
+            File file = ReUtil.getDataFile(configName);
             YML yml = new YML(file);
             for (Field declaredField : this.getClass().getDeclaredFields()) {
                 if (declaredField.getAnnotation(ConfigSetting.class) == null) continue;
@@ -104,7 +105,7 @@ public class Configuration {
 
     protected final void save() {
         try {
-            File file = ReMinecraft.INSTANCE.getDataFile(configName);
+            File file = ReUtil.getDataFile(configName);
             YML yml = new YML(file);
             for (Field declaredField : this.getClass().getDeclaredFields()) {
                 if (declaredField.getAnnotation(ConfigSetting.class) == null) continue;

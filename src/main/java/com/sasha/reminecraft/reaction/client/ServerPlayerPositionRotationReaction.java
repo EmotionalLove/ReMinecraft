@@ -4,8 +4,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTelepo
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.ServerResetPlayerPositionEvent;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 
 public class ServerPlayerPositionRotationReaction implements IPacketReactor<ServerPlayerPositionRotationPacket> {
     @Override

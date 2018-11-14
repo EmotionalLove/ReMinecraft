@@ -3,8 +3,8 @@ package com.sasha.reminecraft.reaction.client;
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.EntityInRangeEvent;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.util.entity.EntityPlayer;
 import com.sasha.reminecraft.util.entity.EntityType;
 

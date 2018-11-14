@@ -5,8 +5,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientRequestPacke
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.PlayerDamagedEvent;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 
 public class ServerPlayerHealthReaction implements IPacketReactor<ServerPlayerHealthPacket> {
     @Override

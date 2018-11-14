@@ -4,8 +4,8 @@ import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerUnloadChunkPacket;
 import com.sasha.reminecraft.ReMinecraft;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.util.ChunkUtil;
 
 public class ServerChunkDataReaction implements IPacketReactor<ServerChunkDataPacket> {

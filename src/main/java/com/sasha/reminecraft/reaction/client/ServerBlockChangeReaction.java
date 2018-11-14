@@ -4,8 +4,8 @@ import com.github.steveice10.mc.protocol.data.game.chunk.Chunk;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
 import com.sasha.reminecraft.ReMinecraft;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.util.ChunkUtil;
 
 public class ServerBlockChangeReaction implements IPacketReactor<ServerBlockChangePacket> {

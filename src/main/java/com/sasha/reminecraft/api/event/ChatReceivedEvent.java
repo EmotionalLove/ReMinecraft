@@ -5,12 +5,12 @@ import com.sasha.eventsys.SimpleEvent;
 /**
  * Invoked when a message is recieved from the remote server
  */
-public class ChatRecievedEvent extends SimpleEvent {
+public class ChatReceivedEvent extends SimpleEvent {
 
     public String messageText;
     public long timeRecieved;
 
-    public ChatRecievedEvent(String messageText, long timeRecieved) {
+    public ChatReceivedEvent(String messageText, long timeRecieved) {
         this.messageText = messageText;
         this.timeRecieved = timeRecieved;
     }

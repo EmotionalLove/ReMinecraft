@@ -8,7 +8,6 @@ import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
 import com.github.steveice10.mc.protocol.data.game.UnlockRecipesAction;
 import com.github.steveice10.mc.protocol.data.game.entity.EquipmentSlot;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionPacket;
@@ -115,7 +114,7 @@ public class ReServer extends SessionAdapter {
             ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile());
             ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(joinEvent);
             if (joinEvent.isCancelled()) {
-                this.child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.of(joinEvent.getCancelledKickMessage())));
+                this.child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.from(joinEvent.getCancelledKickMessage())));
                 this.child.getSession().disconnect(joinEvent.getCancelledKickMessage());
                 return;
             }
@@ -140,7 +139,7 @@ public class ReServer extends SessionAdapter {
                                 try {
                                     Field field = PlayerListEntry.class.getDeclaredField("displayName");
                                     field.setAccessible(true);
-                                    field.set(entry, TextMessageColoured.of(entry.getProfile().getName()));
+                                    field.set(entry, TextMessageColoured.from(entry.getProfile().getName()));
                                     if (entry.getProfile().getName() == null) {
                                         Field f = GameProfile.class.getDeclaredField("name");
                                         f.setAccessible(true);
@@ -308,10 +307,10 @@ public class ReServer extends SessionAdapter {
             SubProtocol proto = ((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol();
             switch (proto){
                 case LOGIN:
-                    child.getSession().send(new LoginDisconnectPacket(TextMessageColoured.of("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    child.getSession().send(new LoginDisconnectPacket(TextMessageColoured.from("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;
                 case GAME:
-                    child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.of("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
+                    child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.from("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;
             }
             child.getSession().disconnect("Not whitelisted!");

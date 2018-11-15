@@ -1,6 +1,5 @@
 package com.sasha.reminecraft.command.game;
 
-import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.RePluginLoader;
@@ -20,7 +19,7 @@ public class PluginsCommand extends SimpleCommand {
     @Override
     public void onCommand() {
         if (RePluginLoader.getPluginList().isEmpty()) {
-            ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(TextMessageColoured.of("&4There are no plugins loaded.")));
+            ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(TextMessageColoured.from("&4There are no plugins loaded.")));
             return;
         }
         StringBuilder builder = new StringBuilder("&7");
@@ -36,7 +35,7 @@ public class PluginsCommand extends SimpleCommand {
         });
 
         int i = c.get();
-        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(TextMessageColoured.of(builder.toString())));
-        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(TextMessageColoured.of("&e" + c.get() + " plugin" + (i == 1 ? "" : "s") + " loaded")));
+        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(TextMessageColoured.from(builder.toString())));
+        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(TextMessageColoured.from("&e" + c.get() + " plugin" + (i == 1 ? "" : "s") + " loaded")));
     }
 }

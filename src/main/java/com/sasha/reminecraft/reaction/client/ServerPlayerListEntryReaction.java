@@ -7,8 +7,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.ServerPlayerListEn
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.ServerOtherPlayerJoinEvent;
 import com.sasha.reminecraft.api.event.ServerOtherPlayerQuitEvent;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 
 import java.lang.reflect.Field;
 import java.util.*;

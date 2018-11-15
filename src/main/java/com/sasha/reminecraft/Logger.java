@@ -1,9 +1,19 @@
 package com.sasha.reminecraft;
 
+import org.jline.reader.LineReader;
+import org.jline.utils.InfoCmp;
+
+import java.io.Console;
+
+import static com.sasha.reminecraft.ReMinecraft.reader;
+
 /**
  * A simple logging mechanism
  */
 public class Logger {
+
+    private Console stashed;
+
     private final String name;
     private boolean seeDebug = false; //whether to display debug msgs
 
@@ -16,19 +26,30 @@ public class Logger {
     }
 
     public void log(String msg) {
-        System.out.println("[" + name + " / INFO] " + msg);
+        this.println("[" + name + " / INFO] " + msg);
+
     }
 
     public void logWarning(String msg) {
-        System.out.println("[" + name + " / WARN] " + msg);
+        this.println("[" + name + " / WARN] " + msg);
     }
 
     public void logError(String msg) {
-        System.err.println("[" + name + " / ERROR] " + msg);
+        this.println("[" + name + " / ERROR] " + msg);
     }
 
     public void logDebug(String msg) {
-        if (seeDebug) System.out.println("[" + name + " / DEBUG] " + msg);
+        if (seeDebug) this.println("[" + name + " / DEBUG] " + msg);
+    }
+
+    private void println(String msg) {
+        reader.getTerminal().puts(InfoCmp.Capability.carriage_return);
+        reader.getTerminal().writer().println(msg);
+        try {
+            reader.callWidget(LineReader.REDRAW_LINE);
+            reader.callWidget(LineReader.REDISPLAY);
+        }catch (Exception ignored){}
+        reader.getTerminal().writer().flush();
     }
 
 }

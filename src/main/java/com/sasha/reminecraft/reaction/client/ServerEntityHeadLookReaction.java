@@ -2,8 +2,8 @@ package com.sasha.reminecraft.reaction.client;
 
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityHeadLookPacket;
 import com.sasha.reminecraft.ReMinecraft;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.util.entity.EntityRotation;
 
 public class ServerEntityHeadLookReaction implements IPacketReactor<ServerEntityHeadLookPacket> {

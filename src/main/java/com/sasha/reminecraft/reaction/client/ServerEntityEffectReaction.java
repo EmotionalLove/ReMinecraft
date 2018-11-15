@@ -1,8 +1,8 @@
 package com.sasha.reminecraft.reaction.client;
 
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityEffectPacket;
-import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.client.ReClient;
+import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.util.entity.EntityEquipment;
 import com.sasha.reminecraft.util.entity.PotionEffect;
 

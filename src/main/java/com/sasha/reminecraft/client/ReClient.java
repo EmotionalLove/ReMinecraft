@@ -1,5 +1,6 @@
 package com.sasha.reminecraft.client;
 
+import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
 import com.github.steveice10.mc.protocol.data.game.chunk.Column;
 import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
@@ -207,12 +208,42 @@ public class ReClient implements SessionListener {
         /**
          * Tablist header/footer
          */
-        public Message tabHeader = TextMessageColoured.of("\n&7RE:Minecraft &d" + ReMinecraft.VERSION + "\n");
-        public Message tabFooter = TextMessageColoured.of("\n&7Created by Sasha\nhttps://github.com/EmotionalLove/ReMinecraft\n");
+        public Message tabHeader = TextMessageColoured.from("\n&7RE:Minecraft &d" + ReMinecraft.VERSION + "\n");
+        public Message tabFooter = TextMessageColoured.from("\n&7Created by Sasha\nhttps://github.com/EmotionalLove/ReMinecraft\n");
         public List<PlayerListEntry> playerListEntries = new ArrayList<>();
 
         public ReClientCache() {
             INSTANCE = this;
+        }
+
+        /**
+         * Get a user's GameProfile via their UUID
+         * @param id The user's UUID
+         * @return their Gameprofile
+         * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST
+         */
+        public GameProfile getGameProfileByUuid(UUID id) {
+            for (PlayerListEntry playerListEntry : this.playerListEntries) {
+                if (playerListEntry.getProfile().getId() == id) {
+                    return playerListEntry.getProfile();
+                }
+            }
+            return null;
+        }
+        /**
+         * Get a user's GameProfile via their username
+         * @param name The user's username
+         * @return their Gameprofile
+         * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST
+         */
+
+        public GameProfile getGameProfileByName(String name) {
+            for (PlayerListEntry playerListEntry : this.playerListEntries) {
+                if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
+                    return playerListEntry.getProfile();
+                }
+            }
+            return null;
         }
 
 

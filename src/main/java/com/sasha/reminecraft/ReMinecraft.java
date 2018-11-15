@@ -14,15 +14,19 @@ import com.sasha.eventsys.SimpleEventManager;
 import com.sasha.reminecraft.api.RePlugin;
 import com.sasha.reminecraft.api.RePluginLoader;
 import com.sasha.reminecraft.api.event.MojangAuthenticateEvent;
-import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.client.ChildReClient;
+import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.command.game.AboutCommand;
 import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -30,28 +34,47 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * The main Re:Minecraft class, where the majority of essential startup functions will be stored.
  */
-public class ReMinecraft {
+public class ReMinecraft implements IReMinecraft {
 
-    private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
-
+    public static final String DATA_FILE = "ReMinecraft";
+    /**
+     * Current software version of Re:Minecraft
+     */
+    public static final String VERSION = "1.1.7";
+    /**
+     * The command line command processor
+     */
+    public static final SimpleCommandProcessor TERMINAL_CMD_PROCESSOR = new SimpleCommandProcessor("");
+    /**
+     * The in-game command processor
+     */
+    public static final SimpleCommandProcessor INGAME_CMD_PROCESSOR = new SimpleCommandProcessor("\\");
     /**
      * Singleton of this Re:Minecraft
      */
     public static ReMinecraft INSTANCE;
-    public static final String DATA_FILE = "ReMinecraft";
-    public List<Configuration> configurations = new ArrayList<>();
-    public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
 
     /**
-     * Current software version of Re:Minecraft
+     * The JLine terminal instance
      */
-    public static final String VERSION = "1.1.6";
+    public static Terminal terminal;
+    /**
+     * The Jline reader instance
+     */
+    public static LineReader reader;
 
+
+    private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
+    /**
+     * The event manager for Re:Minecraft
+     */
+    public final SimpleEventManager EVENT_BUS = new SimpleEventManager();
+    public List<Configuration> configurations = new ArrayList<>();
+    public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
     public Logger logger = new Logger("RE:Minecraft " + VERSION);
     public Client minecraftClient = null;
     public Server minecraftServer = null;
@@ -62,31 +85,25 @@ public class ReMinecraft {
     private boolean isRelaunching = false;
 
     /**
-     * The command line command processor
-     */
-    public static final SimpleCommandProcessor TERMINAL_CMD_PROCESSOR = new SimpleCommandProcessor("");
-    /**
-     * The in-game command processor
-     */
-    public static final SimpleCommandProcessor INGAME_CMD_PROCESSOR = new SimpleCommandProcessor("\\");
-    /**
-     * The event manager for Re:Minecraft
-     */
-    public final SimpleEventManager EVENT_BUS = new SimpleEventManager();
-
-    /**
      * Launch Re:Minecraft and and setup the console command system.
      */
-    public static void main(String[] args) throws IllegalAccessException, InstantiationException, IOException {
+    public static void main(String[] args) throws IOException {
+        terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
+        reader = LineReaderBuilder.builder().terminal(terminal).build();
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
-        Scanner scanner = new Scanner(System.in);
         while (true) {
-            String cmd = scanner.nextLine();
-            TERMINAL_CMD_PROCESSOR.processCommand(cmd);
+            try {
+                String cmd = reader.readLine(null, null, "> ");
+                TERMINAL_CMD_PROCESSOR.processCommand(cmd.trim().replace("> ", ""));
+            } catch (UserInterruptException | IllegalStateException ex) {
+                ReMinecraft.INSTANCE.stop();
+                return;
+            }
         }
     }
 
+    @Override
     public void sendToChildren(Packet pck) {
         INSTANCE.childClients.stream()
                 .filter(ChildReClient::isPlaying)
@@ -96,37 +113,44 @@ public class ReMinecraft {
     /**
      * Launch (or relaunch) Re:Minecraft
      */
-    public void start(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-        INSTANCE = this;
-        new ReClient.ReClientCache();
-        logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft " + MinecraftConstants.GAME_VERSION);
-        RePluginLoader loader = new RePluginLoader();
-        loader.preparePlugins(loader.findPlugins());
-        loader.loadPlugins();
-        this.registerCommands();
-        this.registerConfigurations();
-        configurations.forEach(Configuration::configure); // set config vars
-        Proxy proxy = Proxy.NO_PROXY;
-        if (!MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
-            proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
-        }
-        AuthenticationService service = authenticate(proxy);// log into mc
-        if (service != null) {
-            minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
-                    MAIN_CONFIG.var_remoteServerPort,
-                    protocol,
-                    new TcpSessionFactory(proxy));
-            minecraftClient.getSession().addListener(new ReClient());
-            this.logger.log("Connecting...");
-            RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
-            minecraftClient.getSession().connect(true); // connect to the remote server
-            this.logger.log("Connected!");
+    @Override
+    public void start(String[] args) {
+        try {
+            INSTANCE = this;
+            new ReClient.ReClientCache();
+            logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft " + MinecraftConstants.GAME_VERSION);
+            RePluginLoader loader = new RePluginLoader();
+            loader.preparePlugins(loader.findPlugins());
+            loader.loadPlugins();
+            this.registerCommands();
+            this.registerConfigurations();
+            configurations.forEach(Configuration::configure); // set config vars
+            Proxy proxy = Proxy.NO_PROXY;
+            if (!MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
+                proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
+            }
+            AuthenticationService service = authenticate(proxy);// log into mc
+            if (service != null) {
+                minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
+                        MAIN_CONFIG.var_remoteServerPort,
+                        protocol,
+                        new TcpSessionFactory(proxy));
+                minecraftClient.getSession().addListener(new ReClient());
+                this.logger.log("Connecting...");
+                RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
+                minecraftClient.getSession().connect(true); // connect to the remote server
+                this.logger.log("Connected!");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.logError("A SEVERE EXCEPTION OCCURRED WHILST STARTING RE:MINECRAFT");
         }
     }
 
     /**
      * Authenticate with Mojang, first via session token, then via email/password
      */
+    @Override
     public AuthenticationService authenticate(Proxy proxy) {
         if (!MAIN_CONFIG.var_sessionId.equalsIgnoreCase("[no default]")) {
             try {
@@ -141,9 +165,9 @@ public class ReMinecraft {
                 authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
                 authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
                 authServ.login();
-                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId,authServ.getAccessToken());
+                protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
                 updateToken(authServ.getAccessToken());
-                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID,true);
+                MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID, true);
                 this.EVENT_BUS.invokeEvent(postEvent);
                 ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 ReClient.ReClientCache.INSTANCE.playerName = authServ.getSelectedProfile().getName();
@@ -180,6 +204,7 @@ public class ReMinecraft {
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
             ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
+            /*todo jline
             Scanner scanner = new Scanner(System.in);
             System.out.print("mojang email > ");
             String email = scanner.nextLine();
@@ -191,6 +216,8 @@ public class ReMinecraft {
             MAIN_CONFIG.var_mojangPassword = password;
             MAIN_CONFIG.save();
             authenticate(proxy);
+            */
+            this.stop();
         }
         return null;
     }
@@ -198,46 +225,30 @@ public class ReMinecraft {
     /**
      * Update the session token inside ReMinecraft.yml
      */
-    private void updateToken(String token) {
+    @Override
+    public void updateToken(String token) {
         MAIN_CONFIG.var_sessionId = token;
     }
 
+    @Override
     public boolean areChildrenConnected() {
         return !childClients.isEmpty();
     }
 
-    public File getDataFile() {
-        File file = new File(DATA_FILE + ".yml");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    @Override
+    public void registerCommands() {
+        try {
+            TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
+            TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
+            INGAME_CMD_PROCESSOR.register(PluginsCommand.class);
+            INGAME_CMD_PROCESSOR.register(AboutCommand.class);
+        } catch (IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
         }
-        return file;
-    }
-
-    public File getDataFile(String s) {
-        File file = new File(s + ".yml");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return file;
-    }
-
-    private void registerCommands() throws InstantiationException, IllegalAccessException {
-        TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
-        TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
-        INGAME_CMD_PROCESSOR.register(PluginsCommand.class);
-        INGAME_CMD_PROCESSOR.register(AboutCommand.class);
         RePluginLoader.getPluginList().forEach(RePlugin::registerCommands);
     }
 
+    @Override
     public boolean processInGameCommand(String s) {
         if (!s.startsWith("\\")) {
             return false;
@@ -246,7 +257,8 @@ public class ReMinecraft {
         return true;
     }
 
-    private void registerConfigurations() {
+    @Override
+    public void registerConfigurations() {
         configurations.add(MAIN_CONFIG);
         RePluginLoader.getPluginList().forEach(RePlugin::registerConfig);
     }
@@ -254,6 +266,7 @@ public class ReMinecraft {
     /**
      * Stop and close RE:Minecraft
      */
+    @Override
     public void stop() {
         if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
@@ -272,6 +285,7 @@ public class ReMinecraft {
         System.exit(0);
     }
 
+    @Override
     public void stopSoft() {
         if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
@@ -291,6 +305,7 @@ public class ReMinecraft {
     /**
      * Invoked if the player gets kicked from the remote server
      */
+    @Override
     public void reLaunch() {
         if (isShuttingDownCompletely) return;
         if (isRelaunching) return;
@@ -318,7 +333,7 @@ public class ReMinecraft {
             try {
                 Runtime.getRuntime().removeShutdownHook(shutdownThread);
                 ReMinecraft.main(new String[]{});
-            } catch (IllegalAccessException | InstantiationException | IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }).start();

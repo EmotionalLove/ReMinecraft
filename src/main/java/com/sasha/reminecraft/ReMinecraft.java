@@ -43,7 +43,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static final String VERSION = "1.1.7";
+    public static final String VERSION = "1.1.8";
     /**
      * The command line command processor
      */

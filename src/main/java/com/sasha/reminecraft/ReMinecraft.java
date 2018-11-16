@@ -20,6 +20,7 @@ import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
+import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
@@ -93,8 +94,15 @@ public class ReMinecraft implements IReMinecraft {
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
         while (true) {
             try {
-                String cmd = reader.readLine(null, null, "> ");
-                TERMINAL_CMD_PROCESSOR.processCommand(cmd.trim().replace("> ", ""));
+                try {
+                    String cmd = reader.readLine(null, null, "> ");
+                    try {
+                        TERMINAL_CMD_PROCESSOR.processCommand(cmd.trim().replace("> ", ""));
+                    } catch (Exception ignored) {
+                    }
+                } catch (EndOfFileException | IllegalStateException ex) {
+                    ReMinecraft.INSTANCE.stop();
+                }
             } catch (UserInterruptException | IllegalStateException ex) {
                 ReMinecraft.INSTANCE.stop();
                 return;
@@ -202,20 +210,7 @@ public class ReMinecraft implements IReMinecraft {
             MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, false);
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
-            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
-            /*todo jline
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("mojang email > ");
-            String email = scanner.nextLine();
-            System.out.print("\n");
-            System.out.print("mojang password > ");
-            String password = scanner.nextLine();
-            //scanner.close();
-            MAIN_CONFIG.var_mojangEmail = email;
-            MAIN_CONFIG.var_mojangPassword = password;
-            MAIN_CONFIG.save();
-            authenticate(proxy);
-            */
+            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang. Please update your credentials in the configuration.");
             this.stop();
         }
         return null;

@@ -27,8 +27,8 @@ public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
      *
      * @086 help ;-;
      *
-     * @param object
-     * @return
+     * @param object a json boi
+     * @return the fixed json boi
      */
     private static JsonObject removeEvents(JsonObject object) {
         if (object.has("extra")) {

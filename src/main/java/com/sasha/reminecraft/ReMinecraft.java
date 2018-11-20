@@ -18,6 +18,7 @@ import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.command.game.AboutCommand;
 import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
+import com.sasha.reminecraft.command.terminal.LoginCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 import org.jline.reader.LineReader;
@@ -202,21 +203,7 @@ public class ReMinecraft implements IReMinecraft {
             MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, false);
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
-            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
-            /*todo jline
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("mojang email > ");
-            String email = scanner.nextLine();
-            System.out.print("\n");
-            System.out.print("mojang password > ");
-            String password = scanner.nextLine();
-            //scanner.close();
-            MAIN_CONFIG.var_mojangEmail = email;
-            MAIN_CONFIG.var_mojangPassword = password;
-            MAIN_CONFIG.save();
-            authenticate(proxy);
-            */
-            this.stop();
+            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang. Please use the \"login\" command to log in to Minecraft.");
         }
         return null;
     }
@@ -241,6 +228,7 @@ public class ReMinecraft implements IReMinecraft {
             TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
             INGAME_CMD_PROCESSOR.register(PluginsCommand.class);
             INGAME_CMD_PROCESSOR.register(AboutCommand.class);
+            TERMINAL_CMD_PROCESSOR.register(LoginCommand.class);
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
@@ -268,6 +256,7 @@ public class ReMinecraft implements IReMinecraft {
     @Override
     public void stop() {
         if (isShuttingDownCompletely) return;
+        MAIN_CONFIG.save();
         isShuttingDownCompletely = true;
         configurations.forEach(Configuration::save);
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
@@ -287,6 +276,7 @@ public class ReMinecraft implements IReMinecraft {
     @Override
     public void stopSoft() {
         if (isShuttingDownCompletely) return;
+        MAIN_CONFIG.save();
         isShuttingDownCompletely = true;
         configurations.forEach(Configuration::save);
         logger.log("Stopping RE:Minecraft...");
@@ -308,6 +298,7 @@ public class ReMinecraft implements IReMinecraft {
     public void reLaunch() {
         if (isShuttingDownCompletely) return;
         if (isRelaunching) return;
+        MAIN_CONFIG.save();
         isRelaunching = true;
         configurations.forEach(Configuration::save);
         RePluginLoader.shutdownPlugins();

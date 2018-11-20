@@ -21,6 +21,7 @@ import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.LoginCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
+import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
@@ -44,7 +45,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static final String VERSION = "1.1.7";
+    public static final String VERSION = "1.1.9";
     /**
      * The command line command processor
      */
@@ -96,7 +97,7 @@ public class ReMinecraft implements IReMinecraft {
             try {
                 String cmd = reader.readLine(null, null, "> ");
                 TERMINAL_CMD_PROCESSOR.processCommand(cmd.trim().replace("> ", ""));
-            } catch (UserInterruptException | IllegalStateException ex) {
+            } catch (UserInterruptException | IllegalStateException | EndOfFileException ex) {
                 ReMinecraft.INSTANCE.stop();
                 return;
             }
@@ -203,7 +204,7 @@ public class ReMinecraft implements IReMinecraft {
             MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, false);
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.INSTANCE.logger.logError(e.getMessage());
-            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang. Please use the \"login\" command to log in to Minecraft.");
+            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
         }
         return null;
     }
@@ -256,7 +257,6 @@ public class ReMinecraft implements IReMinecraft {
     @Override
     public void stop() {
         if (isShuttingDownCompletely) return;
-        MAIN_CONFIG.save();
         isShuttingDownCompletely = true;
         configurations.forEach(Configuration::save);
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
@@ -276,7 +276,6 @@ public class ReMinecraft implements IReMinecraft {
     @Override
     public void stopSoft() {
         if (isShuttingDownCompletely) return;
-        MAIN_CONFIG.save();
         isShuttingDownCompletely = true;
         configurations.forEach(Configuration::save);
         logger.log("Stopping RE:Minecraft...");
@@ -298,7 +297,6 @@ public class ReMinecraft implements IReMinecraft {
     public void reLaunch() {
         if (isShuttingDownCompletely) return;
         if (isRelaunching) return;
-        MAIN_CONFIG.save();
         isRelaunching = true;
         configurations.forEach(Configuration::save);
         RePluginLoader.shutdownPlugins();

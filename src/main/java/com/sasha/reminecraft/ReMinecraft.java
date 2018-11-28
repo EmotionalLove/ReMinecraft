@@ -45,7 +45,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static final String VERSION = "1.1.9";
+    public static final String VERSION = "1.1.10";
     /**
      * The command line command processor
      */
@@ -309,21 +309,17 @@ public class ReMinecraft implements IReMinecraft {
         }
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.clear();
-        new Thread(() -> {
-            for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
-                ReMinecraft.INSTANCE.logger.logWarning("Reconnecting in " + i + " seconds");
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+        for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
+            ReMinecraft.INSTANCE.logger.logWarning("Reconnecting in " + i + " seconds");
             try {
-                Runtime.getRuntime().removeShutdownHook(shutdownThread);
-                ReMinecraft.main(new String[]{});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+                Thread.sleep(1000L);
+            } catch (InterruptedException ignored) {}
+        }
+        try {
+            Runtime.getRuntime().removeShutdownHook(shutdownThread);
+            ReMinecraft.main(new String[]{});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

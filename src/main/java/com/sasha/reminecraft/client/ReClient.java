@@ -73,6 +73,7 @@ public class ReClient implements SessionListener {
         this.reactionRegistry.put(ServerWindowItemsPacket.class, new ServerWindowItemsReaction());
         this.reactionRegistry.put(ServerPlayerPositionRotationPacket.class, new ServerPlayerPositionRotationReaction());
         this.reactionRegistry.put(ServerSpawnPlayerPacket.class, new ServerSpawnPlayerReaction());
+        this.reactionRegistry.put(ServerUpdateTimePacket.class, new ServerUpdateTimeReaction());
     }
 
     /**
@@ -126,17 +127,6 @@ public class ReClient implements SessionListener {
                 ("Connected to " + connectedEvent.getSession().getHost() +
                         ":"
                         + connectedEvent.getSession().getPort());
-        ReMinecraft.INSTANCE.logger.log("Starting server on " + ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerIp + ":" +
-                ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerPort);
-        try {
-            ReMinecraft.INSTANCE.minecraftServer = ReServerManager.prepareServer();
-            ReMinecraft.INSTANCE.minecraftServer.addListener(new ReServerManager());
-            ReMinecraft.INSTANCE.minecraftServer.bind(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ReMinecraft.INSTANCE.logger.logError("A severe exception occurred whilst creating the server! Maybe there's already a server running on the port?");
-        }
-        ReMinecraft.INSTANCE.logger.log("Server started!");
     }
 
     /**
@@ -163,6 +153,8 @@ public class ReClient implements SessionListener {
     public static class ReClientCache {
 
         public static ReClientCache INSTANCE;
+
+        public boolean serverTicked = false;
 
         public String playerName;
         public UUID playerUuid;

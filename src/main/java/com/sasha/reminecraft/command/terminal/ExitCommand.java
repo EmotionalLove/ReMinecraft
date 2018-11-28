@@ -8,7 +8,7 @@ import com.sasha.simplecmdsys.SimpleCommand;
  */
 public class ExitCommand extends SimpleCommand {
     public ExitCommand() {
-        super("exit");
+        super("stop");
     }
 
     @Override

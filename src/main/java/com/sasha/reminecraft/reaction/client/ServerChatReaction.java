@@ -36,7 +36,7 @@ public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
             for (int i = 0; i < extra.size(); i++) {
                 JsonObject extraObject = extra.get(i).getAsJsonObject();
                 extra.remove(extraObject);
-                extra.set(i, removeEvents(extraObject));
+                extra.add(removeEvents(extraObject));
             }
             object.add("extra", extra);
         }

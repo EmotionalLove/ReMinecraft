@@ -8,7 +8,7 @@ public class ChildJoinEvent extends SimpleCancellableEvent {
     private String cancelledKickMessage;
     private GameProfile profile;
 
-    public ChildJoinEvent(GameProfile profile){
+    public ChildJoinEvent(GameProfile profile) {
         this.profile = profile;
     }
 

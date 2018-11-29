@@ -57,6 +57,7 @@ public class Configuration {
     public String var_socksProxy = null;
     @ConfigSetting
     public int var_socksPort = -1;
+
     {
         var_whitelistServer.add("Phi_Phi");
         var_whitelistServer.add("Color");
@@ -113,7 +114,7 @@ public class Configuration {
                 if (!yml.exists("config-version")) {
                     yml.set("config-version", 0);
                 }
-                String target = declaredField.getName().replace("var_" ,"");
+                String target = declaredField.getName().replace("var_", "");
                 yml.set(target, declaredField.get(this));
                 ReMinecraft.LOGGER.logDebug("Saved " + target);
             }

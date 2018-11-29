@@ -23,10 +23,9 @@ public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
      * This is supposed to fix the issue where death messages on 2b2t would show up
      * as raw JSON, but it doesn't work
      *
-     * @086 help ;-;
-     *
      * @param object a json boi
      * @return the fixed json boi
+     * @086 help ;-;
      */
     private static JsonObject removeEvents(JsonObject object) {
         if (object.has("extra")) {

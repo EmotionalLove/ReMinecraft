@@ -4,8 +4,6 @@ import com.sasha.reminecraft.logging.Logger;
 import org.jline.reader.LineReader;
 import org.jline.utils.InfoCmp;
 
-import java.io.Console;
-
 import static com.sasha.reminecraft.ReMinecraft.reader;
 
 /**

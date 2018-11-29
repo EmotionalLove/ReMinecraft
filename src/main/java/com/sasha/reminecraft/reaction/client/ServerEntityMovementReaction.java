@@ -31,7 +31,7 @@ public class ServerEntityMovementReaction implements IPacketReactor<ServerEntity
                 ((EntityRotation) e).yaw = packet.getYaw();
                 ((EntityRotation) e).pitch = packet.getPitch();
             }
-        }catch (NoSuchFieldException | IllegalAccessException ignored) {
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
             //
         }
         return true;

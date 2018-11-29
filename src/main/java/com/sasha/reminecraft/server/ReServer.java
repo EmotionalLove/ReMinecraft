@@ -74,18 +74,20 @@ public class ReServer extends SessionAdapter {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         try {
             if (!reactionRegistry.containsKey(ev.getPacket().getClass())) { // so we aren't blocking packets that dont need special processing
-                if (((MinecraftProtocol)this.child.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME) return;
+                if (((MinecraftProtocol) this.child.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME)
+                    return;
                 ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket());
                 return;
             }
             this.reactionRegistry.forEach((pck, reactor) -> { // iterate over the registered reactions
                 if (pck == ev.getPacket().getClass()) { // if the reaction is paired with pck's clas
-                    if (reactor instanceof AbstractChildPacketReactor) ((AbstractChildPacketReactor) reactor).setChild(this.child);
+                    if (reactor instanceof AbstractChildPacketReactor)
+                        ((AbstractChildPacketReactor) reactor).setChild(this.child);
                     boolean flag = reactor.takeAction(ev.getPacket());
                     if (flag
                             && ReMinecraft.INSTANCE.minecraftClient != null
                             && ReMinecraft.INSTANCE.minecraftClient.getSession().isConnected()
-                            && ((MinecraftProtocol)this.child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) // perform the action
+                            && ((MinecraftProtocol) this.child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) // perform the action
                         ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket()); // send the packet to server if true
                 } //ez
             });
@@ -305,7 +307,7 @@ public class ReServer extends SessionAdapter {
         if (flag) {
             ReMinecraft.LOGGER.logWarning(name + " isn't whitelisted.");
             SubProtocol proto = ((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol();
-            switch (proto){
+            switch (proto) {
                 case LOGIN:
                     child.getSession().send(new LoginDisconnectPacket(TextMessageColoured.from("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;

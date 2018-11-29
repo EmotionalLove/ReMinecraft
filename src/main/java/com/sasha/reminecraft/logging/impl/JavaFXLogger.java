@@ -2,9 +2,6 @@ package com.sasha.reminecraft.logging.impl;
 
 import com.sasha.reminecraft.logging.Logger;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Created by Sasha at 7:46 PM on 11/28/2018
  */

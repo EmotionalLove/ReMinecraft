@@ -2,6 +2,7 @@ package com.sasha.reminecraft.javafx;
 
 import com.sasha.reminecraft.ReMinecraft;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
@@ -17,7 +18,10 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
     public static final int WIDTH = 600;
     public static final int HEIGHT = 400;
 
+    public static boolean launched = false;
+
     public void startLaunch() {
+        launched = true;
         launch();
     }
 
@@ -40,7 +44,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         stage.setTitle("RE:Minecraft " + ReMinecraft.VERSION);
         TabPane pane = new TabPane();
         StackPane configPane = new StackPane();
-        Tab chatTab = new Tab("Chat", prepareChatPane());
+        Tab chatTab = new Tab("Chat", prepareChatPane(stage));
         chatTab.setClosable(false);
         Tab configTab = new Tab("Configuration", configPane);
         configTab.setClosable(false);
@@ -49,18 +53,31 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         return new Scene(pane);
     }
 
-    private StackPane prepareChatPane() {
+    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
+    private StackPane prepareChatPane(Stage stage) {
         StackPane pane = new StackPane();
         Button relaunchButton = new Button("Restart");
-        relaunchButton.setTranslateY(-30);
+        relaunchButton.setTranslateY(-HEIGHT / 2 + 55);
+        relaunchButton.setTranslateX(-WIDTH / 2 + 40);
         relaunchButton.setOnAction(e -> {
             ReMinecraft.INSTANCE.reLaunch();
         });
         Button stopButton = new Button("Stop");
-        relaunchButton.setOnAction(e -> {
-            ReMinecraft.INSTANCE.stopSoft();
+        stopButton.setTranslateX(-WIDTH / 2 + 95);
+        stopButton.setTranslateY(-HEIGHT / 2 + 55);
+        stopButton.setOnAction(e -> {
+            ReMinecraft.INSTANCE.stop();
         });
         pane.getChildren().addAll(relaunchButton, stopButton);
+        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
+            relaunchButton.setTranslateX(-newVal.intValue() / 2 + 40);
+            stopButton.setTranslateX(-newVal.intValue() / 2 + 95);
+        });
+        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+            relaunchButton.setTranslateY(-newVal.intValue() / 2 + 55);
+            stopButton.setTranslateY(-newVal.intValue() / 2 + 55);
+        });
+
         return pane;
     }
 

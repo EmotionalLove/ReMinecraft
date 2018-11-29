@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static com.sasha.reminecraft.javafx.ReMinecraftGui.launched;
+
 /**
  * The main Re:Minecraft class, where the majority of essential startup functions will be stored.
  */
@@ -109,7 +111,7 @@ public class ReMinecraft implements IReMinecraft {
             LOGGER = new TerminalLogger("RE:Minecraft " + VERSION);
         } else {
             LOGGER = new JavaFXLogger("RE:Minecraft " + VERSION);
-            new Thread(() -> new ReMinecraftGui().startLaunch()).start();
+            if (!launched) new Thread(() -> new ReMinecraftGui().startLaunch()).start();
         }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands

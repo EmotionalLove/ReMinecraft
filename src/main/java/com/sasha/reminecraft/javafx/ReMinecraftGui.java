@@ -3,10 +3,9 @@ package com.sasha.reminecraft.javafx;
 import com.sasha.reminecraft.ReMinecraft;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 /**
@@ -16,6 +15,8 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
 
     public static final int WIDTH = 600;
     public static final int HEIGHT = 400;
+
+    public static TextArea areaToLogTo = null;
 
     public static boolean launched = false;
 
@@ -42,7 +43,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
     private Scene prepareScreen(Stage stage) {
         stage.setTitle("RE:Minecraft " + ReMinecraft.VERSION);
         TabPane pane = new TabPane();
-        StackPane configPane = new StackPane();
+        ScrollPane configPane = new ScrollPane();
         Tab chatTab = new Tab("Chat", prepareChatPane(stage));
         chatTab.setClosable(false);
         Tab configTab = new Tab("Configuration", configPane);
@@ -67,15 +68,20 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         stopButton.setOnAction(e -> {
             ReMinecraft.INSTANCE.stop();
         });
-        pane.getChildren().addAll(relaunchButton, stopButton);
+        areaToLogTo = new TextArea();
+        areaToLogTo.setEditable(false);
+        areaToLogTo.setMaxSize(WIDTH - 75, HEIGHT - 160);
+        pane.getChildren().addAll(relaunchButton, stopButton, areaToLogTo);
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
             relaunchButton.setTranslateX(-newVal.intValue() / 2 + 40);
             stopButton.setTranslateX(-newVal.intValue() / 2 + 95);
+            areaToLogTo.setMaxWidth((double)newVal - 75);
         });
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
             relaunchButton.setTranslateY(-newVal.intValue() / 2 + 55);
             stopButton.setTranslateY(-newVal.intValue() / 2 + 55);
-        });
+            areaToLogTo.setMaxHeight((double)newVal - 160);
+    });
 
         return pane;
     }

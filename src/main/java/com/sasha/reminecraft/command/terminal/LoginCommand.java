@@ -14,13 +14,13 @@ public class LoginCommand extends SimpleCommand {
     @Override
     public void onCommand() {
         if (this.getArguments() == null || this.getArguments().length != 2) {
-            ReMinecraft.INSTANCE.logger.logError("Requires two arguments!");
+            ReMinecraft.INSTANCE.terminalLogger.logError("Requires two arguments!");
             return;
         }
         String email = this.getArguments()[0];
         String pass = this.getArguments()[1];
         ReMinecraft.INSTANCE.MAIN_CONFIG.var_mojangEmail = email;
         ReMinecraft.INSTANCE.MAIN_CONFIG.var_mojangEmail = pass;
-        ReMinecraft.INSTANCE.logger.log("Credentials updated! Please type \"relaunch\" to try logging in again.");
+        ReMinecraft.INSTANCE.terminalLogger.log("Credentials updated! Please type \"relaunch\" to try logging in again.");
     }
 }

@@ -24,7 +24,6 @@ import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.RemoteServerPacketRecieveEvent;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.reaction.client.*;
-import com.sasha.reminecraft.server.ReServerManager;
 import com.sasha.reminecraft.util.TextMessageColoured;
 import com.sasha.reminecraft.util.entity.Entity;
 import com.sasha.reminecraft.util.entity.EntityPlayer;
@@ -123,7 +122,7 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void connected(ConnectedEvent connectedEvent) {
-        ReMinecraft.INSTANCE.logger.log
+        ReMinecraft.INSTANCE.terminalLogger.log
                 ("Connected to " + connectedEvent.getSession().getHost() +
                         ":"
                         + connectedEvent.getSession().getPort());
@@ -143,7 +142,7 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void disconnected(DisconnectedEvent disconnectedEvent) {
-        ReMinecraft.INSTANCE.logger.logWarning("Disconnected: " + disconnectedEvent.getReason());
+        ReMinecraft.INSTANCE.terminalLogger.logWarning("Disconnected: " + disconnectedEvent.getReason());
         ReMinecraft.INSTANCE.reLaunch();
     }
 

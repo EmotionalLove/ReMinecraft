@@ -21,6 +21,7 @@ import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.LoginCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.reminecraft.javafx.ReMinecraftGui;
+import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -46,7 +47,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static final String VERSION = "1.1.10";
+    public static String VERSION = "1.1.10";
     /**
      * The command line command processor
      */
@@ -77,7 +78,7 @@ public class ReMinecraft implements IReMinecraft {
     public final SimpleEventManager EVENT_BUS = new SimpleEventManager();
     public List<Configuration> configurations = new ArrayList<>();
     public Configuration MAIN_CONFIG = new Configuration(DATA_FILE);
-    public Logger logger = new Logger("RE:Minecraft " + VERSION);
+    public TerminalLogger terminalLogger = new TerminalLogger("RE:Minecraft " + VERSION);
     public Client minecraftClient = null;
     public Server minecraftServer = null;
     public MinecraftProtocol protocol;
@@ -96,15 +97,15 @@ public class ReMinecraft implements IReMinecraft {
                 doGui = false;
             }
         }
-        if (doGui) {
-            ReMinecraftGui.launch(args);
-        }
-        else {
+        if (!doGui) {
             terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
             reader = LineReaderBuilder.builder().terminal(terminal).build();
         }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
+        if (doGui) {
+            new ReMinecraftGui().startLaunch();
+        }
         //noinspection LoopConditionNotUpdatedInsideLoop
         while (!doGui) {
             try {
@@ -132,7 +133,7 @@ public class ReMinecraft implements IReMinecraft {
         try {
             INSTANCE = this;
             new ReClient.ReClientCache();
-            logger.log("Starting RE:Minecraft " + VERSION + " for Minecraft " + MinecraftConstants.GAME_VERSION);
+            terminalLogger.log("Starting RE:Minecraft " + VERSION + " for Minecraft " + MinecraftConstants.GAME_VERSION);
             RePluginLoader loader = new RePluginLoader();
             loader.preparePlugins(loader.findPlugins());
             loader.loadPlugins();
@@ -150,14 +151,14 @@ public class ReMinecraft implements IReMinecraft {
                         protocol,
                         new TcpSessionFactory(proxy));
                 minecraftClient.getSession().addListener(new ReClient());
-                this.logger.log("Connecting...");
+                this.terminalLogger.log("Connecting...");
                 RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
                 minecraftClient.getSession().connect(true); // connect to the remote server
-                this.logger.log("Connected!");
+                this.terminalLogger.log("Connected!");
             }
         } catch (IOException e) {
             e.printStackTrace();
-            logger.logError("A SEVERE EXCEPTION OCCURRED WHILST STARTING RE:MINECRAFT");
+            terminalLogger.logError("A SEVERE EXCEPTION OCCURRED WHILST STARTING RE:MINECRAFT");
         }
     }
 
@@ -174,7 +175,7 @@ public class ReMinecraft implements IReMinecraft {
                     return null;
                 }
                 // try authing with session id first, since it [appears] to be present
-                ReMinecraft.INSTANCE.logger.log("Attempting to log in with session token");
+                ReMinecraft.INSTANCE.terminalLogger.log("Attempting to log in with session token");
                 AuthenticationService authServ = new AuthenticationService(MAIN_CONFIG.var_clientId, proxy);
                 authServ.setUsername(MAIN_CONFIG.var_mojangEmail);
                 authServ.setAccessToken(MAIN_CONFIG.var_sessionId);
@@ -183,7 +184,7 @@ public class ReMinecraft implements IReMinecraft {
                 updateToken(authServ.getAccessToken());
                 MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID, true);
                 this.EVENT_BUS.invokeEvent(postEvent);
-                ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
+                ReMinecraft.INSTANCE.terminalLogger.log("Logged in as " + authServ.getSelectedProfile().getName());
                 ReClient.ReClientCache.INSTANCE.playerName = authServ.getSelectedProfile().getName();
                 ReClient.ReClientCache.INSTANCE.playerUuid = authServ.getSelectedProfile().getId();
                 return authServ;
@@ -191,11 +192,11 @@ public class ReMinecraft implements IReMinecraft {
                 // the session token is invalid
                 MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.SESSIONID, false);
                 this.EVENT_BUS.invokeEvent(postEvent);
-                ReMinecraft.INSTANCE.logger.logError("Session token was invalid!");
+                ReMinecraft.INSTANCE.terminalLogger.logError("Session token was invalid!");
             }
         }
         // log in normally w username and password
-        ReMinecraft.INSTANCE.logger.log("Attemping to log in with email and password");
+        ReMinecraft.INSTANCE.terminalLogger.log("Attemping to log in with email and password");
         try {
             MojangAuthenticateEvent.Pre event = new MojangAuthenticateEvent.Pre(MojangAuthenticateEvent.Method.EMAILPASS);
             this.EVENT_BUS.invokeEvent(event);
@@ -206,7 +207,7 @@ public class ReMinecraft implements IReMinecraft {
             authServ.login();
             protocol = new MinecraftProtocol(authServ.getSelectedProfile(), MAIN_CONFIG.var_clientId, authServ.getAccessToken());
             updateToken(authServ.getAccessToken());
-            ReMinecraft.INSTANCE.logger.log("Logged in as " + authServ.getSelectedProfile().getName());
+            ReMinecraft.INSTANCE.terminalLogger.log("Logged in as " + authServ.getSelectedProfile().getName());
             ReClient.ReClientCache.INSTANCE.playerName = authServ.getSelectedProfile().getName();
             ReClient.ReClientCache.INSTANCE.playerUuid = authServ.getSelectedProfile().getId();
             MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, true);
@@ -216,8 +217,8 @@ public class ReMinecraft implements IReMinecraft {
             // login completely failed
             MojangAuthenticateEvent.Post postEvent = new MojangAuthenticateEvent.Post(MojangAuthenticateEvent.Method.EMAILPASS, false);
             this.EVENT_BUS.invokeEvent(postEvent);
-            ReMinecraft.INSTANCE.logger.logError(e.getMessage());
-            ReMinecraft.INSTANCE.logger.logError("Could not login with Mojang.");
+            ReMinecraft.INSTANCE.terminalLogger.logError(e.getMessage());
+            ReMinecraft.INSTANCE.terminalLogger.logError("Could not login with Mojang.");
         }
         return null;
     }
@@ -273,7 +274,7 @@ public class ReMinecraft implements IReMinecraft {
         isShuttingDownCompletely = true;
         configurations.forEach(Configuration::save);
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
-        logger.log("Stopping RE:Minecraft...");
+        terminalLogger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
         if (minecraftServer != null) {
@@ -282,7 +283,7 @@ public class ReMinecraft implements IReMinecraft {
         }
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
-        logger.log("Stopped RE:Minecraft...");
+        terminalLogger.log("Stopped RE:Minecraft...");
         System.exit(0);
     }
 
@@ -291,7 +292,7 @@ public class ReMinecraft implements IReMinecraft {
         if (isShuttingDownCompletely) return;
         isShuttingDownCompletely = true;
         configurations.forEach(Configuration::save);
-        logger.log("Stopping RE:Minecraft...");
+        terminalLogger.log("Stopping RE:Minecraft...");
         RePluginLoader.shutdownPlugins();
         RePluginLoader.getPluginList().clear();
         if (minecraftServer != null) {
@@ -300,7 +301,7 @@ public class ReMinecraft implements IReMinecraft {
         }
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is shutting down...", true);
-        logger.log("Stopped RE:Minecraft...");
+        terminalLogger.log("Stopped RE:Minecraft...");
     }
 
     /**
@@ -323,10 +324,11 @@ public class ReMinecraft implements IReMinecraft {
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.clear();
         for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
-            ReMinecraft.INSTANCE.logger.logWarning("Reconnecting in " + i + " seconds");
+            ReMinecraft.INSTANCE.terminalLogger.logWarning("Reconnecting in " + i + " seconds");
             try {
                 Thread.sleep(1000L);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
         try {
             Runtime.getRuntime().removeShutdownHook(shutdownThread);

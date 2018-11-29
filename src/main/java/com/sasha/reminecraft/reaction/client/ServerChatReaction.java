@@ -3,7 +3,6 @@ package com.sasha.reminecraft.reaction.client;
 import com.github.steveice10.mc.protocol.data.message.Message;
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.ChatReceivedEvent;
@@ -15,7 +14,7 @@ public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
         Message pckMsg = Message.fromJson(removeEvents(packet.getMessage().toJson().getAsJsonObject()));
         ChatReceivedEvent chatEvent = new ChatReceivedEvent(pckMsg.getFullText(), System.currentTimeMillis());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(chatEvent);
-        ReMinecraft.INSTANCE.logger.log("(CHAT) " + pckMsg.getFullText());
+        ReMinecraft.INSTANCE.terminalLogger.log("(CHAT) " + pckMsg.getFullText());
         ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromJson(pckMsg.toJson()), packet.getType()));
         return false;
     }

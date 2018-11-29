@@ -15,7 +15,7 @@ public class ServerEntityMovementReaction implements IPacketReactor<ServerEntity
         try {
             Entity e = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
             if (e == null) {
-                ReMinecraft.INSTANCE.logger.logDebug
+                ReMinecraft.INSTANCE.terminalLogger.logDebug
                         ("Null entity with entity id " + packet.getEntityId());
                 ReMinecraft.INSTANCE.sendToChildren(packet);
                 return false;

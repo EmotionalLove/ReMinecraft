@@ -1,6 +1,6 @@
 package com.sasha.reminecraft.api;
 
-import com.sasha.reminecraft.Logger;
+import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.reminecraft.util.YML;
 
 import java.io.*;
@@ -16,32 +16,32 @@ import java.util.jar.JarFile;
 public class RePluginLoader {
 
     private static final String DIR_NAME = "plugins";
-    private static final Logger LOGGER = new Logger("Plugin Loader");
+    private static final TerminalLogger TERMINAL_LOGGER = new TerminalLogger("Plugin Loader");
     private static LinkedHashMap<File /*jar*/, PluginInfo> theRawPlugins = new LinkedHashMap<>();
     private static List<RePlugin> pluginList = new ArrayList<>();
 
     public List<File> findPlugins() {
-        LOGGER.log("Finding plugins...");
+        TERMINAL_LOGGER.log("Finding plugins...");
         File dir = new File(DIR_NAME);
         if (!dir.exists()) {
             dir.mkdir();
-            LOGGER.log("No plugins were found.");
+            TERMINAL_LOGGER.log("No plugins were found.");
             return new ArrayList<>();
         }
         if (!dir.isDirectory()) {
             dir.delete();
             dir.mkdir();
-            LOGGER.log("No plugins were found.");
+            TERMINAL_LOGGER.log("No plugins were found.");
             return new ArrayList<>();
         }
         File[] allFiles = dir.listFiles();
         if (allFiles == null) {
-            LOGGER.log("No plugins were found.");
+            TERMINAL_LOGGER.log("No plugins were found.");
             return new ArrayList<>(); // no files?
         }
         List<File> theFiles = new ArrayList<>();
         Arrays.stream(allFiles).filter(fname -> fname.getName().endsWith(".jar")).forEach(theFiles::add);
-        LOGGER.log(theFiles.size() + " potential plugins were found!");
+        TERMINAL_LOGGER.log(theFiles.size() + " potential plugins were found!");
         return theFiles;
     }
 
@@ -51,7 +51,7 @@ public class RePluginLoader {
             JarFile jar = new JarFile(file, true);
             JarEntry entry = jar.getJarEntry("plugin.yml");
             if (entry == null) {
-                LOGGER.logError(file.getName() + " is missing it's plugin.yml");
+                TERMINAL_LOGGER.logError(file.getName() + " is missing it's plugin.yml");
                 continue; // invalid plugin
             }
             PluginInfo info = new PluginInfo();
@@ -81,7 +81,7 @@ public class RePluginLoader {
             info.pluginVersion = yml.getString("version");
             info.mainClass = yml.getString("mainClass");
             tmp.delete();
-            LOGGER.log("Prepared " + info.pluginName + " " + info.pluginVersion);
+            TERMINAL_LOGGER.log("Prepared " + info.pluginName + " " + info.pluginVersion);
             theRawPlugins.put(file, info);
         }
         return i;
@@ -94,7 +94,7 @@ public class RePluginLoader {
                 Class clazz = Class.forName(info.mainClass, true, classLoader);
                 if (clazz.getSuperclass() == null || clazz.getSuperclass() != RePlugin.class) {
                     //invalid
-                    LOGGER.logError(info.pluginName + " has an invalid main class, cannot load.");
+                    TERMINAL_LOGGER.logError(info.pluginName + " has an invalid main class, cannot load.");
                     return;
                 }
                 RePlugin plugin = (RePlugin) clazz.newInstance();
@@ -102,19 +102,19 @@ public class RePluginLoader {
                 plugin.pluginDescription = info.pluginDescription;
                 plugin.pluginAuthors = info.pluginAuthors;
                 plugin.pluginVersion = info.pluginVersion;
-                LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialised");
+                TERMINAL_LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialised");
                 plugin.onPluginInit();
                 pluginList.add(plugin);
             } catch (Exception e) {
                 //
             }
         });
-        LOGGER.log(getPluginList().size() + " plugins were successfully loaded");
+        TERMINAL_LOGGER.log(getPluginList().size() + " plugins were successfully loaded");
     }
 
     public static void shutdownPlugins() {
         getPluginList().forEach(pl -> {
-            LOGGER.log("Disabling " + pl.pluginName);
+            TERMINAL_LOGGER.log("Disabling " + pl.pluginName);
             pl.onPluginDisable();
         });
     }

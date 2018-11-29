@@ -14,10 +14,12 @@ import javafx.stage.Stage;
  */
 public class ReMinecraftGui extends Application implements IReMinecraftGui {
 
-    public static final int WIDTH = 450;
+    public static final int WIDTH = 600;
     public static final int HEIGHT = 400;
 
-    public
+    public void startLaunch() {
+        launch();
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -32,14 +34,19 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         });
         primaryStage.setScene(prepareScreen(primaryStage));
         primaryStage.show();
-    }
 
+    }
     private Scene prepareScreen(Stage stage) {
+        stage.setTitle("RE:Minecraft " + ReMinecraft.VERSION);
         TabPane pane = new TabPane();
         StackPane chatPane = new StackPane();
         StackPane configPaned = new StackPane();
-        pane.getTabs().add(new Tab("Chat", chatPane));
-        pane.getTabs().add(new Tab("Configuration", configPaned));
+        Tab chatTab = new Tab("Chat", chatPane);
+        chatTab.setClosable(false);
+        Tab configTab = new Tab("Configuration", configPaned);
+        configTab.setClosable(false);
+        pane.getTabs().add(chatTab);
+        pane.getTabs().add(configTab);
         return new Scene(pane);
     }
 

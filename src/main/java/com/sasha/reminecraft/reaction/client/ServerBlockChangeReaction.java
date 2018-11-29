@@ -18,7 +18,7 @@ public class ServerBlockChangeReaction implements IPacketReactor<ServerBlockChan
                 .getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
         if (column == null) {
             // not ignoring this can leak memory in the notchian client
-            ReMinecraft.INSTANCE.terminalLogger.logDebug("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
+            ReMinecraft.LOGGER.logDebug("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
             return false;
         }
         Chunk subChunk = column.getChunks()[cubeY];

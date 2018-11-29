@@ -122,7 +122,7 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void connected(ConnectedEvent connectedEvent) {
-        ReMinecraft.INSTANCE.terminalLogger.log
+        ReMinecraft.LOGGER.log
                 ("Connected to " + connectedEvent.getSession().getHost() +
                         ":"
                         + connectedEvent.getSession().getPort());
@@ -142,7 +142,7 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void disconnected(DisconnectedEvent disconnectedEvent) {
-        ReMinecraft.INSTANCE.terminalLogger.logWarning("Disconnected: " + disconnectedEvent.getReason());
+        ReMinecraft.LOGGER.logWarning("Disconnected: " + disconnectedEvent.getReason());
         ReMinecraft.INSTANCE.reLaunch();
     }
 
@@ -209,6 +209,7 @@ public class ReClient implements SessionListener {
 
         /**
          * Get a user's GameProfile via their UUID
+         *
          * @param id The user's UUID
          * @return their Gameprofile
          * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST
@@ -221,8 +222,10 @@ public class ReClient implements SessionListener {
             }
             return null;
         }
+
         /**
          * Get a user's GameProfile via their username
+         *
          * @param name The user's username
          * @return their Gameprofile
          * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST

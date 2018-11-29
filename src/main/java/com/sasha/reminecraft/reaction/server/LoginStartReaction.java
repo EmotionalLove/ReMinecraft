@@ -16,7 +16,7 @@ public class LoginStartReaction extends AbstractChildPacketReactor implements IP
         if (((MinecraftProtocol)this.getChild().getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.LOGIN) {
             return false;
         }
-        ReMinecraft.INSTANCE.terminalLogger.log("Child user %s connecting!".replace("%s", packet.getUsername()));
+        ReMinecraft.LOGGER.log("Child user %s connecting!".replace("%s", packet.getUsername()));
         ReServer.runWhitelist(packet.getUsername(), this.getChild());
         return false;
     }

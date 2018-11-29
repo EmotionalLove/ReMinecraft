@@ -21,21 +21,21 @@ public class JavaFXLogger implements Logger {
 
     @Override
     public void log(String msg) {
-
+        System.out.println(msg);
     }
 
     @Override
     public void logWarning(String msg) {
-
+        System.out.println(msg);
     }
 
     @Override
     public void logError(String msg) {
-
+        System.out.println(msg);
     }
 
     @Override
     public void logDebug(String msg) {
-
+        System.out.println(msg);
     }
 }

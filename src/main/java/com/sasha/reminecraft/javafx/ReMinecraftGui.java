@@ -34,24 +34,33 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         });
         primaryStage.setScene(prepareScreen(primaryStage));
         primaryStage.show();
-
     }
+
     private Scene prepareScreen(Stage stage) {
         stage.setTitle("RE:Minecraft " + ReMinecraft.VERSION);
         TabPane pane = new TabPane();
-        StackPane chatPane = new StackPane();
-        StackPane configPaned = new StackPane();
-        Tab chatTab = new Tab("Chat", chatPane);
+        StackPane configPane = new StackPane();
+        Tab chatTab = new Tab("Chat", prepareChatPane());
         chatTab.setClosable(false);
-        Tab configTab = new Tab("Configuration", configPaned);
+        Tab configTab = new Tab("Configuration", configPane);
         configTab.setClosable(false);
         pane.getTabs().add(chatTab);
         pane.getTabs().add(configTab);
         return new Scene(pane);
     }
 
-    private StackPane prepareChatPane(StackPane pane) {
+    private StackPane prepareChatPane() {
+        StackPane pane = new StackPane();
         Button relaunchButton = new Button("Restart");
+        relaunchButton.setTranslateY(-30);
+        relaunchButton.setOnAction(e -> {
+            ReMinecraft.INSTANCE.reLaunch();
+        });
+        Button stopButton = new Button("Stop");
+        relaunchButton.setOnAction(e -> {
+            ReMinecraft.INSTANCE.stopSoft();
+        });
+        pane.getChildren().addAll(relaunchButton, stopButton);
         return pane;
     }
 

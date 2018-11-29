@@ -99,7 +99,7 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                 });
                 break;
             default:
-                ReMinecraft.INSTANCE.terminalLogger.logError("Unsupported tablist action!");
+                ReMinecraft.LOGGER.logError("Unsupported tablist action!");
 
         }
         return true;

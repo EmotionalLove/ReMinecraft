@@ -13,7 +13,7 @@ public class ServerEntityEquipmentReaction implements IPacketReactor<ServerEntit
     public boolean takeAction(ServerEntityEquipmentPacket packet) {
         Entity entity = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (entity instanceof EntityObject) {
-            ReMinecraft.INSTANCE.terminalLogger.logError("Server tried adding equipment to an EntityObject! Ignoring.");
+            ReMinecraft.LOGGER.logError("Server tried adding equipment to an EntityObject! Ignoring.");
             return false;
         }
         EntityEquipment equipment = (EntityEquipment) entity;

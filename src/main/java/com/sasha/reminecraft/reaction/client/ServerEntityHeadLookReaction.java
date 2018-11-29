@@ -11,7 +11,7 @@ public class ServerEntityHeadLookReaction implements IPacketReactor<ServerEntity
     public boolean takeAction(ServerEntityHeadLookPacket packet) {
         EntityRotation e = (EntityRotation) ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (e == null) {
-            ReMinecraft.INSTANCE.terminalLogger.logDebug
+            ReMinecraft.LOGGER.logDebug
                     ("Null entity with entity id " + packet.getEntityId());
             ReMinecraft.INSTANCE.sendToChildren(packet);
             return false;

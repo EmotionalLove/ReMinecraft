@@ -14,7 +14,7 @@ public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
         Message pckMsg = Message.fromJson(removeEvents(packet.getMessage().toJson().getAsJsonObject()));
         ChatReceivedEvent chatEvent = new ChatReceivedEvent(pckMsg.getFullText(), System.currentTimeMillis());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(chatEvent);
-        ReMinecraft.INSTANCE.terminalLogger.log("(CHAT) " + pckMsg.getFullText());
+        ReMinecraft.LOGGER.log("(CHAT) " + pckMsg.getFullText());
         ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromJson(pckMsg.toJson()), packet.getType()));
         return false;
     }

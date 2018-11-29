@@ -85,7 +85,7 @@ public class Configuration {
                 if (!yml.exists(target)) {
                     yml.set(target, declaredField.get(this) == null ? "[no default]" : declaredField.get(this));
                     declaredField.set(this, declaredField.get(this) == null ? "[no default]" : declaredField.get(this));
-                    ReMinecraft.INSTANCE.terminalLogger.log("Created " + target);
+                    ReMinecraft.LOGGER.log("Created " + target);
                     continue;
                 }
                 if (declaredField.getType() == float.class) {
@@ -93,7 +93,7 @@ public class Configuration {
                 } else {
                     declaredField.set(this, yml.get(target));
                 }
-                ReMinecraft.INSTANCE.terminalLogger.logDebug("Set " + target);
+                ReMinecraft.LOGGER.logDebug("Set " + target);
             }
             yml.save();
         } catch (IllegalAccessException ex) {
@@ -115,7 +115,7 @@ public class Configuration {
                 }
                 String target = declaredField.getName().replace("var_" ,"");
                 yml.set(target, declaredField.get(this));
-                ReMinecraft.INSTANCE.terminalLogger.logDebug("Saved " + target);
+                ReMinecraft.LOGGER.logDebug("Saved " + target);
             }
             yml.save();
         } catch (IllegalAccessException ex) {

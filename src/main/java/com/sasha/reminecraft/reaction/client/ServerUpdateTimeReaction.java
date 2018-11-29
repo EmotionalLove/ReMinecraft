@@ -11,7 +11,7 @@ public class ServerUpdateTimeReaction implements IPacketReactor<ServerUpdateTime
     public boolean takeAction(ServerUpdateTimePacket packet) {
         if (!ReClient.ReClientCache.INSTANCE.serverTicked) {
             ReClient.ReClientCache.INSTANCE.serverTicked = true;
-            ReMinecraft.INSTANCE.terminalLogger.log("Starting server on " + ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerIp + ":" +
+            ReMinecraft.LOGGER.log("Starting server on " + ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerIp + ":" +
                     ReMinecraft.INSTANCE.MAIN_CONFIG.var_hostServerPort);
             try {
                 ReMinecraft.INSTANCE.minecraftServer = ReServerManager.prepareServer();
@@ -19,9 +19,9 @@ public class ServerUpdateTimeReaction implements IPacketReactor<ServerUpdateTime
                 ReMinecraft.INSTANCE.minecraftServer.bind(true);
             } catch (Exception e) {
                 e.printStackTrace();
-                ReMinecraft.INSTANCE.terminalLogger.logError("A severe exception occurred whilst creating the server! Maybe there's already a server running on the port?");
+                ReMinecraft.LOGGER.logError("A severe exception occurred whilst creating the server! Maybe there's already a server running on the port?");
             }
-            ReMinecraft.INSTANCE.terminalLogger.log("Server started!");
+            ReMinecraft.LOGGER.log("Server started!");
         }
         return true;
     }

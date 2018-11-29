@@ -109,12 +109,10 @@ public class ReMinecraft implements IReMinecraft {
             LOGGER = new TerminalLogger("RE:Minecraft " + VERSION);
         } else {
             LOGGER = new JavaFXLogger("RE:Minecraft " + VERSION);
+            new Thread(() -> new ReMinecraftGui().startLaunch()).start();
         }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
-        if (isUsingJavaFXGui) {
-            new ReMinecraftGui().startLaunch();
-        }
         while (!isUsingJavaFXGui) {
             try {
                 String cmd = reader.readLine(null, null, "> ");

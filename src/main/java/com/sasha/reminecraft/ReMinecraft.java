@@ -20,6 +20,7 @@ import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.LoginCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
+import com.sasha.reminecraft.javafx.ReMinecraftGui;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -89,11 +90,23 @@ public class ReMinecraft implements IReMinecraft {
      * Launch Re:Minecraft and and setup the console command system.
      */
     public static void main(String[] args) throws IOException {
-        terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
-        reader = LineReaderBuilder.builder().terminal(terminal).build();
+        boolean doGui = true;
+        if (args.length != 0) {
+            if (args[0].toLowerCase().replace("-", "").equals("nogui")) {
+                doGui = false;
+            }
+        }
+        if (doGui) {
+            ReMinecraftGui.launch(args);
+        }
+        else {
+            terminal = TerminalBuilder.builder().name("RE:Minecraft").system(true).build();
+            reader = LineReaderBuilder.builder().terminal(terminal).build();
+        }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
-        while (true) {
+        //noinspection LoopConditionNotUpdatedInsideLoop
+        while (!doGui) {
             try {
                 String cmd = reader.readLine(null, null, "> ");
                 TERMINAL_CMD_PROCESSOR.processCommand(cmd.trim().replace("> ", ""));

@@ -25,6 +25,7 @@ import com.sasha.reminecraft.logging.Logger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
 import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
+import javafx.application.Platform;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -148,6 +149,7 @@ public class ReMinecraft implements IReMinecraft {
             this.registerCommands();
             this.registerConfigurations();
             configurations.forEach(Configuration::configure); // set config vars
+            if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
             Proxy proxy = Proxy.NO_PROXY;
             if (!MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));

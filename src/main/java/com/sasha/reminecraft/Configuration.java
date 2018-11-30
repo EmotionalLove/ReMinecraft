@@ -126,6 +126,9 @@ public class Configuration {
         }
     }
 
+    public String getConfigName() {
+        return configName;
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)

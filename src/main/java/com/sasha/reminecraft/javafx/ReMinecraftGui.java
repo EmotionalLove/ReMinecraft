@@ -98,6 +98,8 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 field.setText("");
             }
         });
+        field.setMaxWidth(WIDTH - 100);
+        field.setTranslateY(HEIGHT - 75);
 
         pane.getChildren().addAll(relaunchButton, stopButton, areaToLogTo, field);
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
@@ -115,8 +117,13 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
     }
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
-    private StackPane prepareConfigPane(Stage stage) {
+    private ScrollPane prepareConfigPane(Stage stage) {
+        ScrollPane spane = new ScrollPane();//todo
+        spane.setFitToHeight(true);
+        spane.setFitToWidth(true);
+        spane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         StackPane pane = new StackPane();
+        spane.setContent(pane);
         applyBackgroundImage(pane, img1, WIDTH, HEIGHT);
         Button saveButton = new Button("Save");
         saveButton.setTranslateY(-HEIGHT / 2 + 55);
@@ -139,7 +146,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         dropdown.setOnAction(e -> {
             dropdown.setTranslateX((WIDTH - WIDTH / 2) - dropdown.getWidth());
             try {
-                populateConfigPane(pane, getConfigFromName(dropdown.getSelectionModel().getSelectedItem()));
+                populateConfigPane(stage, pane, getConfigFromName(dropdown.getSelectionModel().getSelectedItem()));
             } catch (IllegalAccessException e1) {
                 e1.printStackTrace();
             }
@@ -156,11 +163,12 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
             discardButton.setTranslateY(-newVal.intValue() / 2 + 55);
             dropdown.setTranslateY(-newVal.intValue() / 2 + 55);
         });
-        return pane;
+        return spane;
     }
 
-    private void populateConfigPane(StackPane pane, Configuration selectedConfiguration) throws IllegalAccessException {
-        int translateValue = -HEIGHT / 2 + 75;
+    private void populateConfigPane(Stage stage, StackPane pane, Configuration selectedConfiguration) throws IllegalAccessException {
+        pane.getChildren().removeIf(n -> (!(n instanceof Button)));
+        int translateValue = (int) (-stage.getHeight() / 2 + 25);
         List<Node> elements = new ArrayList<>();
         for (Field declaredField : selectedConfiguration.getClass().getDeclaredFields()) {
             if (!declaredField.getName().startsWith("var_") || declaredField.getAnnotation(Configuration.ConfigSetting.class) == null)
@@ -222,7 +230,18 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                     translateValue += 40;
                 }
             }
+            Label label = new Label(declaredField.getName().replace("var_", ""));
+            label.setTranslateY(translateValue - 40);
+            label.setTranslateX(-stage.getWidth() / 2 - 40);
+            if (!elements.contains(label)) elements.add(label);
         }
+        stage.resizableProperty().addListener((obs, oldVal, newVal) -> {
+            try {
+                populateConfigPane(stage, pane, selectedConfiguration);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
         for (Node element : elements) {
             pane.getChildren().add(element);
         }

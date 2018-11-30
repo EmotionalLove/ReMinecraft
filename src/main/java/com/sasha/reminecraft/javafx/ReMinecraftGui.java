@@ -4,6 +4,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.sasha.reminecraft.Configuration;
 import com.sasha.reminecraft.ReMinecraft;
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -12,6 +13,8 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -135,6 +138,11 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         dropdown.setTranslateX((WIDTH - WIDTH / 2) - 30);
         dropdown.setOnAction(e -> {
             dropdown.setTranslateX((WIDTH - WIDTH / 2) - dropdown.getWidth());
+            try {
+                populateConfigPane(pane, getConfigFromName(dropdown.getSelectionModel().getSelectedItem()));
+            } catch (IllegalAccessException e1) {
+                e1.printStackTrace();
+            }
         });
 
         pane.getChildren().addAll(saveButton, discardButton, dropdown);
@@ -151,32 +159,72 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         return pane;
     }
 
-    private void populateConfigPane(StackPane pane, Configuration selectedConfiguration) {
+    private void populateConfigPane(StackPane pane, Configuration selectedConfiguration) throws IllegalAccessException {
+        int translateValue = -HEIGHT / 2 + 75;
+        List<Node> elements = new ArrayList<>();
         for (Field declaredField : selectedConfiguration.getClass().getDeclaredFields()) {
-            if (!declaredField.getName().startsWith("var_") || declaredField.getAnnotation(Configuration.ConfigSetting.class) == null) continue;
+            if (!declaredField.getName().startsWith("var_") || declaredField.getAnnotation(Configuration.ConfigSetting.class) == null)
+                continue;
             if (declaredField.getType() == boolean.class) {
                 // put check mark
-            }
-            if (declaredField.getType() == double.class) {
+                CheckBox bool = new CheckBox(declaredField.getName().replace("var_", ""));
+                bool.setTranslateY(translateValue);
+                bool.setSelected((boolean) declaredField.get(selectedConfiguration));
+                if (!elements.contains(bool)) elements.add(bool);
+                translateValue += 40;
+            } else if (declaredField.getType() == double.class) {
                 // put txt field with note that says decimal
-            }
-            if (declaredField.getType() == float.class) {
+                TextField field = new TextField();
+                field.setMaxWidth(250);
+                field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setTranslateY(translateValue);
+                if (!elements.contains(field)) if (!elements.contains(field)) elements.add(field);
+                translateValue += 40;
+            } else if (declaredField.getType() == float.class) {
                 // put txt field with note that says decimal
-            }
-            if (declaredField.getType() == int.class) {
+                TextField field = new TextField();
+                field.setMaxWidth(250);
+                field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setTranslateY(translateValue);
+                if (!elements.contains(field)) elements.add(field);
+                translateValue += 40;
+            } else if (declaredField.getType() == int.class) {
                 // put txt field with note that says whole number
-            }
-            if (declaredField.getType() == long.class) {
+                TextField field = new TextField();
+                field.setMaxWidth(250);
+                field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setTranslateY(translateValue);
+                if (!elements.contains(field)) elements.add(field);
+                translateValue += 40;
+            } else if (declaredField.getType() == long.class) {
                 // put txt field with note that says whole number
-            }
-            if (declaredField.getType() == String.class) {
+                TextField field = new TextField();
+                field.setMaxWidth(250);
+                field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setTranslateY(translateValue);
+                if (!elements.contains(field)) elements.add(field);
+                translateValue += 40;
+            } else if (declaredField.getType() == String.class) {
                 if (declaredField.getName().toLowerCase().contains("password")) {
-                    // put a password field
-                }
-                else {
+                    PasswordField field = new PasswordField();
+                    field.setMaxWidth(250);
+                    field.setText((String) declaredField.get(selectedConfiguration));
+                    field.setTranslateY(translateValue);
+                    if (!elements.contains(field)) elements.add(field);
+                    translateValue += 40;
+                } else {
                     // put a normal text field
+                    TextField field = new TextField();
+                    field.setMaxWidth(250);
+                    field.setText((String) declaredField.get(selectedConfiguration));
+                    field.setTranslateY(translateValue);
+                    if (!elements.contains(field)) elements.add(field);
+                    translateValue += 40;
                 }
             }
+        }
+        for (Node element : elements) {
+            pane.getChildren().add(element);
         }
     }
 
@@ -207,6 +255,15 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                         BackgroundPosition.CENTER,
                         BackgroundSize.DEFAULT);
         node.setBackground(new Background(myBI));
+    }
+
+    private static Configuration getConfigFromName(String name) {
+        for (Configuration configuration : ReMinecraft.INSTANCE.configurations) {
+            if (configuration.getConfigName().equalsIgnoreCase(name)) {
+                return configuration;
+            }
+        }
+        return null;
     }
 
 }

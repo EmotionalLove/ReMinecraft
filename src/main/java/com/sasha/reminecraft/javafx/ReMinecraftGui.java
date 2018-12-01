@@ -102,7 +102,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
             }
         });
         field.setMaxWidth(WIDTH - 100);
-        field.setTranslateY(HEIGHT - 75);
+        field.setTranslateY(-HEIGHT / 2 + 345);
 
         pane.getChildren().addAll(relaunchButton, stopButton, areaToLogTo, field);
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
@@ -115,12 +115,11 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
             relaunchButton.setTranslateY(-newVal.intValue() / 2 + 55);
             stopButton.setTranslateY(-newVal.intValue() / 2 + 55);
             areaToLogTo.setMaxHeight((double) newVal - 160);
-            field.setTranslateY(newVal.intValue() - 75);
+            field.setTranslateY(-newVal.intValue() / 2 - 345);
         });
         return pane;
     }
 
-    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     private StackPane prepareConfigPane(Stage stage) {
         StackPane background = new StackPane();
         TilePane pane = new TilePane();

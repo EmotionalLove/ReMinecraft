@@ -87,6 +87,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         });
         areaToLogTo = new TextArea();
         areaToLogTo.setEditable(false);
+        areaToLogTo.setWrapText(true);
         areaToLogTo.setMaxSize(WIDTH - 75, HEIGHT - 160);
 
         TextField field = new TextField();
@@ -133,7 +134,23 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         //saveButton.setTranslateY(-HEIGHT / 2 + 55);
         //saveButton.setTranslateX(-WIDTH / 2 + 40);
         saveButton.setOnAction(e -> {
-            // todo
+            Configuration cfg = getConfigFromName(dropdown.getSelectionModel().getSelectedItem());
+            if (cfg == null) return;
+            pane.getChildrenUnmodifiable().forEach(child -> {
+                if (child.getId() != null && child.getId().startsWith("var_")) {
+                    try {
+                        Field field = cfg.getClass().getDeclaredField(child.getId());
+                        Object value;
+                        if (child instanceof TextField) value = ((TextField) child).getText();
+                        else if (child instanceof CheckBox) value = ((CheckBox) child).isSelected();
+                        else value = null; // sad
+                        if (value == null) return;
+                        setConfigVar(field, cfg, value);
+                    } catch (NoSuchFieldException | IllegalAccessException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            });
         });
         Button discardButton = new Button("Discard");
         //discardButton.setTranslateX(-WIDTH / 2 + 95);
@@ -148,7 +165,6 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         //dropdown.setTranslateY(-HEIGHT / 2 + 55);
         //dropdown.setTranslateX((WIDTH - WIDTH / 2) - 30);
         dropdown.setOnAction(e -> {
-            dropdown.setTranslateX((WIDTH - WIDTH / 2) - dropdown.getWidth());
             try {
                 populateConfigPane(stage, pane, getConfigFromName(dropdown.getSelectionModel().getSelectedItem()));
             } catch (IllegalAccessException e1) {
@@ -186,6 +202,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 CheckBox bool = new CheckBox(declaredField.getName().replace("var_", ""));
                 //bool.setTranslateY(translateValue);
                 bool.setSelected((boolean) declaredField.get(selectedConfiguration));
+                bool.setId(declaredField.getName());
                 if (!elements.contains(bool)) elements.add(bool);
                 translateValue += 40;
             } else if (declaredField.getType() == double.class) {
@@ -193,6 +210,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setId(declaredField.getName());
                 //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
@@ -201,6 +219,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setId(declaredField.getName());
                 //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
@@ -209,6 +228,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setId(declaredField.getName());
                 //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
@@ -217,6 +237,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
+                field.setId(declaredField.getName());
                 //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
@@ -225,6 +246,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                     PasswordField field = new PasswordField();
                     field.setMaxWidth(250);
                     field.setText((String) declaredField.get(selectedConfiguration));
+                    field.setId(declaredField.getName());
                     //field.setTranslateY(translateValue);
                     if (!elements.contains(field)) elements.add(field);
                     translateValue += 40;
@@ -233,6 +255,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                     TextField field = new TextField();
                     field.setMaxWidth(250);
                     field.setText((String) declaredField.get(selectedConfiguration));
+                    field.setId(declaredField.getName());
                     //field.setTranslateY(translateValue);
                     if (!elements.contains(field)) elements.add(field);
                     translateValue += 40;
@@ -287,6 +310,24 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
             }
         }
         return null;
+    }
+
+    private void setConfigVar(Field field, Object instance, Object value) throws IllegalAccessException {
+        if (field.getType() == boolean.class || field.getType() == String.class) {
+            field.set(instance, value);
+        }
+        if (field.getType() == double.class) {
+            field.set(instance, Double.parseDouble((String) value));
+        }
+        if (field.getType() == float.class) {
+            field.set(instance, Float.parseFloat((String) value));
+        }
+        if (field.getType() == int.class) {
+            field.set(instance, Integer.parseInt((String) value));
+        }
+        if (field.getType() == long.class) {
+            field.set(instance, Long.parseLong((String) value));
+        }
     }
 
 }

@@ -216,7 +216,7 @@ public class ReClient implements SessionListener {
          */
         public GameProfile getGameProfileByUuid(UUID id) {
             for (PlayerListEntry playerListEntry : this.playerListEntries) {
-                if (playerListEntry.getProfile().getId() == id) {
+                if (playerListEntry.getProfile().getId().toString().equals(id.toString())) {
                     return playerListEntry.getProfile();
                 }
             }

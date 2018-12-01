@@ -4,6 +4,8 @@ import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket;
 import com.sasha.reminecraft.Configuration;
 import com.sasha.reminecraft.ReMinecraft;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -112,28 +114,30 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
             relaunchButton.setTranslateY(-newVal.intValue() / 2 + 55);
             stopButton.setTranslateY(-newVal.intValue() / 2 + 55);
             areaToLogTo.setMaxHeight((double) newVal - 160);
+            field.setTranslateY(newVal.intValue() - 75);
         });
         return pane;
     }
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
-    private ScrollPane prepareConfigPane(Stage stage) {
-        ScrollPane spane = new ScrollPane();//todo
-        spane.setFitToHeight(true);
-        spane.setFitToWidth(true);
-        spane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        StackPane pane = new StackPane();
-        spane.setContent(pane);
-        applyBackgroundImage(pane, img1, WIDTH, HEIGHT);
+    private StackPane prepareConfigPane(Stage stage) {
+        StackPane background = new StackPane();
+        TilePane pane = new TilePane();
+        pane.setPadding(new Insets(5, 0, 5, 0));
+        pane.setPrefRows(2);
+        pane.setPrefColumns(3);
+        pane.setMaxWidth(150);
+        pane.setAlignment(Pos.CENTER);
+        applyBackgroundImage(background, img1, WIDTH, HEIGHT);
         Button saveButton = new Button("Save");
-        saveButton.setTranslateY(-HEIGHT / 2 + 55);
-        saveButton.setTranslateX(-WIDTH / 2 + 40);
+        //saveButton.setTranslateY(-HEIGHT / 2 + 55);
+        //saveButton.setTranslateX(-WIDTH / 2 + 40);
         saveButton.setOnAction(e -> {
             // todo
         });
         Button discardButton = new Button("Discard");
-        discardButton.setTranslateX(-WIDTH / 2 + 95);
-        discardButton.setTranslateY(-HEIGHT / 2 + 55);
+        //discardButton.setTranslateX(-WIDTH / 2 + 95);
+        //discardButton.setTranslateY(-HEIGHT / 2 + 55);
         discardButton.setOnAction(e -> {
             // todo
         });
@@ -141,8 +145,8 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
         dropdown = new ChoiceBox<>();
         dropdown.setAccessibleText("Ok");
         dropdown.getItems().add("Populating configurations...");
-        dropdown.setTranslateY(-HEIGHT / 2 + 55);
-        dropdown.setTranslateX((WIDTH - WIDTH / 2) - 30);
+        //dropdown.setTranslateY(-HEIGHT / 2 + 55);
+        //dropdown.setTranslateX((WIDTH - WIDTH / 2) - 30);
         dropdown.setOnAction(e -> {
             dropdown.setTranslateX((WIDTH - WIDTH / 2) - dropdown.getWidth());
             try {
@@ -151,32 +155,36 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 e1.printStackTrace();
             }
         });
-
         pane.getChildren().addAll(saveButton, discardButton, dropdown);
+        background.getChildren().add(pane);
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            saveButton.setTranslateX(-newVal.intValue() / 2 + 40);
-            discardButton.setTranslateX(-newVal.intValue() / 2 + 95);
-            dropdown.setTranslateX((newVal.intValue() - newVal.intValue() / 2) - dropdown.getWidth());
+            //saveButton.setTranslateX(-newVal.intValue() / 2 + 40);
+            //discardButton.setTranslateX(-newVal.intValue() / 2 + 95);
+            //dropdown.setTranslateX((newVal.intValue() - newVal.intValue() / 2) - dropdown.getWidth());
         });
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            saveButton.setTranslateY(-newVal.intValue() / 2 + 55);
-            discardButton.setTranslateY(-newVal.intValue() / 2 + 55);
-            dropdown.setTranslateY(-newVal.intValue() / 2 + 55);
+            //saveButton.setTranslateY(-newVal.intValue() / 2 + 55);
+            //discardButton.setTranslateY(-newVal.intValue() / 2 + 55);
+            //dropdown.setTranslateY(-newVal.intValue() / 2 + 55);
         });
-        return spane;
+        return background;
     }
 
-    private void populateConfigPane(Stage stage, StackPane pane, Configuration selectedConfiguration) throws IllegalAccessException {
+    private void populateConfigPane(Stage stage, TilePane pane, Configuration selectedConfiguration) throws IllegalAccessException {
         pane.getChildren().removeIf(n -> (!(n instanceof Button)));
         int translateValue = (int) (-stage.getHeight() / 2 + 25);
         List<Node> elements = new ArrayList<>();
         for (Field declaredField : selectedConfiguration.getClass().getDeclaredFields()) {
             if (!declaredField.getName().startsWith("var_") || declaredField.getAnnotation(Configuration.ConfigSetting.class) == null)
                 continue;
+            Label label = new Label(declaredField.getName().replace("var_", ""));
+            //label.setTranslateY(translateValue - 40);
+            //label.setTranslateX(-stage.getWidth() / 2 - 40);
+            if (!elements.contains(label)) elements.add(label);
             if (declaredField.getType() == boolean.class) {
                 // put check mark
                 CheckBox bool = new CheckBox(declaredField.getName().replace("var_", ""));
-                bool.setTranslateY(translateValue);
+                //bool.setTranslateY(translateValue);
                 bool.setSelected((boolean) declaredField.get(selectedConfiguration));
                 if (!elements.contains(bool)) elements.add(bool);
                 translateValue += 40;
@@ -185,7 +193,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
-                field.setTranslateY(translateValue);
+                //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
             } else if (declaredField.getType() == float.class) {
@@ -193,7 +201,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
-                field.setTranslateY(translateValue);
+                //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
             } else if (declaredField.getType() == int.class) {
@@ -201,7 +209,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
-                field.setTranslateY(translateValue);
+                //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
             } else if (declaredField.getType() == long.class) {
@@ -209,7 +217,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                 TextField field = new TextField();
                 field.setMaxWidth(250);
                 field.setText(declaredField.get(selectedConfiguration) + "");
-                field.setTranslateY(translateValue);
+                //field.setTranslateY(translateValue);
                 if (!elements.contains(field)) elements.add(field);
                 translateValue += 40;
             } else if (declaredField.getType() == String.class) {
@@ -217,7 +225,7 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                     PasswordField field = new PasswordField();
                     field.setMaxWidth(250);
                     field.setText((String) declaredField.get(selectedConfiguration));
-                    field.setTranslateY(translateValue);
+                    //field.setTranslateY(translateValue);
                     if (!elements.contains(field)) elements.add(field);
                     translateValue += 40;
                 } else {
@@ -225,15 +233,11 @@ public class ReMinecraftGui extends Application implements IReMinecraftGui {
                     TextField field = new TextField();
                     field.setMaxWidth(250);
                     field.setText((String) declaredField.get(selectedConfiguration));
-                    field.setTranslateY(translateValue);
+                    //field.setTranslateY(translateValue);
                     if (!elements.contains(field)) elements.add(field);
                     translateValue += 40;
                 }
             }
-            Label label = new Label(declaredField.getName().replace("var_", ""));
-            label.setTranslateY(translateValue - 40);
-            label.setTranslateX(-stage.getWidth() / 2 - 40);
-            if (!elements.contains(label)) elements.add(label);
         }
         stage.resizableProperty().addListener((obs, oldVal, newVal) -> {
             try {

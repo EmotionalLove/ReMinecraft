@@ -1,13 +1,13 @@
 package com.sasha.reminecraft.logging.impl;
 
 import com.sasha.reminecraft.javafx.ReMinecraftGui;
-import com.sasha.reminecraft.logging.Logger;
+import com.sasha.reminecraft.logging.ILogger;
 import javafx.application.Platform;
 
 /**
  * Created by Sasha at 7:46 PM on 11/28/2018
  */
-public class JavaFXLogger implements Logger {
+public class JavaFXLogger implements ILogger {
 
     private final String name;
     private boolean seeDebug = false; //whether to display debug msgs

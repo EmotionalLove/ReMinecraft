@@ -21,7 +21,7 @@ import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.LoginCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
 import com.sasha.reminecraft.javafx.ReMinecraftGui;
-import com.sasha.reminecraft.logging.Logger;
+import com.sasha.reminecraft.logging.ILogger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
 import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
@@ -52,7 +52,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "1.1.10";
+    public static String VERSION = "2.0";
     /**
      * The command line command processor
      */
@@ -77,7 +77,7 @@ public class ReMinecraft implements IReMinecraft {
      */
     public static LineReader reader;
 
-    public static Logger LOGGER;
+    public static ILogger LOGGER;
 
 
     private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());

@@ -3,7 +3,7 @@ package com.sasha.reminecraft.logging;
 /**
  * Created by Sasha at 7:41 PM on 11/28/2018
  */
-public interface Logger {
+public interface ILogger {
 
     void viewDebugs(boolean view);
 

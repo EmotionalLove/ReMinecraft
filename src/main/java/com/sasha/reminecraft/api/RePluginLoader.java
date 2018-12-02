@@ -1,7 +1,7 @@
 package com.sasha.reminecraft.api;
 
 import com.sasha.reminecraft.ReMinecraft;
-import com.sasha.reminecraft.logging.Logger;
+import com.sasha.reminecraft.logging.ILogger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
 import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.reminecraft.util.YML;
@@ -19,7 +19,7 @@ import java.util.jar.JarFile;
 public class RePluginLoader {
 
     private static final String DIR_NAME = "plugins";
-    private static Logger LOGGER;
+    private static ILogger LOGGER;
     private static LinkedHashMap<File /*jar*/, PluginInfo> theRawPlugins = new LinkedHashMap<>();
     private static List<RePlugin> pluginList = new ArrayList<>();
 

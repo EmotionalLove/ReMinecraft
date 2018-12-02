@@ -1,6 +1,6 @@
 package com.sasha.reminecraft.logging.impl;
 
-import com.sasha.reminecraft.logging.Logger;
+import com.sasha.reminecraft.logging.ILogger;
 import org.jline.reader.LineReader;
 import org.jline.utils.InfoCmp;
 
@@ -9,7 +9,7 @@ import static com.sasha.reminecraft.ReMinecraft.reader;
 /**
  * A simple logging mechanism
  */
-public class TerminalLogger implements Logger {
+public class TerminalLogger implements ILogger {
 
     private final String name;
     private boolean seeDebug = false; //whether to display debug msgs

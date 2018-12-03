@@ -149,11 +149,11 @@ public class ReMinecraft implements IReMinecraft {
             this.registerCommands();
             this.registerConfigurations();
             configurations.forEach(Configuration::configure); // set config vars
-            if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
             Proxy proxy = Proxy.NO_PROXY;
             if (!MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
             }
+            if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
             AuthenticationService service = authenticate(proxy);// log into mc
             if (service != null) {
                 minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
@@ -333,18 +333,22 @@ public class ReMinecraft implements IReMinecraft {
         }
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.clear();
-        for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
-            ReMinecraft.LOGGER.logWarning("Reconnecting in " + i + " seconds");
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException ignored) {
+        Thread relaunch = new Thread(() -> {
+            for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
+                ReMinecraft.LOGGER.logWarning("Reconnecting in " + i + " seconds");
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException ignored) {
+                }
             }
-        }
-        try {
-            Runtime.getRuntime().removeShutdownHook(shutdownThread);
-            ReMinecraft.main(new String[]{});
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            try {
+                Runtime.getRuntime().removeShutdownHook(shutdownThread);
+                ReMinecraft.main(new String[]{});
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        if (isUsingJavaFXGui) relaunch.start();
+        else relaunch.run();
     }
 }

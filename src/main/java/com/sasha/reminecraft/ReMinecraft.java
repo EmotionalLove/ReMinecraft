@@ -65,9 +65,11 @@ public class ReMinecraft implements IReMinecraft {
      * Singleton of this Re:Minecraft
      */
     public static ReMinecraft INSTANCE;
+
+    /**
+     * Whether the current instance of reminecraft is using the JavaFX gui or not
+     */
     public static boolean isUsingJavaFXGui = true;
-
-
     /**
      * The JLine terminal instance
      */
@@ -229,6 +231,10 @@ public class ReMinecraft implements IReMinecraft {
             this.EVENT_BUS.invokeEvent(postEvent);
             ReMinecraft.LOGGER.logError(e.getMessage());
             ReMinecraft.LOGGER.logError("Could not login with Mojang.");
+            if (postEvent.isCancelled()) {
+                return null;
+            }
+            this.reLaunch();
         }
         return null;
     }

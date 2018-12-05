@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Sasha at 4:01 PM on 11/28/2018
  */
-public class ReMinecraftGui extends Application implements IReMinecraftGui {
+public class ReMinecraftGui extends Application {
 
     public static final int WIDTH = 600;
     public static final int HEIGHT = 400;

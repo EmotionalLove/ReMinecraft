@@ -24,7 +24,6 @@ import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.RemoteServerPacketRecieveEvent;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.reaction.client.*;
-import com.sasha.reminecraft.server.ReServerManager;
 import com.sasha.reminecraft.util.TextMessageColoured;
 import com.sasha.reminecraft.util.entity.Entity;
 import com.sasha.reminecraft.util.entity.EntityPlayer;
@@ -123,7 +122,7 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void connected(ConnectedEvent connectedEvent) {
-        ReMinecraft.INSTANCE.logger.log
+        ReMinecraft.LOGGER.log
                 ("Connected to " + connectedEvent.getSession().getHost() +
                         ":"
                         + connectedEvent.getSession().getPort());
@@ -143,7 +142,7 @@ public class ReClient implements SessionListener {
      */
     @Override
     public void disconnected(DisconnectedEvent disconnectedEvent) {
-        ReMinecraft.INSTANCE.logger.logWarning("Disconnected: " + disconnectedEvent.getReason());
+        ReMinecraft.LOGGER.logWarning("Disconnected: " + disconnectedEvent.getReason());
         ReMinecraft.INSTANCE.reLaunch();
     }
 
@@ -210,20 +209,23 @@ public class ReClient implements SessionListener {
 
         /**
          * Get a user's GameProfile via their UUID
+         *
          * @param id The user's UUID
          * @return their Gameprofile
          * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST
          */
         public GameProfile getGameProfileByUuid(UUID id) {
             for (PlayerListEntry playerListEntry : this.playerListEntries) {
-                if (playerListEntry.getProfile().getId() == id) {
+                if (playerListEntry.getProfile().getId().toString().equals(id.toString())) {
                     return playerListEntry.getProfile();
                 }
             }
             return null;
         }
+
         /**
          * Get a user's GameProfile via their username
+         *
          * @param name The user's username
          * @return their Gameprofile
          * ONLY WORKS IF THE SERVER HAS AN UNMODIFIED TABLIST

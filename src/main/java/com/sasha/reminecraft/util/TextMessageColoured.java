@@ -15,6 +15,7 @@ public class TextMessageColoured extends TextMessage {
 
     /**
      * Replaces ampersand signs with section signs if they are followed by a valid color code character (0-9a-fm-or)
+     *
      * @return The string with section signs
      */
     private static String ampersandToSectionSign(String input) {

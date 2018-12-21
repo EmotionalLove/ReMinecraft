@@ -38,7 +38,7 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                 removalIndexes.forEach(index -> {
                     ServerOtherPlayerQuitEvent event = new ServerOtherPlayerQuitEvent(ReClient.ReClientCache.INSTANCE.playerListEntries.get(index).getProfile());
                     ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
-                    ReClient.ReClientCache.INSTANCE.playerListEntries.remove((int)index);
+                    ReClient.ReClientCache.INSTANCE.playerListEntries.remove((int) index);
                 });
                 break;
             case UPDATE_DISPLAY_NAME:
@@ -99,7 +99,7 @@ public class ServerPlayerListEntryReaction implements IPacketReactor<ServerPlaye
                 });
                 break;
             default:
-                ReMinecraft.INSTANCE.logger.logError("Unsupported tablist action!");
+                ReMinecraft.LOGGER.logError("Unsupported tablist action!");
 
         }
         return true;

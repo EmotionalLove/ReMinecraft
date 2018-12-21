@@ -17,7 +17,7 @@ public class ServerMultiBlockChangeReaction implements IPacketReactor<ServerMult
         Column column = ReClient.ReClientCache.INSTANCE.chunkCache.getOrDefault(ChunkUtil.getChunkHashFromXZ(chunkX, chunkZ), null);
         if (column == null) {
             // not ignoring this can leak memory in the notchian client
-            ReMinecraft.INSTANCE.logger.logDebug("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
+            ReMinecraft.LOGGER.logDebug("Ignoring server request to change blocks in an unloaded chunk, is the remote server running a modified Minecraft server jar? This could cause issues.");
             return false;
         }
         for (BlockChangeRecord record : packet.getRecords()) {

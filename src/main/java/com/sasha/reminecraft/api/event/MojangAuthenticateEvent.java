@@ -17,7 +17,7 @@ public class MojangAuthenticateEvent {
         }
     }
 
-    public static class Post extends SimpleEvent {
+    public static class Post extends SimpleCancellableEvent {
         private boolean success;
         private Method method;
 

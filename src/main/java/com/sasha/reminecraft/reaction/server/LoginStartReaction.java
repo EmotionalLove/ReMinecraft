@@ -13,10 +13,10 @@ public class LoginStartReaction extends AbstractChildPacketReactor implements IP
 
     @Override
     public boolean takeAction(LoginStartPacket packet) {
-        if (((MinecraftProtocol)this.getChild().getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.LOGIN) {
+        if (((MinecraftProtocol) this.getChild().getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.LOGIN) {
             return false;
         }
-        ReMinecraft.INSTANCE.logger.log("Child user %s connecting!".replace("%s", packet.getUsername()));
+        ReMinecraft.LOGGER.log("Child user %s connecting!".replace("%s", packet.getUsername()));
         ReServer.runWhitelist(packet.getUsername(), this.getChild());
         return false;
     }

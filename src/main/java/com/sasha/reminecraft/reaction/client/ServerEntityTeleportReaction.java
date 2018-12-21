@@ -13,7 +13,7 @@ public class ServerEntityTeleportReaction implements IPacketReactor<ServerEntity
     public boolean takeAction(ServerEntityTeleportPacket packet) {
         Entity entity = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
         if (entity == null) {
-            ReMinecraft.INSTANCE.logger.logDebug
+            ReMinecraft.LOGGER.logDebug
                     ("Null entity with entity id " + packet.getEntityId());
             ReMinecraft.INSTANCE.childClients.stream()
                     .filter(ChildReClient::isPlaying)

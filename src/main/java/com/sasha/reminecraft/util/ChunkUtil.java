@@ -33,6 +33,7 @@ public class ChunkUtil {
     public static int getZFromHash(long hash) {
         return (int) hash;
     }
+
     public static int clamp(int value, int min, int max) {
         return Math.min(Math.max(value, min), max);
     }

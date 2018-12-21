@@ -22,7 +22,7 @@ public class ServerOtherPlayerQuitEvent extends SimpleEvent {
         this.name = name;
         this.uuid = uuid;
     }
-    
+
     public String getName() {
         return name;
     }

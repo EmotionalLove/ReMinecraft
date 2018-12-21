@@ -15,7 +15,7 @@ public class ServerEntityMovementReaction implements IPacketReactor<ServerEntity
         try {
             Entity e = ReClient.ReClientCache.INSTANCE.entityCache.get(packet.getEntityId());
             if (e == null) {
-                ReMinecraft.INSTANCE.logger.logDebug
+                ReMinecraft.LOGGER.logDebug
                         ("Null entity with entity id " + packet.getEntityId());
                 ReMinecraft.INSTANCE.sendToChildren(packet);
                 return false;
@@ -31,7 +31,7 @@ public class ServerEntityMovementReaction implements IPacketReactor<ServerEntity
                 ((EntityRotation) e).yaw = packet.getYaw();
                 ((EntityRotation) e).pitch = packet.getPitch();
             }
-        }catch (NoSuchFieldException | IllegalAccessException ignored) {
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
             //
         }
         return true;

@@ -22,6 +22,7 @@ public class ServerSpawnPlayerReaction implements IPacketReactor<ServerSpawnPlay
         e.yaw = packet.getYaw();
         e.metadata = packet.getMetadata();
         ReClient.ReClientCache.INSTANCE.entityCache.put(e.entityId, e);
+        System.out.println(ReClient.ReClientCache.INSTANCE.getGameProfileByUuid(e.uuid).getName());
         EntityInRangeEvent.Player event = new EntityInRangeEvent.Player(e.uuid, e.entityId);
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         return true;

@@ -74,18 +74,20 @@ public class ReServer extends SessionAdapter {
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(event);
         try {
             if (!reactionRegistry.containsKey(ev.getPacket().getClass())) { // so we aren't blocking packets that dont need special processing
-                if (((MinecraftProtocol)this.child.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME) return;
+                if (((MinecraftProtocol) this.child.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME)
+                    return;
                 ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket());
                 return;
             }
             this.reactionRegistry.forEach((pck, reactor) -> { // iterate over the registered reactions
                 if (pck == ev.getPacket().getClass()) { // if the reaction is paired with pck's clas
-                    if (reactor instanceof AbstractChildPacketReactor) ((AbstractChildPacketReactor) reactor).setChild(this.child);
+                    if (reactor instanceof AbstractChildPacketReactor)
+                        ((AbstractChildPacketReactor) reactor).setChild(this.child);
                     boolean flag = reactor.takeAction(ev.getPacket());
                     if (flag
                             && ReMinecraft.INSTANCE.minecraftClient != null
                             && ReMinecraft.INSTANCE.minecraftClient.getSession().isConnected()
-                            && ((MinecraftProtocol)this.child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) // perform the action
+                            && ((MinecraftProtocol) this.child.getSession().getPacketProtocol()).getSubProtocol() == SubProtocol.GAME) // perform the action
                         ReMinecraft.INSTANCE.minecraftClient.getSession().send(event.getRecievedPacket()); // send the packet to server if true
                 } //ez
             });
@@ -109,7 +111,7 @@ public class ReServer extends SessionAdapter {
         if (event.isCancelled()) return;
         if (event.getSendingPacket() instanceof LoginSuccessPacket) {
             LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
-            ReMinecraft.INSTANCE.logger.log("Child user " + pck.getProfile().getName() + " authenticated!");
+            ReMinecraft.LOGGER.log("Child user " + pck.getProfile().getName() + " authenticated!");
             runWhitelist(pck.getProfile().getName(), this.child);
             ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile());
             ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(joinEvent);
@@ -128,7 +130,7 @@ public class ReServer extends SessionAdapter {
                     e.printStackTrace();
                 }
             });
-            ReMinecraft.INSTANCE.logger.log("Sent " + ReClient.ReClientCache.INSTANCE.chunkCache.size() + " chunks");
+            ReMinecraft.LOGGER.log("Sent " + ReClient.ReClientCache.INSTANCE.chunkCache.size() + " chunks");
             this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
             this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReClient.ReClientCache.INSTANCE.heldItem));
             this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReClient.ReClientCache.INSTANCE.posX, ReClient.ReClientCache.INSTANCE.posY, ReClient.ReClientCache.INSTANCE.posZ, ReClient.ReClientCache.INSTANCE.yaw, ReClient.ReClientCache.INSTANCE.pitch, new Random().nextInt(1000) + 10));
@@ -259,7 +261,7 @@ public class ReServer extends SessionAdapter {
                                 object.motionZ));
                         continue;
                     }
-                    ReMinecraft.INSTANCE.logger.logDebug("???");
+                    ReMinecraft.LOGGER.logDebug("???");
                 }
                 for (Entity entity : ReClient.ReClientCache.INSTANCE.entityCache.values()) {
                     if (entity instanceof EntityEquipment && ((EntityEquipment) entity).passengerIds.length > 0) {
@@ -293,7 +295,7 @@ public class ReServer extends SessionAdapter {
     @Override
     public void disconnected(DisconnectedEvent event) {
         event.getCause().printStackTrace();
-        ReMinecraft.INSTANCE.logger.log("Child disconnected due to " + event.getReason());
+        ReMinecraft.LOGGER.log("Child disconnected due to " + event.getReason());
     }
 
     public static void runWhitelist(String name, ChildReClient child) {
@@ -303,9 +305,9 @@ public class ReServer extends SessionAdapter {
                 .collect(Collectors.toList())
                 .contains(name.toLowerCase());
         if (flag) {
-            ReMinecraft.INSTANCE.logger.logWarning(name + " isn't whitelisted.");
+            ReMinecraft.LOGGER.logWarning(name + " isn't whitelisted.");
             SubProtocol proto = ((MinecraftProtocol) child.getSession().getPacketProtocol()).getSubProtocol();
-            switch (proto){
+            switch (proto) {
                 case LOGIN:
                     child.getSession().send(new LoginDisconnectPacket(TextMessageColoured.from("&cYou are not whitelisted on this server!\nIf you believe that this is an error, please contact the server administrator")));
                     break;

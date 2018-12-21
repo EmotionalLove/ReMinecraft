@@ -57,6 +57,7 @@ public class Configuration {
     public String var_socksProxy = null;
     @ConfigSetting
     public int var_socksPort = -1;
+
     {
         var_whitelistServer.add("Phi_Phi");
         var_whitelistServer.add("Color");
@@ -85,7 +86,7 @@ public class Configuration {
                 if (!yml.exists(target)) {
                     yml.set(target, declaredField.get(this) == null ? "[no default]" : declaredField.get(this));
                     declaredField.set(this, declaredField.get(this) == null ? "[no default]" : declaredField.get(this));
-                    ReMinecraft.INSTANCE.logger.log("Created " + target);
+                    ReMinecraft.LOGGER.log("Created " + target);
                     continue;
                 }
                 if (declaredField.getType() == float.class) {
@@ -93,7 +94,7 @@ public class Configuration {
                 } else {
                     declaredField.set(this, yml.get(target));
                 }
-                ReMinecraft.INSTANCE.logger.logDebug("Set " + target);
+                ReMinecraft.LOGGER.logDebug("Set " + target);
             }
             yml.save();
         } catch (IllegalAccessException ex) {
@@ -113,9 +114,9 @@ public class Configuration {
                 if (!yml.exists("config-version")) {
                     yml.set("config-version", 0);
                 }
-                String target = declaredField.getName().replace("var_" ,"");
+                String target = declaredField.getName().replace("var_", "");
                 yml.set(target, declaredField.get(this));
-                ReMinecraft.INSTANCE.logger.logDebug("Saved " + target);
+                ReMinecraft.LOGGER.logDebug("Saved " + target);
             }
             yml.save();
         } catch (IllegalAccessException ex) {
@@ -125,6 +126,9 @@ public class Configuration {
         }
     }
 
+    public String getConfigName() {
+        return configName;
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)

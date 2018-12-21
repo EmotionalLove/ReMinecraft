@@ -117,7 +117,11 @@ public class ReMinecraft implements IReMinecraft {
             if (!launched) new Thread(() -> new ReMinecraftGui().startLaunch()).start();
         }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-        new ReMinecraft().start(args); // start Re:Minecraft before handling console commands
+        Thread thread = new Thread(() -> {
+            new ReMinecraft().start(args);
+        }); // start Re:Minecraft before handling console commands
+        if (!isUsingJavaFXGui) thread.run();
+        else thread.start();
         while (!isUsingJavaFXGui) {
             try {
                 String cmd = reader.readLine(null, null, "> ");
@@ -339,22 +343,28 @@ public class ReMinecraft implements IReMinecraft {
         }
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.clear();
-        Thread relaunch = new Thread(() -> {
-            for (int i = MAIN_CONFIG.var_reconnectDelaySeconds; i > 0; i--) {
-                ReMinecraft.LOGGER.logWarning("Reconnecting in " + i + " seconds");
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException ignored) {
+        final int[] i = {-1};
+        new Thread(() -> {
+            synchronized (ReMinecraft.INSTANCE) {
+                for (i[0] = MAIN_CONFIG.var_reconnectDelaySeconds; i[0] >= 0; i[0]--) {
+                    ReMinecraft.LOGGER.logWarning("Reconnecting in " + i[0] + " seconds");
+                    try {
+                        ReMinecraft.INSTANCE.wait(1000L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+                return;
             }
-            try {
-                Runtime.getRuntime().removeShutdownHook(shutdownThread);
-                ReMinecraft.main(new String[]{});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        if (isUsingJavaFXGui) relaunch.start();
-        else relaunch.run();
+        }).start();
+        while (i[0] == -1 || i[0] != 0) {
+            try {ReMinecraft.INSTANCE.notify(); } catch (IllegalMonitorStateException ignored){}
+        }
+        try {
+            Runtime.getRuntime().removeShutdownHook(shutdownThread);
+            ReMinecraft.main(new String[]{});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

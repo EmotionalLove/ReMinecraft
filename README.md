@@ -16,10 +16,14 @@ RE:Minecraft is a headless Minecraft bouncer and bot API, all in one! RE:Minecra
 Please see the ["Getting started" page on the wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Getting-started)
 
 ### Developers
-
 Please see the ["Using the Plugin API" page on the wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Using-the-plugin-API)
 
-## Needed libaries
+### Help
+We have a Discord server for your questions or troubles. https://discord.gg/uFKX2tW
+
+## Used libaries
+
+> **Hey!**, all libraries are managed by Gradle. You don't need to manually download them if you decide to contribute to RE:Minecraft!
 
 - Gson
 - SnakeYAML

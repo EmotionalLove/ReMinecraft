@@ -126,7 +126,12 @@ public class RePluginLoader {
     public static void shutdownPlugins() {
         getPluginList().forEach(pl -> {
             LOGGER.log("Disabling " + pl.pluginName);
-            pl.onPluginDisable();
+            try {
+                pl.onPluginDisable();
+            }catch (Exception e) {
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
+                e.printStackTrace();
+            }
         });
     }
 

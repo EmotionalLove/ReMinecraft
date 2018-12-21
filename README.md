@@ -23,7 +23,7 @@ We have a Discord server for your questions or troubles. https://discord.gg/uFKX
 
 ## Used libaries
 
-> **Hey!**, all libraries are managed by Gradle. You don't need to manually download them if you decide to contribute to RE:Minecraft!
+> **Hey!** all libraries are managed by Gradle. You don't need to manually download them if you decide to contribute to RE:Minecraft!
 
 - Gson
 - SnakeYAML

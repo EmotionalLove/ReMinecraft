@@ -59,7 +59,7 @@ public class RePluginLoader {
             JarFile jar = new JarFile(file, true);
             JarEntry entry = jar.getJarEntry("plugin.yml");
             if (entry == null) {
-                LOGGER.logError(file.getName() + " is missing it's plugin.yml");
+                LOGGER.logError(file.getName() + " is missing it's plugin.yml. This plugin will not load!");
                 continue; // invalid plugin
             }
             PluginInfo info = new PluginInfo();
@@ -96,6 +96,7 @@ public class RePluginLoader {
     }
 
     public void loadPlugins() {
+        final int[] failed = {0};
         theRawPlugins.forEach((jar, info) -> {
             try {
                 URLClassLoader classLoader = new URLClassLoader(new URL[]{jar.toURI().toURL()}, this.getClass().getClassLoader());
@@ -105,19 +106,21 @@ public class RePluginLoader {
                     LOGGER.logError(info.pluginName + " has an invalid main class, cannot load.");
                     return;
                 }
-                RePlugin plugin = (RePlugin) clazz.newInstance();
-                plugin.pluginName = info.pluginName;
-                plugin.pluginDescription = info.pluginDescription;
-                plugin.pluginAuthors = info.pluginAuthors;
-                plugin.pluginVersion = info.pluginVersion;
-                LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialised");
-                plugin.onPluginInit();
-                pluginList.add(plugin);
+                    RePlugin plugin = (RePlugin) clazz.newInstance();
+                    plugin.pluginName = info.pluginName;
+                    plugin.pluginDescription = info.pluginDescription;
+                    plugin.pluginAuthors = info.pluginAuthors;
+                    plugin.pluginVersion = info.pluginVersion;
+                    LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialised");
+                    plugin.onPluginInit();
+                    pluginList.add(plugin);
             } catch (Exception e) {
-                //
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to load " + info.pluginName + "(" + info.mainClass + ")");
+                failed[0]++;
+                e.printStackTrace();
             }
         });
-        LOGGER.log(getPluginList().size() + " plugins were successfully loaded");
+        LOGGER.log((getPluginList().size() - failed[0]) + " plugins were successfully loaded");
     }
 
     public static void shutdownPlugins() {

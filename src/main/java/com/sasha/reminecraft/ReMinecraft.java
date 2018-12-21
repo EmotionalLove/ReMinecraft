@@ -80,7 +80,10 @@ public class ReMinecraft implements IReMinecraft {
     public static LineReader reader;
 
     public static ILogger LOGGER;
-
+    /**
+     * The args from when we first started the program
+     */
+    public static String[] args = new String[]{};
 
     private static final Thread shutdownThread = new Thread(() -> ReMinecraft.INSTANCE.stopSoft());
     /**
@@ -102,6 +105,7 @@ public class ReMinecraft implements IReMinecraft {
      * Launch Re:Minecraft and and setup the console command system.
      */
     public static void main(String[] args) throws IOException {
+        ReMinecraft.args = args;
         isUsingJavaFXGui = true;
         if (args.length != 0) {
             if (args[0].toLowerCase().replace("-", "").equals("nogui")) {
@@ -362,7 +366,7 @@ public class ReMinecraft implements IReMinecraft {
         }
         try {
             Runtime.getRuntime().removeShutdownHook(shutdownThread);
-            ReMinecraft.main(new String[]{});
+            ReMinecraft.main(ReMinecraft.args);
         } catch (IOException e) {
             e.printStackTrace();
         }

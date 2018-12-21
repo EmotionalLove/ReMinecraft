@@ -47,6 +47,7 @@ public class JavaFXLogger implements ILogger {
 
     @Override
     public void logDebug(String msg) {
+        if (!seeDebug) return;
         System.out.println(msg);
         if (ReMinecraftGui.areaToLogTo != null) Platform.runLater(() -> {
             ReMinecraftGui.areaToLogTo.appendText("\n[Debug] " + msg);

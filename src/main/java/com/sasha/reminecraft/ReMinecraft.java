@@ -98,6 +98,7 @@ public class ReMinecraft implements IReMinecraft {
     public MinecraftProtocol protocol;
     public List<ChildReClient> childClients = new ArrayList<>();
     public LinkedHashMap<ChildReClient, SessionListener> childAdapters = new LinkedHashMap<>();
+    private static RePluginLoader loader;
     private boolean isShuttingDownCompletely = false;
     private boolean isRelaunching = false;
 
@@ -121,6 +122,9 @@ public class ReMinecraft implements IReMinecraft {
             if (!launched) new Thread(() -> new ReMinecraftGui().startLaunch()).start();
         }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
+        loader = new RePluginLoader();
+        loader.preparePlugins(loader.findPlugins());
+        loader.loadPlugins();
         Thread thread = new Thread(() -> {
             new ReMinecraft().start(args);
         }); // start Re:Minecraft before handling console commands
@@ -149,13 +153,12 @@ public class ReMinecraft implements IReMinecraft {
      */
     @Override
     public void start(String[] args) {
+        isRelaunching = false;
+        isShuttingDownCompletely = false;
         try {
             INSTANCE = this;
             new ReClient.ReClientCache();
             LOGGER.log("Starting RE:Minecraft " + VERSION + " for Minecraft " + MinecraftConstants.GAME_VERSION);
-            RePluginLoader loader = new RePluginLoader();
-            loader.preparePlugins(loader.findPlugins());
-            loader.loadPlugins();
             this.registerCommands();
             this.registerConfigurations();
             configurations.forEach(Configuration::configure); // set config vars
@@ -172,9 +175,9 @@ public class ReMinecraft implements IReMinecraft {
                         new TcpSessionFactory(proxy));
                 minecraftClient.getSession().addListener(new ReClient());
                 LOGGER.log("Connecting...");
-                RePluginLoader.getPluginList().forEach(RePlugin::onPluginEnable);
                 minecraftClient.getSession().connect(true); // connect to the remote server
                 LOGGER.log("Connected!");
+                RePluginLoader.enablePlugins();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -337,7 +340,7 @@ public class ReMinecraft implements IReMinecraft {
         if (isRelaunching) return;
         isRelaunching = true;
         configurations.forEach(Configuration::save);
-        RePluginLoader.shutdownPlugins();
+        RePluginLoader.disablePlugins();
         RePluginLoader.getPluginList().clear();
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
@@ -364,11 +367,7 @@ public class ReMinecraft implements IReMinecraft {
         while (i[0] == -1 || i[0] != 0) {
             try {ReMinecraft.INSTANCE.notify(); } catch (IllegalMonitorStateException ignored){}
         }
-        try {
-            Runtime.getRuntime().removeShutdownHook(shutdownThread);
-            ReMinecraft.main(ReMinecraft.args);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Runtime.getRuntime().removeShutdownHook(shutdownThread);
+        ReMinecraft.INSTANCE.start(ReMinecraft.args);
     }
 }

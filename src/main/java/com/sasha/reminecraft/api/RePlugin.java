@@ -20,9 +20,14 @@ public abstract class RePlugin {
     public abstract void onPluginEnable();
 
     /**
-     * Called when the client is shutting down or relaunching
+     * Called when the client is relaunching
      */
     public abstract void onPluginDisable();
+
+    /**
+     * Called when the client is completely shutting down
+     */
+    public abstract void onPluginShutdown();
 
     /**
      * Called when the client registers it's stock commands to it's command processor's

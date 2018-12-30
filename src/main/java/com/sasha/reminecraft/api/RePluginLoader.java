@@ -127,6 +127,30 @@ public class RePluginLoader {
         getPluginList().forEach(pl -> {
             LOGGER.log("Disabling " + pl.pluginName);
             try {
+                pl.onPluginShutdown();
+            }catch (Exception e) {
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public static void enablePlugins() {
+        getPluginList().forEach(pl -> {
+            LOGGER.log("Disabling " + pl.pluginName);
+            try {
+                pl.onPluginEnable();
+            }catch (Exception e) {
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public static void disablePlugins() {
+        getPluginList().forEach(pl -> {
+            LOGGER.log("Disabling " + pl.pluginName);
+            try {
                 pl.onPluginDisable();
             }catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);

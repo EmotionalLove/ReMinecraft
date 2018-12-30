@@ -111,12 +111,13 @@ public class RePluginLoader {
                     plugin.pluginDescription = info.pluginDescription;
                     plugin.pluginAuthors = info.pluginAuthors;
                     plugin.pluginVersion = info.pluginVersion;
-                    LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialised");
+                    LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialising...");
                     plugin.onPluginInit();
                     pluginList.add(plugin);
+                    LOGGER.log(plugin.pluginName + " initialised");
             } catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to load " + info.pluginName + "(" + info.mainClass + ")");
-                failed[0]++;
+                //failed[0]++;
                 e.printStackTrace();
             }
         });
@@ -125,7 +126,7 @@ public class RePluginLoader {
 
     public static void shutdownPlugins() {
         getPluginList().forEach(pl -> {
-            LOGGER.log("Disabling " + pl.pluginName);
+            LOGGER.log("Shutting down " + pl.pluginName);
             try {
                 pl.onPluginShutdown();
             }catch (Exception e) {
@@ -137,7 +138,7 @@ public class RePluginLoader {
 
     public static void enablePlugins() {
         getPluginList().forEach(pl -> {
-            LOGGER.log("Disabling " + pl.pluginName);
+            LOGGER.log("Enabling " + pl.pluginName);
             try {
                 pl.onPluginEnable();
             }catch (Exception e) {

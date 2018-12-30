@@ -162,6 +162,7 @@ public class ReMinecraft implements IReMinecraft {
             this.registerCommands();
             this.registerConfigurations();
             configurations.forEach(Configuration::configure); // set config vars
+            RePluginLoader.initPlugins();
             Proxy proxy = Proxy.NO_PROXY;
             if (MAIN_CONFIG.var_socksProxy != null && !MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));

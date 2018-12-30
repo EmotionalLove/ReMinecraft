@@ -79,10 +79,10 @@ public class RePluginLoader {
             out.close();
             YML yml = new YML(tmp);
             if (!yml.exists("name")) throw new IllegalStateException("Key \"name\" doesn't exit");
-            if (!yml.exists("description")) throw new IllegalStateException("Key \"name\" doesn't exit");
-            if (!yml.exists("authors")) throw new IllegalStateException("Key \"name\" doesn't exit");
-            if (!yml.exists("version")) throw new IllegalStateException("Key \"name\" doesn't exit");
-            if (!yml.exists("mainClass")) throw new IllegalStateException("Key \"name\" doesn't exit");
+            if (!yml.exists("description")) throw new IllegalStateException("Key \"description\" doesn't exit");
+            if (!yml.exists("authors")) throw new IllegalStateException("Key \"authors\" doesn't exit");
+            if (!yml.exists("version")) throw new IllegalStateException("Key \"version\" doesn't exit");
+            if (!yml.exists("mainClass")) throw new IllegalStateException("Key \"mainClass\" doesn't exit");
             info.pluginName = yml.getString("name");
             info.pluginDescription = yml.getString("description");
             info.pluginAuthors = yml.getStringList("authors").toArray(new String[0]);
@@ -111,10 +111,7 @@ public class RePluginLoader {
                 plugin.pluginDescription = info.pluginDescription;
                 plugin.pluginAuthors = info.pluginAuthors;
                 plugin.pluginVersion = info.pluginVersion;
-                LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialising...");
-                plugin.onPluginInit();
                 pluginList.add(plugin);
-                LOGGER.log(plugin.pluginName + " initialised");
             } catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to load " + info.pluginName + "(" + info.mainClass + ")");
                 //failed[0]++;
@@ -127,6 +124,17 @@ public class RePluginLoader {
     public static void shutdownPlugins() {
         getPluginList().forEach(pl -> {
             LOGGER.log("Shutting down " + pl.pluginName);
+            try {
+                pl.onPluginShutdown();
+            } catch (Exception e) {
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to shut down " + pl.pluginName);
+                e.printStackTrace();
+            }
+        });
+    }
+    public static void initPlugins() {
+        getPluginList().forEach(pl -> {
+            LOGGER.log("Initialising " + pl.pluginName);
             try {
                 pl.onPluginShutdown();
             } catch (Exception e) {

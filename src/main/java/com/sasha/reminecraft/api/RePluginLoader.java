@@ -130,7 +130,7 @@ public class RePluginLoader {
             try {
                 pl.onPluginShutdown();
             } catch (Exception e) {
-                LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to shut down " + pl.pluginName);
                 e.printStackTrace();
             }
         });
@@ -142,7 +142,7 @@ public class RePluginLoader {
             try {
                 pl.onPluginEnable();
             } catch (Exception e) {
-                LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to enable " + pl.pluginName);
                 e.printStackTrace();
             }
         });

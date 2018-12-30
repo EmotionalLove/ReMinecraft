@@ -126,7 +126,7 @@ public class ReMinecraft implements IReMinecraft {
         loader.preparePlugins(loader.findPlugins());
         loader.loadPlugins();
         Thread thread = new Thread(() -> {
-            new ReMinecraft().start(args);
+            new ReMinecraft().start(args, false);
         }); // start Re:Minecraft before handling console commands
         if (!isUsingJavaFXGui) thread.run();
         else thread.start();
@@ -152,7 +152,7 @@ public class ReMinecraft implements IReMinecraft {
      * Launch (or relaunch) Re:Minecraft
      */
     @Override
-    public void start(String[] args) {
+    public void start(String[] args, boolean restart) {
         isRelaunching = false;
         isShuttingDownCompletely = false;
         try {
@@ -162,7 +162,7 @@ public class ReMinecraft implements IReMinecraft {
             this.registerCommands();
             this.registerConfigurations();
             configurations.forEach(Configuration::configure); // set config vars
-            RePluginLoader.initPlugins();
+            if (!restart) RePluginLoader.initPlugins();
             Proxy proxy = Proxy.NO_PROXY;
             if (MAIN_CONFIG.var_socksProxy != null && !MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
@@ -266,6 +266,8 @@ public class ReMinecraft implements IReMinecraft {
 
     @Override
     public void registerCommands() {
+        TERMINAL_CMD_PROCESSOR.getCommandRegistry().clear();
+        INGAME_CMD_PROCESSOR.getCommandRegistry().clear();
         try {
             TERMINAL_CMD_PROCESSOR.register(ExitCommand.class);
             TERMINAL_CMD_PROCESSOR.register(RelaunchCommand.class);
@@ -372,6 +374,6 @@ public class ReMinecraft implements IReMinecraft {
             }
         }
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
-        ReMinecraft.INSTANCE.start(ReMinecraft.args);
+        ReMinecraft.INSTANCE.start(ReMinecraft.args, true);
     }
 }

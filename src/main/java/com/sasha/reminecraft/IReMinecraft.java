@@ -17,7 +17,7 @@ public interface IReMinecraft {
     /**
      * Load RE:Minecraft any any plugins
      */
-    void start(String[] args);
+    void start(String[] args, boolean restart);
 
     /**
      * Authenticate with Mojang

@@ -106,15 +106,15 @@ public class RePluginLoader {
                     LOGGER.logError(info.pluginName + " has an invalid main class, cannot load.");
                     return;
                 }
-                    RePlugin plugin = (RePlugin) clazz.newInstance();
-                    plugin.pluginName = info.pluginName;
-                    plugin.pluginDescription = info.pluginDescription;
-                    plugin.pluginAuthors = info.pluginAuthors;
-                    plugin.pluginVersion = info.pluginVersion;
-                    LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialising...");
-                    plugin.onPluginInit();
-                    pluginList.add(plugin);
-                    LOGGER.log(plugin.pluginName + " initialised");
+                RePlugin plugin = (RePlugin) clazz.newInstance();
+                plugin.pluginName = info.pluginName;
+                plugin.pluginDescription = info.pluginDescription;
+                plugin.pluginAuthors = info.pluginAuthors;
+                plugin.pluginVersion = info.pluginVersion;
+                LOGGER.log(plugin.pluginName + " " + plugin.pluginVersion + " is initialising...");
+                plugin.onPluginInit();
+                pluginList.add(plugin);
+                LOGGER.log(plugin.pluginName + " initialised");
             } catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to load " + info.pluginName + "(" + info.mainClass + ")");
                 //failed[0]++;
@@ -129,7 +129,7 @@ public class RePluginLoader {
             LOGGER.log("Shutting down " + pl.pluginName);
             try {
                 pl.onPluginShutdown();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
                 e.printStackTrace();
             }
@@ -141,7 +141,7 @@ public class RePluginLoader {
             LOGGER.log("Enabling " + pl.pluginName);
             try {
                 pl.onPluginEnable();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
                 e.printStackTrace();
             }
@@ -153,7 +153,7 @@ public class RePluginLoader {
             LOGGER.log("Disabling " + pl.pluginName);
             try {
                 pl.onPluginDisable();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.logError("A severe uncaught exception occurred whilst trying to disable " + pl.pluginName);
                 e.printStackTrace();
             }

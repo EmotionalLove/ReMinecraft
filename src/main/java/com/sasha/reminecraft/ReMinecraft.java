@@ -365,7 +365,10 @@ public class ReMinecraft implements IReMinecraft {
             }
         }).start();
         while (i[0] == -1 || i[0] != 0) {
-            try {ReMinecraft.INSTANCE.notify(); } catch (IllegalMonitorStateException ignored){}
+            try {
+                ReMinecraft.INSTANCE.notify();
+            } catch (IllegalMonitorStateException ignored) {
+            }
         }
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
         ReMinecraft.INSTANCE.start(ReMinecraft.args);

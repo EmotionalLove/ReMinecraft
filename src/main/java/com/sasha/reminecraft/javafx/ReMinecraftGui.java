@@ -102,7 +102,7 @@ public class ReMinecraftGui extends Application {
             }
         });
         field.setMaxWidth(WIDTH - 100);
-        field.setTranslateY(HEIGHT - (HEIGHT/2)-50);
+        field.setTranslateY(HEIGHT - (HEIGHT / 2) - 50);
 
         pane.getChildren().addAll(relaunchButton, stopButton, areaToLogTo, field);
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
@@ -115,7 +115,7 @@ public class ReMinecraftGui extends Application {
             relaunchButton.setTranslateY(-newVal.intValue() / 2 + 55);
             stopButton.setTranslateY(-newVal.intValue() / 2 + 55);
             areaToLogTo.setMaxHeight((double) newVal - 160);
-            field.setTranslateY(newVal.intValue() - (newVal.intValue()/2)-50);
+            field.setTranslateY(newVal.intValue() - (newVal.intValue() / 2) - 50);
         });
         return pane;
     }

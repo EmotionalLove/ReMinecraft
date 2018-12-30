@@ -6,8 +6,11 @@ package com.sasha.reminecraft.util.sound;
 public interface ISound {
 
     ISound getSoundById(int id);
+
     ISound getSoundByMinecraftTranslationKey(String key);
+
     String getMinecraftTranslationKeyFromSound(ISound sound);
+
     int getIdFromSound(ISound sound);
-    
+
 }

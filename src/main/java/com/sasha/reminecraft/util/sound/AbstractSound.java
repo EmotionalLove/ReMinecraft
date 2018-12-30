@@ -13,6 +13,7 @@ import java.util.List;
 public abstract class AbstractSound implements ISound {
 
     public static List<ISound> soundRegistry = new ArrayList<>();
+
     static {
         soundRegistry.add(new AmbientCaveSound(0, "ambient.cave"));
         soundRegistry.add(new BlockAnvilBreakSound(1, "block.anvil.break"));

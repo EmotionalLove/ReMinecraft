@@ -10,7 +10,7 @@ import com.sasha.reminecraft.logging.impl.TerminalLogger;
 public abstract class LoggerBuilder {
 
     public static ILogger buildProperLogger(String name) {
-        if (ReMinecraft.isUsingJavaFXGui){
+        if (ReMinecraft.isUsingJavaFXGui) {
             return new JavaFXLogger(name);
         }
         return new TerminalLogger(name);

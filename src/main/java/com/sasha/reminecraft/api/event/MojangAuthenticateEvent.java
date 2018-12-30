@@ -1,7 +1,6 @@
 package com.sasha.reminecraft.api.event;
 
 import com.sasha.eventsys.SimpleCancellableEvent;
-import com.sasha.eventsys.SimpleEvent;
 
 public class MojangAuthenticateEvent {
 

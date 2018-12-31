@@ -136,9 +136,9 @@ public class RePluginLoader {
         getPluginList().forEach(pl -> {
             LOGGER.log("Initialising " + pl.pluginName);
             try {
-                pl.onPluginShutdown();
+                pl.onPluginInit();
             } catch (Exception e) {
-                LOGGER.logError("A severe uncaught exception occurred whilst trying to shut down " + pl.pluginName);
+                LOGGER.logError("A severe uncaught exception occurred whilst trying to init " + pl.pluginName);
                 e.printStackTrace();
             }
         });

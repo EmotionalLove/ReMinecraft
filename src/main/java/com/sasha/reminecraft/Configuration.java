@@ -54,6 +54,8 @@ public class Configuration {
     @ConfigSetting
     public int var_reconnectDelaySeconds = 5;
     @ConfigSetting
+    public boolean var_authWithoutProxy = true;
+    @ConfigSetting
     public String var_socksProxy = null;
     @ConfigSetting
     public int var_socksPort = -1;

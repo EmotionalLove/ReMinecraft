@@ -168,7 +168,7 @@ public class ReMinecraft implements IReMinecraft {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
             }
             if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
-            AuthenticationService service = authenticate(proxy);// log into mc
+            AuthenticationService service = authenticate(MAIN_CONFIG.var_authWithoutProxy ? null : proxy);// log into mc
             if (service != null) {
                 minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
                         MAIN_CONFIG.var_remoteServerPort,

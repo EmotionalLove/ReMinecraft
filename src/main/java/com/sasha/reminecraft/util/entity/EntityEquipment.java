@@ -9,11 +9,12 @@ import java.util.HashMap;
 public class EntityEquipment extends EntityRotation {
     public ArrayList<PotionEffect> potionEffects = new ArrayList<>();
     public HashMap<EquipmentSlot, ItemStack> equipment = new HashMap<>();
-    public int passengerIds[] = {};
 
     {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             equipment.put(slot, null);
         }
     }
+
+
 }

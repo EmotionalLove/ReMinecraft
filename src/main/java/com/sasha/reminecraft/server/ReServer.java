@@ -264,9 +264,8 @@ public class ReServer extends SessionAdapter {
                     ReMinecraft.LOGGER.logDebug("???");
                 }
                 for (Entity entity : ReClient.ReClientCache.INSTANCE.entityCache.values()) {
-                    if (entity instanceof EntityEquipment && ((EntityEquipment) entity).passengerIds.length > 0) {
-                        this.child.getSession().send(new ServerEntitySetPassengersPacket(entity.entityId,
-                                ((EntityEquipment) entity).passengerIds));
+                    if (entity.passengerIds.size() > 0) {
+                        this.child.getSession().send(new ServerEntitySetPassengersPacket(entity.entityId, entity.passengersAsArray()));
                     }
                     if (entity instanceof EntityRotation) {
                         EntityRotation rotation = (EntityRotation) entity;

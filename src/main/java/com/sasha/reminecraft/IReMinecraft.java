@@ -7,6 +7,8 @@ import java.net.Proxy;
 
 public interface IReMinecraft {
 
+    void sendFromClient(Packet pck);
+
     /**
      * Send a packet to all of the currently connected and set up children
      *

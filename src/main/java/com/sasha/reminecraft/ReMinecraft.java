@@ -4,6 +4,7 @@ import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.auth.service.AuthenticationService;
 import com.github.steveice10.mc.protocol.MinecraftConstants;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.mc.protocol.data.SubProtocol;
 import com.github.steveice10.packetlib.Client;
 import com.github.steveice10.packetlib.Server;
 import com.github.steveice10.packetlib.event.session.SessionListener;
@@ -142,6 +143,16 @@ public class ReMinecraft implements IReMinecraft {
     }
 
     @Override
+    public void sendFromClient(Packet pck) {
+        if (minecraftClient == null ||
+                !minecraftClient.getSession().isConnected() ||
+                ((MinecraftProtocol)minecraftClient.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME) {
+            return;
+        }
+        minecraftClient.getSession().send(pck);
+    }
+
+    @Override
     public void sendToChildren(Packet pck) {
         INSTANCE.childClients.stream()
                 .filter(ChildReClient::isPlaying)
@@ -168,7 +179,7 @@ public class ReMinecraft implements IReMinecraft {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
             }
             if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
-            AuthenticationService service = authenticate(MAIN_CONFIG.var_authWithoutProxy ? null : proxy);// log into mc
+            AuthenticationService service = authenticate(MAIN_CONFIG.var_authWithoutProxy ? Proxy.NO_PROXY : proxy);// log into mc
             if (service != null) {
                 minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
                         MAIN_CONFIG.var_remoteServerPort,

@@ -62,7 +62,7 @@ public class ReMinecraftGui extends Application {
         TabPane pane = new TabPane();
         Tab chatTab = new Tab("Chat", prepareChatPane(stage));
         chatTab.setClosable(false);
-        Tab configTab = new Tab("Configuration", prepareConfigPane(stage));
+        Tab configTab = new Tab("About", prepareConfigPane(stage));
         configTab.setClosable(false);
         pane.getTabs().add(chatTab);
         pane.getTabs().add(configTab);
@@ -129,59 +129,6 @@ public class ReMinecraftGui extends Application {
         pane.setMaxWidth(150);
         pane.setAlignment(Pos.CENTER);
         applyBackgroundImage(background, img1, WIDTH, HEIGHT);
-        Button saveButton = new Button("Save");
-        //saveButton.setTranslateY(-HEIGHT / 2 + 55);
-        //saveButton.setTranslateX(-WIDTH / 2 + 40);
-        saveButton.setOnAction(e -> {
-            Configuration cfg = getConfigFromName(dropdown.getSelectionModel().getSelectedItem());
-            if (cfg == null) return;
-            pane.getChildrenUnmodifiable().forEach(child -> {
-                if (child.getId() != null && child.getId().startsWith("var_")) {
-                    try {
-                        Field field = cfg.getClass().getDeclaredField(child.getId());
-                        Object value;
-                        if (child instanceof TextField) value = ((TextField) child).getText();
-                        else if (child instanceof CheckBox) value = ((CheckBox) child).isSelected();
-                        else value = null; // sad
-                        if (value == null) return;
-                        setConfigVar(field, cfg, value);
-                    } catch (NoSuchFieldException | IllegalAccessException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            });
-        });
-        Button discardButton = new Button("Discard");
-        //discardButton.setTranslateX(-WIDTH / 2 + 95);
-        //discardButton.setTranslateY(-HEIGHT / 2 + 55);
-        discardButton.setOnAction(e -> {
-            // todo
-        });
-
-        dropdown = new ChoiceBox<>();
-        dropdown.setAccessibleText("Ok");
-        dropdown.getItems().add("Populating configurations...");
-        //dropdown.setTranslateY(-HEIGHT / 2 + 55);
-        //dropdown.setTranslateX((WIDTH - WIDTH / 2) - 30);
-        dropdown.setOnAction(e -> {
-            try {
-                populateConfigPane(stage, pane, getConfigFromName(dropdown.getSelectionModel().getSelectedItem()));
-            } catch (IllegalAccessException e1) {
-                e1.printStackTrace();
-            }
-        });
-        pane.getChildren().addAll(saveButton, discardButton, dropdown);
-        background.getChildren().add(pane);
-        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            //saveButton.setTranslateX(-newVal.intValue() / 2 + 40);
-            //discardButton.setTranslateX(-newVal.intValue() / 2 + 95);
-            //dropdown.setTranslateX((newVal.intValue() - newVal.intValue() / 2) - dropdown.getWidth());
-        });
-        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            //saveButton.setTranslateY(-newVal.intValue() / 2 + 55);
-            //discardButton.setTranslateY(-newVal.intValue() / 2 + 55);
-            //dropdown.setTranslateY(-newVal.intValue() / 2 + 55);
-        });
         return background;
     }
 
@@ -273,14 +220,6 @@ public class ReMinecraftGui extends Application {
         }
     }
 
-    public static void refreshConfigurationEntries() {
-        dropdown.getItems().clear();
-        dropdown.getItems()
-                .addAll(ReMinecraft.INSTANCE.configurations
-                        .stream()
-                        .map(Configuration::getConfigName)
-                        .collect(Collectors.toList()));
-    }
 
     private void applyBackgroundImage(Region node, Image img, double width, double height) {
         BackgroundImage myBI = new BackgroundImage

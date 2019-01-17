@@ -53,7 +53,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "2.0";
+    public static String VERSION = "2.0.1";
     /**
      * The command line command processor
      */
@@ -178,7 +178,7 @@ public class ReMinecraft implements IReMinecraft {
             if (MAIN_CONFIG.var_socksProxy != null && !MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
             }
-            if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
+            //if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
             AuthenticationService service = authenticate(MAIN_CONFIG.var_authWithoutProxy ? Proxy.NO_PROXY : proxy);// log into mc
             if (service != null) {
                 minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,

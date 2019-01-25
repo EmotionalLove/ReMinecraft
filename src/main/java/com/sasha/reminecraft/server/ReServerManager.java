@@ -80,7 +80,7 @@ public class ReServerManager extends ServerAdapter {
                 Difficulty.NORMAL,
                 1,
                 WorldType.DEFAULT,
-                true)));
+                false)));
         return server;
     }
 

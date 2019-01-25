@@ -17,6 +17,7 @@ Please see the ["Getting started" page on the wiki](https://github.com/Emotional
 
 ### Developers
 Please see the ["Using the Plugin API" page on the wiki](https://github.com/EmotionalLove/ReMinecraft/wiki/Using-the-plugin-API)
+You can also watch the demonstration video [here](https://drive.google.com/open?id=1-ixylT0CFfuLTDk0CYfOagVGHq_wxvv-)
 
 ### Help
 We have a Discord server for your questions or troubles. https://discord.gg/uFKX2tW

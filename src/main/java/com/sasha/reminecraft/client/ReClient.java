@@ -165,9 +165,11 @@ public class ReClient implements SessionListener {
          * Player inventory
          */
         public ItemStack[] playerInventory;
-        public boolean wasFilteringRecipes;
-        public boolean wasRecipeBookOpened;
-        public List<Integer> recipeCache = new ArrayList<>();
+        public boolean wasFilteringCraftingRecipes;
+        public boolean wasFilteringSmeltingRecipes;
+        public boolean wasCraftingRecipeBookOpened;
+        public boolean wasSmeltingRecipeBookOpened;
+        public List<String> recipeCache = new ArrayList<>();
         public int heldItem = 0;
         /**
          * Player position

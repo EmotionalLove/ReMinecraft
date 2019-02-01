@@ -278,7 +278,11 @@ public class ReServer extends SessionAdapter {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            this.child.getSession().send(new ServerUnlockRecipesPacket(ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened, ReClient.ReClientCache.INSTANCE.wasFilteringRecipes, ReClient.ReClientCache.INSTANCE.recipeCache, UnlockRecipesAction.ADD));
+            this.child.getSession().send(new ServerUnlockRecipesPacket(ReClient.ReClientCache.INSTANCE.wasCraftingRecipeBookOpened,
+                    ReClient.ReClientCache.INSTANCE.wasSmeltingRecipeBookOpened,
+                    ReClient.ReClientCache.INSTANCE.wasFilteringCraftingRecipes,
+                    ReClient.ReClientCache.INSTANCE.wasFilteringSmeltingRecipes,
+                    ReClient.ReClientCache.INSTANCE.recipeCache, UnlockRecipesAction.ADD));
             this.child.setPlaying(true);
         }
     }

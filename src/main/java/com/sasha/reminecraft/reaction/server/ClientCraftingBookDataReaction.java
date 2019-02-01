@@ -11,8 +11,10 @@ public class ClientCraftingBookDataReaction implements IPacketReactor<ClientCraf
     @Override
     public boolean takeAction(ClientCraftingBookDataPacket packet) {
         if (packet.getType() == CraftingBookDataType.CRAFTING_BOOK_STATUS) {
-            ReClient.ReClientCache.INSTANCE.wasFilteringRecipes = packet.isFilterActive();
-            ReClient.ReClientCache.INSTANCE.wasRecipeBookOpened = packet.isCraftingBookOpen();
+            ReClient.ReClientCache.INSTANCE.wasFilteringCraftingRecipes = packet.isFilterCraftingActive();
+            ReClient.ReClientCache.INSTANCE.wasFilteringSmeltingRecipes = packet.isFilterSmeltingActive();
+            ReClient.ReClientCache.INSTANCE.wasCraftingRecipeBookOpened = packet.isCraftingBookOpen();
+            ReClient.ReClientCache.INSTANCE.wasSmeltingRecipeBookOpened = packet.isSmeltingBookOpen();
         }
         return true;
     }

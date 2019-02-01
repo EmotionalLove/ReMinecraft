@@ -131,7 +131,7 @@ public class ReServer extends SessionAdapter {
                 }
             });
             ReMinecraft.LOGGER.log("Sent " + ReClient.ReClientCache.INSTANCE.chunkCache.size() + " chunks");
-            this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED));
+            //this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED)); todo err?
             this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReClient.ReClientCache.INSTANCE.heldItem));
             this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReClient.ReClientCache.INSTANCE.posX, ReClient.ReClientCache.INSTANCE.posY, ReClient.ReClientCache.INSTANCE.posZ, ReClient.ReClientCache.INSTANCE.yaw, ReClient.ReClientCache.INSTANCE.pitch, new Random().nextInt(1000) + 10));
             this.child.getSession().send(new ServerWindowItemsPacket(0, ReClient.ReClientCache.INSTANCE.playerInventory));
@@ -325,7 +325,7 @@ public class ReServer extends SessionAdapter {
 }
 
 class ServerBranding {
-    private static final String BRAND = "RE_Minecraft " + ReMinecraft.VERSION;
+    private static final String BRAND = "re_minecraft";
     protected static byte[] BRAND_ENCODED;
 
     static {

@@ -325,7 +325,7 @@ public class ReServer extends SessionAdapter {
 }
 
 class ServerBranding {
-    private static final String BRAND = "RE:Minecraft " + ReMinecraft.VERSION;
+    private static final String BRAND = "RE_Minecraft " + ReMinecraft.VERSION;
     protected static byte[] BRAND_ENCODED;
 
     static {

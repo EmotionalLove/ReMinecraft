@@ -159,7 +159,10 @@ public class ReMinecraft implements IReMinecraft {
     public void sendToChildren(Packet pck) {
         INSTANCE.childClients.stream()
                 .filter(ChildReClient::isPlaying)
-                .forEach(client -> client.getSession().send(pck));
+                .forEach(client -> {
+                    System.out.println(pck.getClass().getSimpleName());
+                    client.getSession().send(pck);
+                });
     }
 
     /**

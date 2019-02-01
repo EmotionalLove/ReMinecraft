@@ -9,7 +9,7 @@ public interface IPacketReactor<T extends Packet> {
      *
      * @param packet The packet
      * @return TRUE if RE:Minecraft should push the packet to the connected children,
-     * FALSE if RE:Minecraft should BLOCK the packet from reaching the chilren.
+     * FALSE if RE:Minecraft should BLOCK the packet from reaching the children.
      */
     boolean takeAction(T packet);
 

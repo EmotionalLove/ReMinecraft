@@ -137,10 +137,4 @@ public class Configuration {
     public @interface ConfigSetting {
 
     }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Removed {
-
-    }
 }

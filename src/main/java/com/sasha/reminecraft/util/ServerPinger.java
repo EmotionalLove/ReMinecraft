@@ -29,22 +29,19 @@ public class ServerPinger {
 
 
     public void status(ILogger logger) {
-        try {
             MinecraftProtocol protocol = new MinecraftProtocol(SubProtocol.STATUS);
             Client client = new Client(host, port, protocol, new TcpSessionFactory(Proxy.NO_PROXY));
             client.getSession().setFlag(MinecraftConstants.AUTH_PROXY_KEY, Proxy.NO_PROXY);
-            client.getSession().setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY, (ServerPingTimeHandler) (session, pingTime) -> {
+            client.getSession().setFlag(MinecraftConstants.SERVER_PING_TIME_HANDLER_KEY,
+                    (ServerPingTimeHandler) (session, pingTime) -> {
                 logger.log("Server is alive, will connect. (pong received after " + pingTime + " ms)");
                 ms = pingTime;
                 pinged = PingStatus.PINGED;
-                ReMinecraft.INSTANCE.notify();
             });
             client.getSession().connect(true);
-        } catch (Exception e) {
-            pinged = PingStatus.DEAD;
-            ReMinecraft.INSTANCE.notify();
-        }
-
+            if(!client.getSession().isConnected()) {
+                pinged = PingStatus.DEAD;
+            }
     }
 
 }

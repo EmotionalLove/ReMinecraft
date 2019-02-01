@@ -44,6 +44,7 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.sasha.reminecraft.javafx.ReMinecraftGui.launched;
 
@@ -181,30 +182,9 @@ public class ReMinecraft implements IReMinecraft {
             if (MAIN_CONFIG.var_socksProxy != null && !MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
             }
-            //noinspection SynchronizeOnNonFinalField
-            synchronized (ReMinecraft.INSTANCE) {
-                ServerPingEvent.Pre event = new ServerPingEvent.Pre();
-                EVENT_BUS.invokeEvent(event);
-                // if the event is cancelled, skip pinging the server.
-                if (!event.isCancelled()) {
-                    ServerPinger pinger = new ServerPinger(MAIN_CONFIG.var_remoteServerIp, MAIN_CONFIG.var_remoteServerPort);
-                    pinger.status(LOGGER);
-                    try {
-                        ReMinecraft.INSTANCE.wait(6000L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    ServerPingEvent.Post post = new ServerPingEvent.Post(pinger.ms, pinger.pinged);
-                    EVENT_BUS.invokeEvent(post);
-                    PingStatus status = post.getStatus();
-                    if (status == PingStatus.DEAD) {
-                        LOGGER.logError("Server offline. Will relaunch until it's online.");
-                        this.reLaunch();
-                        return;
-                    } else if (status == PingStatus.PINGING) {
-                        LOGGER.logWarning("Timed out. Will try to connect.");
-                    }
-                }
+            if (!canPing()) {
+                this.reLaunch();
+                return;
             }
             AuthenticationService service = authenticate(MAIN_CONFIG.var_authWithoutProxy ? Proxy.NO_PROXY : proxy);// log into mc
             if (service != null) {
@@ -222,6 +202,30 @@ public class ReMinecraft implements IReMinecraft {
             e.printStackTrace();
             LOGGER.logError("A SEVERE EXCEPTION OCCURRED WHILST STARTING RE:MINECRAFT");
         }
+    }
+
+    public boolean canPing() {
+        ServerPingEvent.Pre event = new ServerPingEvent.Pre();
+        EVENT_BUS.invokeEvent(event);
+        // if the event is cancelled, skip pinging the server.
+        if (!event.isCancelled()) {
+            ServerPinger pinger = new ServerPinger(MAIN_CONFIG.var_remoteServerIp, MAIN_CONFIG.var_remoteServerPort);
+            pinger.status(LOGGER);
+            while (pinger.pinged == PingStatus.PINGING) {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException ignored) {}
+            }
+            ServerPingEvent.Post post = new ServerPingEvent.Post(pinger.ms, pinger.pinged);
+            EVENT_BUS.invokeEvent(post);
+            PingStatus status = post.getStatus();
+            if (status == PingStatus.DEAD) {
+                LOGGER.logError("Server offline. Will relaunch until it's online.");
+                this.reLaunch();
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

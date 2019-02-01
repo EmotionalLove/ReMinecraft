@@ -4,7 +4,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntit
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.reaction.IPacketReactor;
 import com.sasha.reminecraft.util.entity.Entity;
-import com.sasha.reminecraft.util.entity.EntityEquipment;
 
 public class ServerEntitySetPassengersReaction implements IPacketReactor<ServerEntitySetPassengersPacket> {
     @Override

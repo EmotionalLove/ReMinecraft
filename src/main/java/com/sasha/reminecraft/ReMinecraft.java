@@ -26,7 +26,6 @@ import com.sasha.reminecraft.logging.ILogger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
 import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
-import javafx.application.Platform;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -146,7 +145,7 @@ public class ReMinecraft implements IReMinecraft {
     public void sendFromClient(Packet pck) {
         if (minecraftClient == null ||
                 !minecraftClient.getSession().isConnected() ||
-                ((MinecraftProtocol)minecraftClient.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME) {
+                ((MinecraftProtocol) minecraftClient.getSession().getPacketProtocol()).getSubProtocol() != SubProtocol.GAME) {
             return;
         }
         minecraftClient.getSession().send(pck);

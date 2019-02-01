@@ -132,6 +132,7 @@ public class RePluginLoader {
             }
         });
     }
+
     public static void initPlugins() {
         getPluginList().forEach(pl -> {
             LOGGER.log("Initialising " + pl.pluginName);

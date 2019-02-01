@@ -26,17 +26,20 @@ public abstract class Entity {
     public void addEntity(int eid) {
         passengerIds.add(eid);
     }
+
     public void addEntity(int[] eid) {
         for (int i : eid) {
             addEntity(i);
         }
     }
+
     public void setEntity(int[] eid) {
         passengerIds.clear();
         for (int i : eid) {
             addEntity(i);
         }
     }
+
     public void clearEntity() {
         passengerIds.clear();
     }

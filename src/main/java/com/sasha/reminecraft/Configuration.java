@@ -46,6 +46,8 @@ public class Configuration {
     @ConfigSetting
     public boolean var_onlineModeServer = true;
     @ConfigSetting
+    public int var_pingTimeoutSeconds = 30;
+    @ConfigSetting
     public boolean var_useWhitelist = false;
     @ConfigSetting
     public ArrayList<String> var_whitelistServer = new ArrayList<>();

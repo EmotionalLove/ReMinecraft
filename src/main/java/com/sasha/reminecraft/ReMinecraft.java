@@ -57,7 +57,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "2.0.2";
+    public static String VERSION = "2.0.3";
     /**
      * The command line command processor
      */
@@ -211,9 +211,16 @@ public class ReMinecraft implements IReMinecraft {
         if (!event.isCancelled()) {
             ServerPinger pinger = new ServerPinger(MAIN_CONFIG.var_remoteServerIp, MAIN_CONFIG.var_remoteServerPort);
             pinger.status(LOGGER);
+            int time = 0;
             while (pinger.pinged == PingStatus.PINGING) {
                 try {
-                    Thread.sleep(100L);
+                    Thread.sleep(1000L);
+                    time++;
+                    if (MAIN_CONFIG.var_pingTimeoutSeconds > 0 && time > MAIN_CONFIG.var_pingTimeoutSeconds) {
+                        pinger.pinged = PingStatus.PINGED;
+                        LOGGER.logWarning("Ping timeout. Trying to connect anyways.");
+                        break;
+                    }
                 } catch (InterruptedException ignored) {}
             }
             ServerPingEvent.Post post = new ServerPingEvent.Post(pinger.ms, pinger.pinged);

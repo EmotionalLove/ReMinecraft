@@ -13,8 +13,6 @@ public class RelaunchCommand extends SimpleCommand {
 
     @Override
     public void onCommand() {
-        if (ReMinecraft.INSTANCE.minecraftClient != null) {
-            ReMinecraft.INSTANCE.minecraftClient.getSession().disconnect("Relaunching RE:Minecraft");
-        }
+        ReMinecraft.INSTANCE.reLaunch();
     }
 }

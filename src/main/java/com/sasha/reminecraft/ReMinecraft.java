@@ -57,7 +57,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "2.0.4";
+    public static String VERSION = "2.0.5";
     /**
      * The command line command processor
      */

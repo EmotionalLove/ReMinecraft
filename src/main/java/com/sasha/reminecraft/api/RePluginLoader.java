@@ -21,7 +21,7 @@ public class RePluginLoader {
     private static final String DIR_NAME = "plugins";
     private static ILogger LOGGER;
     private static LinkedHashMap<File /*jar*/, PluginInfo> theRawPlugins = new LinkedHashMap<>();
-    private static List<RePlugin> pluginList = new ArrayList<>();
+    private static final List<RePlugin> pluginList = new ArrayList<>();
 
     public RePluginLoader() {
         if (!ReMinecraft.isUsingJavaFXGui) LOGGER = new TerminalLogger("Plugin Loader");

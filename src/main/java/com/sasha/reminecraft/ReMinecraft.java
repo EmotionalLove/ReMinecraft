@@ -393,7 +393,6 @@ public class ReMinecraft implements IReMinecraft {
         isRelaunching = true;
         configurations.forEach(Configuration::save);
         RePluginLoader.disablePlugins();
-        RePluginLoader.getPluginList().clear();
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
         if (minecraftServer != null) {

@@ -7,15 +7,16 @@ import com.google.gson.JsonObject;
 import com.sasha.reminecraft.ReMinecraft;
 import com.sasha.reminecraft.api.event.ChatReceivedEvent;
 import com.sasha.reminecraft.reaction.IPacketReactor;
+import com.sasha.reminecraft.util.MessageUtil;
 
 public class ServerChatReaction implements IPacketReactor<ServerChatPacket> {
     @Override
     public boolean takeAction(ServerChatPacket packet) {
-        Message pckMsg = Message.fromJson(removeEvents(packet.getMessage().toJson().getAsJsonObject()));
+        Message pckMsg = MessageUtil.fromJson(removeEvents(packet.getMessage().toJson().getAsJsonObject()));
         ChatReceivedEvent chatEvent = new ChatReceivedEvent(pckMsg.getFullText(), System.currentTimeMillis());
         ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(chatEvent);
         ReMinecraft.LOGGER.log("(CHAT) " + pckMsg.getFullText());
-        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(Message.fromJson(pckMsg.toJson()), packet.getType()));
+        ReMinecraft.INSTANCE.sendToChildren(new ServerChatPacket(MessageUtil.fromJson(pckMsg.toJson()), packet.getType()));
         return false;
     }
 

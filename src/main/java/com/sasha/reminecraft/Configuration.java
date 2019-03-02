@@ -46,8 +46,6 @@ public class Configuration {
     @ConfigSetting
     public boolean var_onlineModeServer = true;
     @ConfigSetting
-    public int var_pingTimeoutSeconds = 30;
-    @ConfigSetting
     public boolean var_useWhitelist = false;
     @ConfigSetting
     public ArrayList<String> var_whitelistServer = new ArrayList<>();
@@ -79,6 +77,9 @@ public class Configuration {
     protected final void configure() {
         try {
             File file = ReUtil.getDataFile(configName);
+            try {
+                file.getParentFile().mkdirs();
+            } catch (Exception e){}
             YML yml = new YML(file);
             for (Field declaredField : this.getClass().getDeclaredFields()) {
                 if (declaredField.getAnnotation(ConfigSetting.class) == null) continue;

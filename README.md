@@ -39,3 +39,16 @@ We have a Discord server for your questions or troubles. https://discord.gg/uFKX
 SnakeYAML - For YAML parsing.
 
 [MCProtocolLib](https://github.com/Steveice10/MCProtocolLib) - For the minecraft protocol library for Java.
+
+
+### plugins:
+- [ExampleRePlugin](https://github.com/EmotionalLove/ExampleRePlugin)
+- [serverPopulationStats](https://github.com/michuthecomrade/serverPopulationStats)
+- [DontTouchMyBot](https://github.com/TheSocietyProject/DontTouchMyBot)
+- [ChatLogger](https://github.com/TheSocietyProject/ChatLogger)
+- [AntiQueue](https://github.com/TheSocietyProject/AntiQueue)
+- [QueueLength](https://github.com/TheSocietyProject/QueueLength)
+- [AntiAfk](https://github.com/TheSocietyProject/AntiAfk)
+- [QueueSpeedometer](https://github.com/TheSocietyProject/QueueSpeedometer)
+- [MailSystem](https://github.com/TheSocietyProject/MailSystem)
+

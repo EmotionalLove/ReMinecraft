@@ -36,9 +36,7 @@ public class ChatMessage {
     }
 
     public boolean isConnecting(){
-        if(msg.equals("Connecting to the server..."))
-            return true;
-        return false;
+        return ("Connecting to the server...").equals(msg);
     }
 
     public boolean inQueue() {
@@ -46,7 +44,7 @@ public class ChatMessage {
         if (msg.startsWith("<"))
             return false;
 
-        if (msg.startsWith("2b2t is full"))
+        if (("2b2t is full").equals(msg))
             return true;
 
         if(isConnecting())
@@ -55,10 +53,10 @@ public class ChatMessage {
         if (msg.startsWith("Position in queue: "))
             return true;
 
-        if(msg.equals("Exception Connecting:ReadTimeoutException : null"))
+        if(msg.startsWith("Exception Connecting:")) // to catch other connection errors if they ever come up
             return true;
 
-        if(msg.equals("Lost connection to server"))
+        if(("Lost connection to server").equals(msg))
             return true;
 
         // act who knows wether in queue or not?

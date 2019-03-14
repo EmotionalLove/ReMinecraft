@@ -14,6 +14,7 @@ import com.sasha.eventsys.SimpleEventManager;
 import com.sasha.reminecraft.api.RePlugin;
 import com.sasha.reminecraft.api.RePluginLoader;
 import com.sasha.reminecraft.api.event.MojangAuthenticateEvent;
+import com.sasha.reminecraft.api.event.ServerPingEvent;
 import com.sasha.reminecraft.client.ChildReClient;
 import com.sasha.reminecraft.client.ReClient;
 import com.sasha.reminecraft.command.game.AboutCommand;
@@ -25,6 +26,8 @@ import com.sasha.reminecraft.javafx.ReMinecraftGui;
 import com.sasha.reminecraft.logging.ILogger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
 import com.sasha.reminecraft.logging.impl.TerminalLogger;
+import com.sasha.reminecraft.util.PingStatus;
+import com.sasha.reminecraft.util.ServerPinger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
 import javafx.application.Platform;
 import org.jline.reader.EndOfFileException;
@@ -41,6 +44,7 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.sasha.reminecraft.javafx.ReMinecraftGui.launched;
 
@@ -53,7 +57,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "2.0.2";
+    public static String VERSION = "2.0.5";
     /**
      * The command line command processor
      */
@@ -178,7 +182,10 @@ public class ReMinecraft implements IReMinecraft {
             if (MAIN_CONFIG.var_socksProxy != null && !MAIN_CONFIG.var_socksProxy.equalsIgnoreCase("[no default]") && MAIN_CONFIG.var_socksPort != -1) {
                 proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(InetAddress.getByName(MAIN_CONFIG.var_socksProxy), MAIN_CONFIG.var_socksPort));
             }
-            //if (isUsingJavaFXGui) Platform.runLater(ReMinecraftGui::refreshConfigurationEntries);
+            if (!canPing()) {
+                this.reLaunch();
+                return;
+            }
             AuthenticationService service = authenticate(MAIN_CONFIG.var_authWithoutProxy ? Proxy.NO_PROXY : proxy);// log into mc
             if (service != null) {
                 minecraftClient = new Client(MAIN_CONFIG.var_remoteServerIp,
@@ -195,6 +202,37 @@ public class ReMinecraft implements IReMinecraft {
             e.printStackTrace();
             LOGGER.logError("A SEVERE EXCEPTION OCCURRED WHILST STARTING RE:MINECRAFT");
         }
+    }
+
+    public boolean canPing() {
+        ServerPingEvent.Pre event = new ServerPingEvent.Pre();
+        EVENT_BUS.invokeEvent(event);
+        // if the event is cancelled, skip pinging the server.
+        if (!event.isCancelled()) {
+            ServerPinger pinger = new ServerPinger(MAIN_CONFIG.var_remoteServerIp, MAIN_CONFIG.var_remoteServerPort);
+            pinger.status(LOGGER);
+            int time = 0;
+            while (pinger.pinged == PingStatus.PINGING) {
+                try {
+                    Thread.sleep(1000L);
+                    time++;
+                    if (MAIN_CONFIG.var_pingTimeoutSeconds > 0 && time > MAIN_CONFIG.var_pingTimeoutSeconds) {
+                        pinger.pinged = PingStatus.PINGED;
+                        LOGGER.logWarning("Ping timeout. Trying to connect anyways.");
+                        break;
+                    }
+                } catch (InterruptedException ignored) {}
+            }
+            ServerPingEvent.Post post = new ServerPingEvent.Post(pinger.ms, pinger.pinged);
+            EVENT_BUS.invokeEvent(post);
+            PingStatus status = post.getStatus();
+            if (status == PingStatus.DEAD) {
+                LOGGER.logError("Server offline. Will relaunch until it's online.");
+                this.reLaunch();
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -355,7 +393,6 @@ public class ReMinecraft implements IReMinecraft {
         isRelaunching = true;
         configurations.forEach(Configuration::save);
         RePluginLoader.disablePlugins();
-        RePluginLoader.getPluginList().clear();
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
         if (minecraftServer != null) {

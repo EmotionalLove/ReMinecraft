@@ -113,7 +113,7 @@ public class ReServer extends SessionAdapter {
             LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.LOGGER.log("Child user " + pck.getProfile().getName() + " authenticated!");
             runWhitelist(pck.getProfile().getName(), this.child);
-            ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile());
+            ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile(), ev.getSession().getRemoteAddress());
             ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(joinEvent);
             if (joinEvent.isCancelled()) {
                 this.child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.from(joinEvent.getCancelledKickMessage())));

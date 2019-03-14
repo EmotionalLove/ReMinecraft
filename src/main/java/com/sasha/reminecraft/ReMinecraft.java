@@ -29,7 +29,6 @@ import com.sasha.reminecraft.logging.impl.TerminalLogger;
 import com.sasha.reminecraft.util.PingStatus;
 import com.sasha.reminecraft.util.ServerPinger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
-import javafx.application.Platform;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -44,7 +43,6 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.sasha.reminecraft.javafx.ReMinecraftGui.launched;
 
@@ -57,7 +55,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "2.0.5";
+    public static String VERSION = "2.0.6";
     /**
      * The command line command processor
      */

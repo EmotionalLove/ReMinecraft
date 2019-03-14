@@ -56,7 +56,7 @@ public class ReMinecraft implements IReMinecraft {
     /**
      * Current software version of Re:Minecraft
      */
-    public static String VERSION = "2.1";
+    public static String VERSION = "2.1.1";
     /**
      * The command line command processor
      */
@@ -159,7 +159,10 @@ public class ReMinecraft implements IReMinecraft {
     public void sendToChildren(Packet pck) {
         INSTANCE.childClients.stream()
                 .filter(ChildReClient::isPlaying)
-                .forEach(client -> client.getSession().send(pck));
+                .forEach(client -> {
+                    System.out.println(pck.getClass().getSimpleName());
+                    client.getSession().send(pck);
+                });
     }
 
     /**
@@ -385,7 +388,6 @@ public class ReMinecraft implements IReMinecraft {
         isRelaunching = true;
         configurations.forEach(Configuration::save);
         RePluginLoader.disablePlugins();
-        RePluginLoader.getPluginList().clear();
         if (minecraftClient != null && minecraftClient.getSession().isConnected())
             minecraftClient.getSession().disconnect("RE:Minecraft is restarting!");
         if (minecraftServer != null) {

@@ -113,7 +113,7 @@ public class ReServer extends SessionAdapter {
             LoginSuccessPacket pck = (LoginSuccessPacket) event.getSendingPacket();
             ReMinecraft.LOGGER.log("Child user " + pck.getProfile().getName() + " authenticated!");
             runWhitelist(pck.getProfile().getName(), this.child);
-            ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile());
+            ChildJoinEvent joinEvent = new ChildJoinEvent(pck.getProfile(), ev.getSession().getRemoteAddress());
             ReMinecraft.INSTANCE.EVENT_BUS.invokeEvent(joinEvent);
             if (joinEvent.isCancelled()) {
                 this.child.getSession().send(new ServerDisconnectPacket(TextMessageColoured.from(joinEvent.getCancelledKickMessage())));
@@ -131,7 +131,6 @@ public class ReServer extends SessionAdapter {
                 }
             });
             ReMinecraft.LOGGER.log("Sent " + ReClient.ReClientCache.INSTANCE.chunkCache.size() + " chunks");
-            //this.child.getSession().send(new ServerPluginMessagePacket("MC|Brand", ServerBranding.BRAND_ENCODED)); todo err?
             this.child.getSession().send(new ServerPlayerChangeHeldItemPacket(ReClient.ReClientCache.INSTANCE.heldItem));
             this.child.getSession().send(new ServerPlayerPositionRotationPacket(ReClient.ReClientCache.INSTANCE.posX, ReClient.ReClientCache.INSTANCE.posY, ReClient.ReClientCache.INSTANCE.posZ, ReClient.ReClientCache.INSTANCE.yaw, ReClient.ReClientCache.INSTANCE.pitch, new Random().nextInt(1000) + 10));
             this.child.getSession().send(new ServerWindowItemsPacket(0, ReClient.ReClientCache.INSTANCE.playerInventory));

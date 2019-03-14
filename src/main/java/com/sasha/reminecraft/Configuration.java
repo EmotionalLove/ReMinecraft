@@ -67,6 +67,8 @@ public class Configuration {
         var_whitelistServer.add("Sogalt");
         var_whitelistServer.add("SonEasterZombie");
         var_whitelistServer.add("IronException");
+        var_whitelistServer.add("leijurv");
+        var_whitelistServer.add("milse113");
     }
 
     public Configuration(String configName) {

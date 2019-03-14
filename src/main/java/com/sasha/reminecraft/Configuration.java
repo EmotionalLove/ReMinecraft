@@ -63,10 +63,10 @@ public class Configuration {
     public int var_socksPort = -1;
 
     {
-        var_whitelistServer.add("Phi_Phi");
-        var_whitelistServer.add("Color");
-        var_whitelistServer.add("086");
-        var_whitelistServer.add("minecart26");
+        var_whitelistServer.add("SomeUsername");
+        var_whitelistServer.add("AnotherWeirdMinecraftName");
+        var_whitelistServer.add("1248_test_user");
+        var_whitelistServer.add("uwu");
     }
 
     public Configuration(String configName) {

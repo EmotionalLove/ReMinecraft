@@ -63,10 +63,10 @@ public class Configuration {
     public int var_socksPort = -1;
 
     {
-        var_whitelistServer.add("Phi_Phi");
-        var_whitelistServer.add("Color");
-        var_whitelistServer.add("086");
-        var_whitelistServer.add("minecart26");
+        var_whitelistServer.add("soggier");
+        var_whitelistServer.add("Sogalt");
+        var_whitelistServer.add("SonEasterZombie");
+        var_whitelistServer.add("IronException");
     }
 
     public Configuration(String configName) {

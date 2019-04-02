@@ -8,7 +8,7 @@ A headless Minecraft bouncer written in Java
 It's a spin on the anime "RE:Zero"
 
 ## About
-RE:Minecraft is a headless Minecraft bouncer and bot API, all in one! RE:Minecraft can run multiple plugins at once, and "mirror" the game that its logged into onto an Ip and port of your choice. RE:Minecraft is currently only compatible with Minecraft 1.12.2, but a 1.13.x version will be written soon.
+RE:Minecraft is a headless Minecraft bouncer and bot API, all in one! RE:Minecraft can run multiple plugins at once, and "mirror" the game that its logged into onto an Ip and port of your choice. RE:Minecraft is currently only compatible with Minecraft 1.12.2 and 1.13.2.
 
 ## Getting started
 

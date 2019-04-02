@@ -43,7 +43,6 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.sasha.reminecraft.javafx.ReMinecraftGui.launched;
 
@@ -213,10 +212,18 @@ public class ReMinecraft implements IReMinecraft {
         if (!event.isCancelled()) {
             ServerPinger pinger = new ServerPinger(MAIN_CONFIG.var_remoteServerIp, MAIN_CONFIG.var_remoteServerPort);
             pinger.status(LOGGER);
+            int time = 0;
             while (pinger.pinged == PingStatus.PINGING) {
                 try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException ignored) {}
+                    Thread.sleep(1000L);
+                    time++;
+                    if (MAIN_CONFIG.var_pingTimeoutSeconds > 0 && time > MAIN_CONFIG.var_pingTimeoutSeconds) {
+                        pinger.pinged = PingStatus.PINGED;
+                        LOGGER.logWarning("Ping timeout. Trying to connect anyways.");
+                        break;
+                    }
+                } catch (InterruptedException ignored) {
+                }
             }
             ServerPingEvent.Post post = new ServerPingEvent.Post(pinger.ms, pinger.pinged);
             EVENT_BUS.invokeEvent(post);

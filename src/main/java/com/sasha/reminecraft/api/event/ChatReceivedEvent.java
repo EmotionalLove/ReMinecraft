@@ -8,15 +8,22 @@ import com.sun.istack.internal.NotNull;
  */
 public class ChatReceivedEvent extends SimpleEvent {
 
-    public String messageText;
-    public long timeRecieved;
-    public String messageAuthor;
+    private String messageRaw;
+    private String messageText;
+    private long timeRecieved;
+    private String messageAuthor;
 
     public ChatReceivedEvent(String messageText, long timeRecieved) {
-        this.messageText = messageText;
+        this.messageRaw = messageText;
         this.timeRecieved = timeRecieved;
-        if (messageText.startsWith("<")) this.messageAuthor = messageText.replaceAll(".*<.*?>.*", "");
-        else this.messageAuthor = null;
+        if (messageText.startsWith("<")) {
+            this.messageText = messageText.replaceFirst(".*<.*?>.", "");
+            this.messageAuthor = messageText.substring(0, messageText.indexOf(">") - 1);
+            //this.messageAuthor = messageText.replaceAll(".*<.*?>.*", "");
+        } else {
+            this.messageAuthor = null;
+            this.messageText = messageText;
+        }
     }
 
     public ChatReceivedEvent(String messageText, @NotNull String messageAuthor, long timeRecieved) {
@@ -34,6 +41,10 @@ public class ChatReceivedEvent extends SimpleEvent {
      */
     public long getTimeRecieved() {
         return timeRecieved;
+    }
+
+    public String getMessageRaw() {
+        return messageRaw;
     }
 
     public String getMessageAuthor() {

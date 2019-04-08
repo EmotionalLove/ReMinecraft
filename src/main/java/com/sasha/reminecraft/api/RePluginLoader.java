@@ -29,6 +29,8 @@ public class RePluginLoader {
     }
 
     public List<File> findPlugins() {
+        theRawPlugins.clear();
+        pluginList.clear();
         LOGGER.log("Finding plugins...");
         File dir = new File(DIR_NAME);
         if (!dir.exists()) {
@@ -54,8 +56,6 @@ public class RePluginLoader {
     }
 
     public int preparePlugins(List<File> theJarFiles) throws IOException {
-        theRawPlugins.clear();
-        pluginList.clear();
         int i = 0;
         for (File file : theJarFiles) {
             JarFile jar = new JarFile(file, true);

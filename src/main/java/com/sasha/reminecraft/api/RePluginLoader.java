@@ -54,6 +54,8 @@ public class RePluginLoader {
     }
 
     public int preparePlugins(List<File> theJarFiles) throws IOException {
+        theRawPlugins.clear();
+        pluginList.clear();
         int i = 0;
         for (File file : theJarFiles) {
             JarFile jar = new JarFile(file, true);

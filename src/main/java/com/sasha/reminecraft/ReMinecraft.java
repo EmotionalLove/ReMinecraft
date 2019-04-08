@@ -22,6 +22,7 @@ import com.sasha.reminecraft.command.game.PluginsCommand;
 import com.sasha.reminecraft.command.terminal.ExitCommand;
 import com.sasha.reminecraft.command.terminal.LoginCommand;
 import com.sasha.reminecraft.command.terminal.RelaunchCommand;
+import com.sasha.reminecraft.command.terminal.ReloadCommand;
 import com.sasha.reminecraft.javafx.ReMinecraftGui;
 import com.sasha.reminecraft.logging.ILogger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
@@ -122,7 +123,14 @@ public class ReMinecraft implements IReMinecraft {
             LOGGER = new TerminalLogger("RE:Minecraft " + VERSION);
         } else {
             LOGGER = new JavaFXLogger("RE:Minecraft " + VERSION);
-            if (!launched) new Thread(() -> new ReMinecraftGui().startLaunch()).start();
+            if (!launched) new Thread(() -> {
+                try {
+                    new ReMinecraftGui().startLaunch();
+                } catch (Exception e) {
+                    System.out.println("!!! Couldn't start JavaFX GUI. Please run with the -nogui flag !!!");
+                    System.exit(69);
+                }
+            }).start();
         }
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         loader = new RePluginLoader();
@@ -324,6 +332,7 @@ public class ReMinecraft implements IReMinecraft {
             INGAME_CMD_PROCESSOR.register(PluginsCommand.class);
             INGAME_CMD_PROCESSOR.register(AboutCommand.class);
             TERMINAL_CMD_PROCESSOR.register(LoginCommand.class);
+            TERMINAL_CMD_PROCESSOR.register(ReloadCommand.class);
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }

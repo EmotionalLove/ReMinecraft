@@ -27,6 +27,7 @@ import com.sasha.reminecraft.javafx.ReMinecraftGui;
 import com.sasha.reminecraft.logging.ILogger;
 import com.sasha.reminecraft.logging.impl.JavaFXLogger;
 import com.sasha.reminecraft.logging.impl.TerminalLogger;
+import com.sasha.reminecraft.util.AwaitThread;
 import com.sasha.reminecraft.util.PingStatus;
 import com.sasha.reminecraft.util.ServerPinger;
 import com.sasha.simplecmdsys.SimpleCommandProcessor;
@@ -44,6 +45,7 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static com.sasha.reminecraft.javafx.ReMinecraftGui.launched;
 
@@ -412,24 +414,26 @@ public class ReMinecraft implements IReMinecraft {
         ReClient.ReClientCache.INSTANCE.chunkCache.clear();
         ReClient.ReClientCache.INSTANCE.entityCache.clear();
         final int[] i = {-1};
-        new Thread(() -> {
-            synchronized (ReMinecraft.INSTANCE) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AwaitThread thread = new AwaitThread(latch) {
+            @Override
+            public void run() {
                 for (i[0] = MAIN_CONFIG.var_reconnectDelaySeconds; i[0] >= 0; i[0]--) {
                     ReMinecraft.LOGGER.logWarning("Reconnecting in " + i[0] + " seconds");
                     try {
-                        ReMinecraft.INSTANCE.wait(1000L);
+                        Thread.sleep(1000L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-                return;
+                this.finish();
             }
-        }).start();
-        while (i[0] == -1 || i[0] != 0) {
-            try {
-                ReMinecraft.INSTANCE.notify();
-            } catch (IllegalMonitorStateException ignored) {
-            }
+        };
+        thread.start();
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         Runtime.getRuntime().removeShutdownHook(shutdownThread);
         ReMinecraft.INSTANCE.start(ReMinecraft.args, true);

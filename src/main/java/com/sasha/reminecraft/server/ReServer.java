@@ -23,13 +23,13 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.Serve
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.window.ServerWindowItemsPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerMapDataPacket;
 import com.github.steveice10.mc.protocol.packet.login.client.LoginStartPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginDisconnectPacket;
 import com.github.steveice10.mc.protocol.packet.login.server.LoginSuccessPacket;
 import com.github.steveice10.packetlib.event.session.*;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.sasha.reminecraft.ReMinecraft;
+import com.sasha.reminecraft.api.event.ChildDisconnectEvent;
 import com.sasha.reminecraft.api.event.ChildJoinEvent;
 import com.sasha.reminecraft.api.event.ChildServerPacketRecieveEvent;
 import com.sasha.reminecraft.api.event.ChildServerPacketSendEvent;
@@ -298,6 +298,7 @@ public class ReServer extends SessionAdapter {
     @Override
     public void disconnected(DisconnectedEvent event) {
         event.getCause().printStackTrace();
+        ChildDisconnectEvent event1 = new ChildDisconnectEvent(event.getSession().getRemoteAddress());
         ReMinecraft.LOGGER.log("Child disconnected due to " + event.getReason());
     }
 

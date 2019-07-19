@@ -18,7 +18,7 @@ public class ChatReceivedEvent extends SimpleEvent {
         this.timeRecieved = timeRecieved;
         if (messageText.startsWith("<")) {
             this.messageText = messageText.replaceFirst(".*<.*?>.", "");
-            this.messageAuthor = messageText.substring(0, messageText.indexOf(">") - 1);
+            this.messageAuthor = messageText.substring(1, messageText.indexOf(">"));
             //this.messageAuthor = messageText.replaceAll(".*<.*?>.*", "");
         } else {
             this.messageAuthor = null;

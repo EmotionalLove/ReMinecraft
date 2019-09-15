@@ -1,4 +1,4 @@
-Play 2b2t.org? https://discord.gg/9DeK49Q Check out QueueSkip!
+~~Play 2b2t.org? https://discord.gg/9DeK49Q Check out QueueSkip!~~ QueueSkip has been discountinued.
 
 # *RE:Minecraft* - Starting life on another server
 
